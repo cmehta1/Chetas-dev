@@ -1,0 +1,385 @@
+.hud-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    font-family: 'Poppins', sans-serif;
+}
+
+.hud-overlay > * {
+    pointer-events: auto;
+}
+
+/* ─── TOP BAR ─────────────────────────────────── */
+.hud-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    gap: 16px;
+}
+
+/* ─── YEAR + LOCATION ─────────────────────────── */
+.year-counter {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    backdrop-filter: blur(8px);
+}
+
+.year-location {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.location-flag {
+    font-size: 22px;
+    line-height: 1;
+}
+
+.location-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.location-city {
+    color: #e0e0e0;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.location-theme {
+    color: #999;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.year-display {
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    padding-left: 16px;
+}
+
+.year-value {
+    color: #FFD700;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* ─── PROGRESS BAR ────────────────────────────── */
+.progress-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 10px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    flex: 1;
+    max-width: 280px;
+    backdrop-filter: blur(8px);
+}
+
+.progress-bar {
+    flex: 1;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #FFC107, #FF5722);
+    border-radius: 5px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 35px;
+    text-align: right;
+}
+
+/* ─── SKILLS PANEL ────────────────────────────── */
+.hud-left {
+    position: absolute;
+    top: 95px;
+    left: 14px;
+    max-height: calc(100% - 220px);
+    overflow-y: auto;
+}
+
+.skills-panel {
+    background: rgba(0, 0, 0, 0.8);
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 215, 0, 0.25);
+    min-width: 170px;
+    backdrop-filter: blur(8px);
+}
+
+.skills-panel::-webkit-scrollbar {
+    width: 4px;
+}
+.skills-panel::-webkit-scrollbar-thumb {
+    background: rgba(255, 215, 0, 0.3);
+    border-radius: 2px;
+}
+
+.skills-header {
+    color: #FFD700;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.25);
+    letter-spacing: 0.5px;
+}
+
+.skills-header-gap {
+    margin-top: 14px;
+}
+
+.skills-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.skill-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+    gap: 8px;
+}
+
+.skill-name {
+    color: #e0e0e0;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.skill-stars {
+    color: #FFD700;
+    font-size: 11px;
+    letter-spacing: -1px;
+    white-space: nowrap;
+}
+
+.skill-new {
+    animation: skillSlideIn 0.5s ease-out;
+}
+
+.skill-new .skill-name {
+    color: #FFD700;
+    font-weight: 700;
+}
+
+/* ─── SKILL TOAST ─────────────────────────────── */
+.skill-toast {
+    position: fixed;
+    top: 80px;
+    right: 24px;
+    background: rgba(0, 0, 0, 0.9);
+    color: #FFD700;
+    padding: 14px 24px;
+    border-radius: 12px;
+    border: 2px solid #FFD700;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    animation: toastIn 0.4s ease-out, toastOut 0.4s ease-in 2.1s forwards;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+}
+
+.toast-upgrade {
+    border-color: #FF9800;
+    color: #FF9800;
+    background: rgba(30, 15, 0, 0.95);
+}
+
+/* ─── MINI MAP (BIGGER & READABLE) ────────────── */
+.hud-bottom {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.minimap {
+    background: rgba(0, 0, 0, 0.8);
+    padding: 14px 24px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+}
+
+.minimap-track {
+    display: flex;
+    align-items: flex-start;
+}
+
+.minimap-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    min-width: 50px;
+}
+
+.minimap-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s ease;
+    background: rgba(30, 30, 30, 0.8);
+}
+
+.minimap-icon {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.dot-completed {
+    background: rgba(76, 175, 80, 0.3);
+    border-color: #4CAF50;
+}
+
+.dot-current {
+    background: rgba(255, 215, 0, 0.25);
+    border-color: #FFD700;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+    animation: pulse 1.5s ease-in-out infinite;
+    transform: scale(1.1);
+}
+
+.dot-future {
+    background: rgba(30, 30, 30, 0.6);
+    border-color: #444;
+    opacity: 0.6;
+}
+
+.minimap-label {
+    color: #888;
+    font-size: 11px;
+    font-weight: 500;
+    margin-top: 6px;
+    white-space: nowrap;
+    transition: color 0.3s;
+}
+
+.label-current {
+    color: #FFD700;
+    font-weight: 700;
+}
+
+.minimap-level-tag {
+    position: absolute;
+    top: -14px;
+    color: #FFD700;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    opacity: 0.7;
+}
+
+.minimap-line {
+    position: absolute;
+    top: 16px;
+    left: calc(50% + 18px);
+    width: 14px;
+    height: 2px;
+    background: #444;
+    transition: background 0.3s;
+}
+
+.line-completed {
+    background: #4CAF50;
+}
+
+/* ─── ANIMATIONS ──────────────────────────────── */
+@keyframes skillSlideIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes toastIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes toastOut {
+    from { opacity: 1; }
+    to { opacity: 0; transform: translateY(-10px); }
+}
+
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(255, 215, 0, 0.4); }
+    50% { box-shadow: 0 0 18px rgba(255, 215, 0, 0.7); }
+}
+
+/* ─── MOBILE ──────────────────────────────────── */
+@media (max-width: 768px) {
+    .hud-left {
+        display: none;
+    }
+
+    .year-value {
+        font-size: 20px;
+    }
+
+    .location-city {
+        font-size: 11px;
+    }
+
+    .minimap-node {
+        min-width: 36px;
+    }
+
+    .minimap-dot {
+        width: 24px;
+        height: 24px;
+    }
+
+    .minimap-icon {
+        font-size: 10px;
+    }
+
+    .minimap-label {
+        font-size: 8px;
+    }
+
+    .minimap-line {
+        width: 8px;
+        top: 12px;
+        left: calc(50% + 14px);
+    }
+
+    .minimap {
+        padding: 8px 12px 6px;
+    }
+
+    .progress-bar-container {
+        max-width: 150px;
+    }
+}
