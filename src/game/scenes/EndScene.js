@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../config/constants';
+import { GAME_WIDTH, GAME_HEIGHT, getMobileMargin } from '../config/constants';
 import { createCharacter } from '../utils/CharacterRenderer';
 import EventBus from '../EventBus';
 
@@ -74,10 +74,12 @@ export default class EndScene extends Phaser.Scene {
 
         this.danceTimer = 0;
 
+        const mobilePortrait = getMobileMargin() > 0;
+
         // "Thanks for visiting!" text
         const thanks = this.add.text(GAME_WIDTH / 2, 80, 'Thanks for visiting!', {
             fontFamily: 'Poppins, sans-serif',
-            fontSize: '40px',
+            fontSize: mobilePortrait ? '26px' : '40px',
             color: '#FFD700',
             fontStyle: 'bold',
             stroke: '#000000',
@@ -93,7 +95,7 @@ export default class EndScene extends Phaser.Scene {
         // Subtitle
         const subtitle = this.add.text(GAME_WIDTH / 2, 120, "Let's connect!", {
             fontFamily: 'Poppins, sans-serif',
-            fontSize: '20px',
+            fontSize: mobilePortrait ? '14px' : '20px',
             color: '#cccccc',
         }).setOrigin(0.5).setDepth(10).setAlpha(0);
 
@@ -137,18 +139,20 @@ export default class EndScene extends Phaser.Scene {
         ];
 
         const startY = GAME_HEIGHT - 140;
-        const spacing = 130;
+        const isMobilePortrait = getMobileMargin() > 0;
+        const spacing = isMobilePortrait ? 70 : 130;
         const startX = GAME_WIDTH / 2 - ((socials.length - 1) * spacing) / 2;
 
         socials.forEach((social, i) => {
             const x = startX + i * spacing;
 
             // Circle background
+            const circleR = isMobilePortrait ? 24 : 32;
             const circle = this.add.graphics().setDepth(10);
             circle.fillStyle(0x1a1a2e, 0.95);
             circle.lineStyle(2.5, 0x444466, 0.8);
-            circle.fillCircle(x, startY, 32);
-            circle.strokeCircle(x, startY, 32);
+            circle.fillCircle(x, startY, circleR);
+            circle.strokeCircle(x, startY, circleR);
 
             // Draw icon using graphics
             const iconGfx = this.add.graphics().setDepth(11).setAlpha(0);
@@ -157,7 +161,7 @@ export default class EndScene extends Phaser.Scene {
             // Label
             const lbl = this.add.text(x, startY + 48, social.label, {
                 fontFamily: 'Poppins, sans-serif',
-                fontSize: '14px',
+                fontSize: isMobilePortrait ? '10px' : '14px',
                 color: '#bbbbbb',
                 fontStyle: 'bold',
             }).setOrigin(0.5).setDepth(11).setAlpha(0);
@@ -179,8 +183,8 @@ export default class EndScene extends Phaser.Scene {
                 circle.clear();
                 circle.fillStyle(0x252550, 0.95);
                 circle.lineStyle(2.5, 0xFFD700, 0.9);
-                circle.fillCircle(x, startY, 34);
-                circle.strokeCircle(x, startY, 34);
+                circle.fillCircle(x, startY, circleR + 2);
+                circle.strokeCircle(x, startY, circleR + 2);
                 lbl.setColor('#FFD700');
             });
 
@@ -188,8 +192,8 @@ export default class EndScene extends Phaser.Scene {
                 circle.clear();
                 circle.fillStyle(0x1a1a2e, 0.95);
                 circle.lineStyle(2.5, 0x444466, 0.8);
-                circle.fillCircle(x, startY, 32);
-                circle.strokeCircle(x, startY, 32);
+                circle.fillCircle(x, startY, circleR);
+                circle.strokeCircle(x, startY, circleR);
                 lbl.setColor('#bbbbbb');
             });
 

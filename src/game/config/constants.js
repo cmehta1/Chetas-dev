@@ -105,6 +105,19 @@ export const TERRAIN = [
     [16500, 580],
 ];
 
+/**
+ * On mobile portrait, ENVELOP clips the sides of the 1280-wide canvas.
+ * Returns the margin (in game units) that the camera bounds need to be
+ * extended on each side so the player can stay centered in the visible area.
+ */
+export function getMobileMargin() {
+    const isPortrait = window.innerWidth < window.innerHeight && window.innerWidth < 1024;
+    if (!isPortrait) return 0;
+    const scaleY = window.innerHeight / GAME_HEIGHT;
+    const visibleWidth = window.innerWidth / scaleY;
+    return Math.ceil((GAME_WIDTH - visibleWidth) / 2);
+}
+
 /** Get the terrain ground-surface Y at a given world X. */
 export function getTerrainY(x) {
     if (x <= TERRAIN[0][0]) return TERRAIN[0][1];

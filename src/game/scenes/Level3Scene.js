@@ -3,7 +3,7 @@ import EventBus from '../EventBus';
 import {
     GAME_WIDTH, GAME_HEIGHT, GROUND_Y,
     PLAYER_SPEED, PLAYER_JUMP_VELOCITY, PLAYER_GRAVITY,
-    PLAYER_STAGES, ZONES, getTerrainY,
+    PLAYER_STAGES, ZONES, getTerrainY, getMobileMargin,
 } from '../config/constants';
 import { JOURNEY, SKILLS_DATA } from '../config/journeyData';
 import { AUTO_JUMP_TRIGGERS } from '../config/levelConfig';
@@ -45,7 +45,8 @@ export default class Level3Scene extends Phaser.Scene {
         const worldWidth = zone.endX - zone.startX;
 
         this.physics.world.setBounds(zone.startX, 0, worldWidth, GAME_HEIGHT);
-        this.cameras.main.setBounds(zone.startX, 0, worldWidth, GAME_HEIGHT);
+        const margin = getMobileMargin();
+        this.cameras.main.setBounds(zone.startX - margin, 0, worldWidth + margin * 2, GAME_HEIGHT);
 
         renderZoneBackground(this, zone);
 
@@ -63,8 +64,7 @@ export default class Level3Scene extends Phaser.Scene {
         this.createWeatherEffects();
 
         this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
-        const isPortrait = window.innerWidth < window.innerHeight && window.innerWidth < 1024;
-        this.cameras.main.setFollowOffset(isPortrait ? -50 : -200, 50);
+        this.cameras.main.setFollowOffset(margin > 0 ? 0 : -200, margin > 0 ? 30 : 50);
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
