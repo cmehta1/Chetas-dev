@@ -74,8 +74,12 @@ export default class Level4Scene extends Phaser.Scene {
             this.scrollVelocity = Phaser.Math.Clamp(this.scrollVelocity, -400, 400);
         });
 
+        this.joystickState = { left: false, right: false };
+        EventBus.on('joystick-input', (state) => { this.joystickState = state; });
+
         this.createParallaxClouds();
         this.updateHUD();
+        EventBus.emit('level-changed', { id: 4, name: 'Career' });
         this.cameras.main.fadeIn(800);
         EventBus.emit('current-scene-ready', this);
     }
@@ -391,10 +395,10 @@ export default class Level4Scene extends Phaser.Scene {
         this.groundPlatform.body.updateFromGameObject();
 
         let moveX = 0;
-        if (this.cursors.left.isDown) {
+        if (this.cursors.left.isDown || this.joystickState.left) {
             moveX = -PLAYER_SPEED;
             this.facingRight = false;
-        } else if (this.cursors.right.isDown) {
+        } else if (this.cursors.right.isDown || this.joystickState.right) {
             moveX = PLAYER_SPEED;
             this.facingRight = true;
         }
@@ -458,5 +462,14 @@ export default class Level4Scene extends Phaser.Scene {
         }
         this.updateHUD();
         this.handleBuildingInteraction();
+
+        // End of game — reached the end of Oracle zone
+        if (this.player.x >= this.worldEndX - 80 && !this.isTransitioning) {
+            this.isTransitioning = true;
+            this.cameras.main.fadeOut(1000, 0, 0, 0);
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                this.scene.start('EndScene', { playerStage: this.playerStage });
+            });
+        }
     }
 }

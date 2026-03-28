@@ -317,6 +317,67 @@
     background: #4CAF50;
 }
 
+/* ─── LEVEL INDICATOR ────────────────────────────── */
+.level-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 10px 18px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    backdrop-filter: blur(8px);
+}
+
+.level-number {
+    color: #FFD700;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.level-name {
+    color: #e0e0e0;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* ─── JOYSTICK ───────────────────────────────────── */
+.joystick-container {
+    position: fixed;
+    bottom: 100px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 24px;
+    pointer-events: none;
+    z-index: 50;
+}
+
+.joystick-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    background: rgba(0, 0, 0, 0.5);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
+    user-select: none;
+    backdrop-filter: blur(4px);
+}
+
+.joystick-btn:active {
+    background: rgba(255, 215, 0, 0.3);
+    border-color: rgba(255, 215, 0, 0.7);
+}
+
 /* ─── ANIMATIONS ──────────────────────────────── */
 @keyframes skillSlideIn {
     from { transform: translateX(-20px); opacity: 0; }
@@ -338,48 +399,120 @@
     50% { box-shadow: 0 0 18px rgba(255, 215, 0, 0.7); }
 }
 
-/* ─── MOBILE ──────────────────────────────────── */
+/* ─── MOBILE (portrait-friendly) ─────────────────── */
 @media (max-width: 768px) {
     .hud-left {
         display: none;
     }
 
+    .hud-top {
+        padding: 8px 12px;
+        gap: 8px;
+    }
+
+    .year-counter {
+        padding: 6px 12px;
+        gap: 8px;
+    }
+
     .year-value {
-        font-size: 20px;
+        font-size: 18px;
+    }
+
+    .year-display {
+        padding-left: 10px;
     }
 
     .location-city {
+        font-size: 10px;
+    }
+
+    .location-flag {
+        font-size: 16px;
+    }
+
+    .location-theme {
+        font-size: 9px;
+    }
+
+    .level-indicator {
+        padding: 6px 12px;
+        gap: 6px;
+    }
+
+    .level-number {
+        font-size: 16px;
+    }
+
+    .level-name {
+        font-size: 11px;
+    }
+
+    .progress-bar-container {
+        max-width: 100px;
+        padding: 6px 10px;
+    }
+
+    .progress-text {
         font-size: 11px;
     }
 
     .minimap-node {
-        min-width: 36px;
+        min-width: 30px;
     }
 
     .minimap-dot {
-        width: 24px;
-        height: 24px;
+        width: 22px;
+        height: 22px;
     }
 
     .minimap-icon {
-        font-size: 10px;
+        font-size: 9px;
     }
 
     .minimap-label {
-        font-size: 8px;
+        font-size: 7px;
+    }
+
+    .minimap-level-tag {
+        font-size: 7px;
+        top: -12px;
     }
 
     .minimap-line {
-        width: 8px;
-        top: 12px;
-        left: calc(50% + 14px);
+        width: 6px;
+        top: 11px;
+        left: calc(50% + 12px);
     }
 
     .minimap {
-        padding: 8px 12px 6px;
+        padding: 6px 8px 4px;
     }
 
-    .progress-bar-container {
-        max-width: 150px;
+    .hud-bottom {
+        bottom: 80px;
+    }
+
+    .skill-toast {
+        top: auto;
+        bottom: 160px;
+        right: 12px;
+        left: 12px;
+        text-align: center;
+        font-size: 14px;
+        padding: 10px 16px;
+    }
+
+    .joystick-container {
+        bottom: 16px;
+    }
+}
+
+/* Ensure game fills viewport in portrait on mobile */
+@media (max-width: 768px) and (orientation: portrait) {
+    #game-container canvas {
+        width: 100vw !important;
+        height: auto !important;
+        max-height: 100vh !important;
     }
 }

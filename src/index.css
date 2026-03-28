@@ -12,6 +12,9 @@ html, body {
     overflow: hidden;
     background: #000;
     font-family: 'Poppins', sans-serif;
+    /* Prevent pull-to-refresh and bounce on mobile */
+    overscroll-behavior: none;
+    touch-action: none;
 }
 
 #root {
@@ -24,4 +27,11 @@ html, body {
     width: 100%;
     height: 100%;
     position: relative;
+}
+
+/* Ensure the viewport meta tag works properly */
+@supports (height: 100dvh) {
+    html, body, #root, #app-container {
+        height: 100dvh;
+    }
 }

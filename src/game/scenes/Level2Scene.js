@@ -82,8 +82,12 @@ export default class Level2Scene extends Phaser.Scene {
             this.scrollVelocity = Phaser.Math.Clamp(this.scrollVelocity, -400, 400);
         });
 
+        this.joystickState = { left: false, right: false };
+        EventBus.on('joystick-input', (state) => { this.joystickState = state; });
+
         this.createParallaxClouds();
         this.updateHUD();
+        EventBus.emit('level-changed', { id: 2, name: 'Engineering' });
         this.cameras.main.fadeIn(800);
         EventBus.emit('current-scene-ready', this);
     }
@@ -422,12 +426,12 @@ export default class Level2Scene extends Phaser.Scene {
         this.groundPlatform.y = terrainY + 10;
         this.groundPlatform.body.updateFromGameObject();
 
-        // Input
+        // Input (keyboard + joystick)
         let moveX = 0;
-        if (this.cursors.left.isDown) {
+        if (this.cursors.left.isDown || this.joystickState.left) {
             moveX = -PLAYER_SPEED;
             this.facingRight = false;
-        } else if (this.cursors.right.isDown) {
+        } else if (this.cursors.right.isDown || this.joystickState.right) {
             moveX = PLAYER_SPEED;
             this.facingRight = true;
         }

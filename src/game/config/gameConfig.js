@@ -7,6 +7,7 @@ import Level1Scene from '../scenes/Level1Scene';
 import Level2Scene from '../scenes/Level2Scene';
 import Level3Scene from '../scenes/Level3Scene';
 import Level4Scene from '../scenes/Level4Scene';
+import EndScene from '../scenes/EndScene';
 
 export const gameConfig = {
     type: Phaser.AUTO,
@@ -23,7 +24,7 @@ export const gameConfig = {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    scene: [BootScene, PreloaderScene, LevelTransitionScene, Level1Scene, Level2Scene, Level3Scene, Level4Scene],
+    scene: [BootScene, PreloaderScene, LevelTransitionScene, Level1Scene, Level2Scene, Level3Scene, Level4Scene, EndScene],
     backgroundColor: '#87CEEB',
     pixelArt: false,
     antialias: true,

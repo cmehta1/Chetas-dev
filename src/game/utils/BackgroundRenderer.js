@@ -71,14 +71,15 @@ export function renderZoneBackground(scene, zone) {
             break;
     }
 
-    // === ZONE LABEL ===
+    // === ZONE LABEL (positioned closer to ground, not at very top) ===
+    const labelY = 380;
     const labelBg = scene.add.graphics();
     labelBg.fillStyle(0x000000, 0.5);
     labelBg.fillRoundedRect(-120, -22, 240, 44, 10);
-    labelBg.setPosition(cx, 50);
+    labelBg.setPosition(cx, labelY);
     labelBg.setDepth(5);
 
-    const label = scene.add.text(cx, 42, zone.name, {
+    const label = scene.add.text(cx, labelY - 8, zone.name, {
         fontFamily: "'Segoe UI', Arial, sans-serif",
         fontSize: '20px',
         color: '#ffffff',
@@ -86,7 +87,7 @@ export function renderZoneBackground(scene, zone) {
     });
     label.setOrigin(0.5).setDepth(6);
 
-    const sublabel = scene.add.text(cx, 62, zone.subtitle || '', {
+    const sublabel = scene.add.text(cx, labelY + 12, zone.subtitle || '', {
         fontFamily: "'Segoe UI', Arial, sans-serif",
         fontSize: '13px',
         color: '#cccccc',
