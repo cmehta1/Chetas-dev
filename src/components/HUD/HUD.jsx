@@ -4,6 +4,7 @@ import SkillsPanel from './SkillsPanel';
 import ProgressBar from './ProgressBar';
 import MiniMap from './MiniMap';
 import LevelIndicator from './LevelIndicator';
+import ProjectsPanel from './ProjectsPanel';
 
 export default function HUD() {
     const gameEnded = useGameEvent('game-ended', false);
@@ -19,6 +20,9 @@ export default function HUD() {
             </div>
             <div className="hud-left">
                 <SkillsPanel />
+            </div>
+            <div className="hud-right">
+                <ProjectsPanel />
             </div>
             <div className="hud-bottom">
                 <MiniMap />
