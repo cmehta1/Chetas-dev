@@ -18,7 +18,7 @@ export default class PreloaderScene extends Phaser.Scene {
             '',
             'SCROLL WHEEL or ARROW KEYS to move | SPACE to enter',
             '',
-            'Press ENTER or CLICK to begin',
+            'TAP or Press ENTER to begin',
         ];
 
         const textStyle = {

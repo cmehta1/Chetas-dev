@@ -71,7 +71,8 @@ export default class Level2Scene extends Phaser.Scene {
         this.createFlightElements();
 
         this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
-        this.cameras.main.setFollowOffset(-200, 50);
+        const isPortrait = window.innerWidth < window.innerHeight && window.innerWidth < 1024;
+        this.cameras.main.setFollowOffset(isPortrait ? -50 : -200, 50);
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -84,6 +85,8 @@ export default class Level2Scene extends Phaser.Scene {
 
         this.joystickState = { left: false, right: false };
         EventBus.on('joystick-input', (state) => { this.joystickState = state; });
+        this.mobileJumpRequested = false;
+        EventBus.on('joystick-jump', () => { this.mobileJumpRequested = true; });
 
         this.createParallaxClouds();
         this.updateHUD();
@@ -117,47 +120,127 @@ export default class Level2Scene extends Phaser.Scene {
             const bx = b.x;
             const groundY = getTerrainY(bx);
             const g = this.add.graphics().setDepth(2);
-            const w = b.width, h = 180;
+            const w = 350, h = 250;
 
-            g.fillStyle(0xBCAAA4);
+            // Main building body - cream/white
+            g.fillStyle(0xF5F5F5);
             g.fillRect(bx - w / 2, groundY - h, w, h);
-            g.lineStyle(0.5, 0x8D6E63, 0.2);
+
+            // Subtle horizontal lines for texture
+            g.lineStyle(0.3, 0xE0E0E0, 0.4);
             for (let r = 0; r < h / 10; r++)
                 g.lineBetween(bx - w / 2, groundY - h + r * 10, bx + w / 2, groundY - h + r * 10);
-            g.fillStyle(0x5D4037);
-            g.fillRect(bx - w / 2 - 8, groundY - h - 8, w + 16, 12);
 
-            g.fillStyle(0xFFF9C4, 0.9);
-            const cols = Math.floor(w / 50);
-            for (let r = 0; r < 3; r++)
-                for (let c = 0; c < cols; c++) {
-                    const wx = bx - w / 2 + 20 + c * (w / cols), wy = groundY - h + 20 + r * 50;
-                    g.fillRect(wx, wy, 24, 30);
-                    g.lineStyle(1.5, 0x795548);
-                    g.strokeRect(wx, wy, 24, 30);
+            // Roof cornice - dark blue strip
+            g.fillStyle(0x1A237E);
+            g.fillRect(bx - w / 2 - 8, groundY - h - 6, w + 16, 10);
+
+            // Triangular pediment above entrance
+            const pedW = 120, pedH = 35;
+            g.fillStyle(0xE0E0E0);
+            g.fillTriangle(bx - pedW / 2, groundY - h, bx + pedW / 2, groundY - h, bx, groundY - h - pedH);
+            // Pediment border
+            g.lineStyle(2, 0x1A237E);
+            g.lineBetween(bx - pedW / 2, groundY - h, bx, groundY - h - pedH);
+            g.lineBetween(bx, groundY - h - pedH, bx + pedW / 2, groundY - h);
+            g.lineBetween(bx - pedW / 2, groundY - h, bx + pedW / 2, groundY - h);
+
+            // 4 columns at entrance (light gray pillars)
+            const colW = 10, colH = 100;
+            const colPositions = [-40, -15, 15, 40];
+            colPositions.forEach(offset => {
+                // Column base
+                g.fillStyle(0xBDBDBD);
+                g.fillRect(bx + offset - colW / 2 - 2, groundY - colH, colW + 4, 6);
+                g.fillRect(bx + offset - colW / 2 - 2, groundY - 6, colW + 4, 6);
+                // Column shaft
+                g.fillStyle(0xE0E0E0);
+                g.fillRect(bx + offset - colW / 2, groundY - colH + 6, colW, colH - 12);
+                // Column highlight
+                g.fillStyle(0xFFFFFF, 0.4);
+                g.fillRect(bx + offset - colW / 2 + 1, groundY - colH + 6, 3, colH - 12);
+            });
+
+            // Windows: 4 rows of 6
+            const winW = 20, winH = 26, winCols = 6, winRows = 4;
+            const winSpacingX = (w - 80) / (winCols - 1);
+            const winSpacingY = 45;
+            for (let r = 0; r < winRows; r++) {
+                for (let c = 0; c < winCols; c++) {
+                    const wx = bx - w / 2 + 40 + c * winSpacingX - winW / 2;
+                    const wy = groundY - h + 20 + r * winSpacingY;
+                    // Skip windows that overlap with columns area in lower rows
+                    if (r >= 2 && Math.abs((bx - w / 2 + 40 + c * winSpacingX) - bx) < 55) continue;
+                    // Window frame
+                    g.fillStyle(0x546E7A);
+                    g.fillRect(wx - 2, wy - 2, winW + 4, winH + 4);
+                    // Window glass (light blue)
+                    g.fillStyle(0x81D4FA);
+                    g.fillRect(wx, wy, winW, winH);
+                    // Window cross divider
+                    g.lineStyle(0.8, 0x546E7A);
+                    g.lineBetween(wx + winW / 2, wy, wx + winW / 2, wy + winH);
+                    g.lineBetween(wx, wy + winH / 2, wx + winW, wy + winH / 2);
                 }
+            }
 
+            // Grand entrance door
+            const doorW = 36, doorH = 55;
             g.fillStyle(0x3E2723);
-            g.fillRoundedRect(bx - 18, groundY - 55, 36, 55, { tl: 18, tr: 18, bl: 0, br: 0 });
+            g.fillRoundedRect(bx - doorW / 2, groundY - doorH, doorW, doorH, { tl: 18, tr: 18, bl: 0, br: 0 });
+            // Door divider
+            g.lineStyle(1, 0x4E342E);
+            g.lineBetween(bx, groundY - doorH + 8, bx, groundY);
+            // Door handles
             g.fillStyle(0xFFC107);
-            g.fillCircle(bx + 8, groundY - 25, 3);
-            g.fillStyle(0x9E9E9E);
-            for (let s = 0; s < 3; s++)
-                g.fillRect(bx - 25 - s * 5, groundY - 3 - s * 5, 50 + s * 10, 5);
+            g.fillCircle(bx - 4, groundY - doorH / 2 + 5, 2);
+            g.fillCircle(bx + 4, groundY - doorH / 2 + 5, 2);
 
+            // Steps
+            g.fillStyle(0xBDBDBD);
+            for (let s = 0; s < 4; s++)
+                g.fillRect(bx - doorW / 2 - 8 - s * 4, groundY - 3 - s * 4, doorW + 16 + s * 8, 5);
+
+            // GTU Logo - gear/cog shape with "GTU" text at top-center
+            const logoX = bx, logoY = groundY - h - pedH - 10;
+            const logoR = 20;
+            // Gear circle (dark blue)
+            g.fillStyle(0x1A237E);
+            g.fillCircle(logoX, logoY, logoR);
+            // Gear teeth - 8 bumps radiating out (approximated as circles)
+            for (let i = 0; i < 8; i++) {
+                const angle = (Math.PI * 2 * i) / 8;
+                g.fillStyle(0x1A237E);
+                g.fillCircle(logoX + Math.cos(angle) * (logoR + 3), logoY + Math.sin(angle) * (logoR + 3), 5);
+            }
+            // Inner circle (slightly lighter)
+            g.fillStyle(0x283593);
+            g.fillCircle(logoX, logoY, logoR - 6);
+            // Inner ring
+            g.lineStyle(1.5, 0x3F51B5);
+            g.strokeCircle(logoX, logoY, logoR - 8);
+
+            // GTU text on the logo (using Phaser text object)
+            this.add.text(logoX, logoY, 'GTU', {
+                fontFamily: 'Poppins, sans-serif', fontSize: '12px',
+                color: '#ffffff', fontStyle: 'bold',
+            }).setOrigin(0.5).setDepth(3);
+
+            // Sign placed on the building facade (below roof line)
             const signBg = this.add.graphics().setDepth(3);
             signBg.fillStyle(0x1A237E, 0.9);
-            signBg.fillRoundedRect(bx - w / 2 + 10, groundY - h - 35, w - 20, 24, 6);
-            this.add.text(bx, groundY - h - 23, b.name, {
+            signBg.fillRoundedRect(bx - w / 2 + 10, groundY - h + 8, w - 20, 24, 6);
+            this.add.text(bx, groundY - h + 20, b.name, {
                 fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ffffff', fontStyle: 'bold',
             }).setOrigin(0.5).setDepth(4);
 
-            const prompt = this.add.text(bx, groundY - h - 55, '[ SPACE to Enter ]', {
+            // Prompt above the logo/pediment
+            const prompt = this.add.text(bx, groundY - h - 75, '[ SPACE to Enter ]', {
                 fontFamily: 'Poppins, sans-serif', fontSize: '15px',
                 color: '#FFD700', stroke: '#000000', strokeThickness: 4, fontStyle: 'bold',
             }).setOrigin(0.5).setDepth(10).setAlpha(0);
 
-            this.tweens.add({ targets: prompt, y: groundY - h - 62, duration: 800, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+            this.tweens.add({ targets: prompt, y: groundY - h - 82, duration: 800, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
             this.buildings.push({ zone: zone2, x: bx, prompt, entered: false });
         }
     }
@@ -263,12 +346,12 @@ export default class Level2Scene extends Phaser.Scene {
             : `+ ${skill.label} ${'★'.repeat(skill.proficiency)}`;
         const color = isUpgrade ? '#FF9800' : '#FFD700';
 
-        const flash = this.add.text(starObj.shape.x, starObj.shape.y - 40, msg, {
+        const flash = this.add.text(this.player.x, this.player.y - 70, msg, {
             fontFamily: 'Poppins, sans-serif', fontSize: '16px',
             color, stroke: '#000000', strokeThickness: 4, fontStyle: 'bold',
         }).setOrigin(0.5).setDepth(20);
         this.tweens.add({
-            targets: flash, y: flash.y - 60, alpha: 0, duration: 1500,
+            targets: flash, y: flash.y - 40, alpha: 0, duration: 800,
             ease: 'Cubic.easeOut', onComplete: () => flash.destroy(),
         });
 
@@ -354,7 +437,7 @@ export default class Level2Scene extends Phaser.Scene {
         EventBus.emit('zone-changed', {
             id: this.currentZoneId, name: zone.name, city: zoneData.city,
             flag: zone.flag, subtitle: zone.subtitle,
-            progress: this.player.x / 14000,
+            progress: this.player.x / 16500,
         });
     }
 
@@ -448,7 +531,9 @@ export default class Level2Scene extends Phaser.Scene {
         this.isMoving = Math.abs(moveX) > 10;
 
         // Jump
-        if (Phaser.Input.Keyboard.JustDown(this.cursors.up) && this.player.body.blocked.down)
+        const wantJump = Phaser.Input.Keyboard.JustDown(this.cursors.up) || this.mobileJumpRequested;
+        this.mobileJumpRequested = false;
+        if (wantJump && this.player.body.blocked.down)
             this.player.body.setVelocityY(-500);
 
         // Sync visual

@@ -3,7 +3,7 @@ export const GAME_WIDTH = 1280;
 export const GAME_HEIGHT = 720;
 
 // World dimensions
-export const WORLD_WIDTH = 14000;
+export const WORLD_WIDTH = 16500;
 export const GROUND_Y = 580;
 
 // Player settings
@@ -92,6 +92,17 @@ export const TERRAIN = [
     [13700, 555],
     [13850, 580],
     [14000, 580],
+
+    // Zone 8: Hobbies — gentle park terrain
+    [14300, 580],
+    [14500, 568],
+    [14900, 568],
+    [15100, 575],
+    [15500, 575],
+    [15700, 562],
+    [16100, 562],
+    [16300, 580],
+    [16500, 580],
 ];
 
 /** Get the terrain ground-surface Y at a given world X. */
@@ -235,5 +246,21 @@ export const ZONES = [
         groundColor: 0x455A64,
         groundAccent: 0x37474F,
         theme: 'oracle-tech',
+        building: { name: 'Oracle Health', x: 13700, width: 320 },
+    },
+    {
+        id: 8,
+        name: 'Hobbies & Interests',
+        subtitle: 'Things I Love',
+        country: 'US',
+        flag: '\u{1F3AF}',
+        startX: 14000,
+        endX: 16500,
+        playerStage: 6,
+        skyTop: 0xFF6F00,
+        skyBottom: 0xFFCC80,
+        groundColor: 0x558B2F,
+        groundAccent: 0x33691E,
+        theme: 'hobby-park',
     },
 ];

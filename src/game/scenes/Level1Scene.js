@@ -62,7 +62,8 @@ export default class Level1Scene extends Phaser.Scene {
         this.createAutoJumpIndicators();
 
         this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
-        this.cameras.main.setFollowOffset(-200, 50);
+        const isPortrait = window.innerWidth < window.innerHeight && window.innerWidth < 1024;
+        this.cameras.main.setFollowOffset(isPortrait ? -50 : -200, 50);
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -76,6 +77,8 @@ export default class Level1Scene extends Phaser.Scene {
         // Joystick input from mobile
         this.joystickState = { left: false, right: false };
         EventBus.on('joystick-input', (state) => { this.joystickState = state; });
+        this.mobileJumpRequested = false;
+        EventBus.on('joystick-jump', () => { this.mobileJumpRequested = true; });
 
         this.createParallaxClouds();
         this.updateHUD();
@@ -121,47 +124,121 @@ export default class Level1Scene extends Phaser.Scene {
             const bx = b.x;
             const groundY = getTerrainY(bx);
             const g = this.add.graphics().setDepth(2);
-            const w = b.width, h = 180;
+            const w = 300, h = 220;
 
-            g.fillStyle(0xBCAAA4);
+            // Main building body - light yellow
+            g.fillStyle(0xFFF8E1);
             g.fillRect(bx - w / 2, groundY - h, w, h);
-            g.lineStyle(0.5, 0x8D6E63, 0.2);
-            for (let r = 0; r < h / 10; r++)
-                g.lineBetween(bx - w / 2, groundY - h + r * 10, bx + w / 2, groundY - h + r * 10);
-            g.fillStyle(0x5D4037);
-            g.fillRect(bx - w / 2 - 8, groundY - h - 8, w + 16, 12);
 
-            g.fillStyle(0xFFF9C4, 0.9);
-            const cols = Math.floor(w / 50);
-            for (let r = 0; r < 3; r++)
-                for (let c = 0; c < cols; c++) {
-                    const wx = bx - w / 2 + 20 + c * (w / cols), wy = groundY - h + 20 + r * 50;
-                    g.fillRect(wx, wy, 24, 30);
-                    g.lineStyle(1.5, 0x795548);
-                    g.strokeRect(wx, wy, 24, 30);
-                }
+            // Subtle brick lines
+            g.lineStyle(0.4, 0xD7CCC8, 0.3);
+            for (let r = 0; r < h / 8; r++)
+                g.lineBetween(bx - w / 2, groundY - h + r * 8, bx + w / 2, groundY - h + r * 8);
+            // Vertical brick offsets every other row
+            for (let r = 0; r < h / 8; r++) {
+                const offset = (r % 2 === 0) ? 0 : 15;
+                for (let c = offset; c < w; c += 30)
+                    g.lineBetween(bx - w / 2 + c, groundY - h + r * 8, bx - w / 2 + c, groundY - h + (r + 1) * 8);
+            }
 
-            g.fillStyle(0x3E2723);
-            g.fillRoundedRect(bx - 18, groundY - 55, 36, 55, { tl: 18, tr: 18, bl: 0, br: 0 });
+            // Bell tower (center, above roof)
+            const towerW = 40, towerH = 50;
+            g.fillStyle(0xFFF8E1);
+            g.fillRect(bx - towerW / 2, groundY - h - towerH, towerW, towerH);
+            // Tower brick lines
+            g.lineStyle(0.4, 0xD7CCC8, 0.3);
+            for (let r = 0; r < towerH / 8; r++)
+                g.lineBetween(bx - towerW / 2, groundY - h - towerH + r * 8, bx + towerW / 2, groundY - h - towerH + r * 8);
+
+            // Tower roof - red triangle
+            g.fillStyle(0xBF360C);
+            g.fillTriangle(bx - towerW / 2 - 5, groundY - h - towerH, bx + towerW / 2 + 5, groundY - h - towerH, bx, groundY - h - towerH - 30);
+
+            // Bell inside tower (gold circle)
             g.fillStyle(0xFFC107);
-            g.fillCircle(bx + 8, groundY - 25, 3);
-            g.fillStyle(0x9E9E9E);
-            for (let s = 0; s < 3; s++)
-                g.fillRect(bx - 25 - s * 5, groundY - 3 - s * 5, 50 + s * 10, 5);
+            g.fillCircle(bx, groundY - h - towerH + 25, 8);
+            g.lineStyle(1, 0xF57F17);
+            g.strokeCircle(bx, groundY - h - towerH + 25, 8);
+            // Bell clapper
+            g.fillStyle(0x795548);
+            g.fillCircle(bx, groundY - h - towerH + 31, 2);
 
+            // Indian flag on bell tower
+            const flagX = bx + towerW / 2 + 2;
+            const flagTop = groundY - h - towerH - 25;
+            // Flag pole
+            g.lineStyle(2, 0x795548);
+            g.lineBetween(flagX, flagTop, flagX, flagTop + 40);
+            // Saffron stripe
+            g.fillStyle(0xFF9933);
+            g.fillRect(flagX + 1, flagTop, 18, 6);
+            // White stripe
+            g.fillStyle(0xFFFFFF);
+            g.fillRect(flagX + 1, flagTop + 6, 18, 6);
+            // Green stripe
+            g.fillStyle(0x138808);
+            g.fillRect(flagX + 1, flagTop + 12, 18, 6);
+            // Ashoka Chakra (small blue circle in white stripe)
+            g.lineStyle(0.8, 0x000080);
+            g.strokeCircle(flagX + 10, flagTop + 9, 2);
+
+            // Main roof trim - red strip
+            g.fillStyle(0xBF360C);
+            g.fillRect(bx - w / 2 - 5, groundY - h - 6, w + 10, 8);
+
+            // Windows: 3 rows of 5
+            const winW = 22, winH = 28, winCols = 5, winRows = 3;
+            const winSpacingX = (w - 60) / (winCols - 1);
+            const winSpacingY = 50;
+            for (let r = 0; r < winRows; r++) {
+                for (let c = 0; c < winCols; c++) {
+                    const wx = bx - w / 2 + 30 + c * winSpacingX - winW / 2;
+                    const wy = groundY - h + 20 + r * winSpacingY;
+                    // Window frame (brown)
+                    g.fillStyle(0x5D4037);
+                    g.fillRect(wx - 2, wy - 2, winW + 4, winH + 4);
+                    // Window glass (light blue)
+                    g.fillStyle(0x81D4FA);
+                    g.fillRect(wx, wy, winW, winH);
+                    // Window cross divider
+                    g.lineStyle(1, 0x5D4037);
+                    g.lineBetween(wx + winW / 2, wy, wx + winW / 2, wy + winH);
+                    g.lineBetween(wx, wy + winH / 2, wx + winW, wy + winH / 2);
+                }
+            }
+
+            // Grand arched double door (dark brown)
+            const doorW = 40, doorH = 60;
+            g.fillStyle(0x3E2723);
+            g.fillRoundedRect(bx - doorW / 2, groundY - doorH, doorW, doorH, { tl: 20, tr: 20, bl: 0, br: 0 });
+            // Door divider line
+            g.lineStyle(1.5, 0x4E342E);
+            g.lineBetween(bx, groundY - doorH + 10, bx, groundY);
+            // Door handles
+            g.fillStyle(0xFFC107);
+            g.fillCircle(bx - 5, groundY - doorH / 2 + 5, 2.5);
+            g.fillCircle(bx + 5, groundY - doorH / 2 + 5, 2.5);
+
+            // Steps at entrance
+            g.fillStyle(0xBDBDBD);
+            for (let s = 0; s < 4; s++)
+                g.fillRect(bx - doorW / 2 - 5 - s * 4, groundY - 3 - s * 4, doorW + 10 + s * 8, 5);
+
+            // Sign placed on the building facade (below roof line)
             const signBg = this.add.graphics().setDepth(3);
             signBg.fillStyle(0x1A237E, 0.9);
-            signBg.fillRoundedRect(bx - w / 2 + 10, groundY - h - 35, w - 20, 24, 6);
-            this.add.text(bx, groundY - h - 23, b.name, {
+            signBg.fillRoundedRect(bx - w / 2 + 10, groundY - h + 8, w - 20, 24, 6);
+            this.add.text(bx, groundY - h + 20, b.name, {
                 fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ffffff', fontStyle: 'bold',
             }).setOrigin(0.5).setDepth(4);
 
-            const prompt = this.add.text(bx, groundY - h - 55, '[ SPACE to Enter ]', {
+            // Prompt above the tower
+            const prompt = this.add.text(bx, groundY - h - 90, '[ SPACE to Enter ]', {
                 fontFamily: 'Poppins, sans-serif', fontSize: '15px',
                 color: '#FFD700', stroke: '#000000', strokeThickness: 4, fontStyle: 'bold',
             }).setOrigin(0.5).setDepth(10).setAlpha(0);
 
-            this.tweens.add({ targets: prompt, y: groundY - h - 62, duration: 800, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+            this.tweens.add({ targets: prompt, y: groundY - h - 97, duration: 800, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
             this.buildings.push({ zone, x: bx, prompt, entered: false });
         });
     }
@@ -242,12 +319,12 @@ export default class Level1Scene extends Phaser.Scene {
             : `+ ${skill.label} ${'★'.repeat(skill.proficiency)}`;
         const color = isUpgrade ? '#FF9800' : '#FFD700';
 
-        const flash = this.add.text(starObj.shape.x, starObj.shape.y - 40, msg, {
+        const flash = this.add.text(this.player.x, this.player.y - 70, msg, {
             fontFamily: 'Poppins, sans-serif', fontSize: '16px',
             color, stroke: '#000000', strokeThickness: 4, fontStyle: 'bold',
         }).setOrigin(0.5).setDepth(20);
         this.tweens.add({
-            targets: flash, y: flash.y - 60, alpha: 0, duration: 1500,
+            targets: flash, y: flash.y - 40, alpha: 0, duration: 800,
             ease: 'Cubic.easeOut', onComplete: () => flash.destroy(),
         });
 
@@ -289,7 +366,7 @@ export default class Level1Scene extends Phaser.Scene {
         EventBus.emit('zone-changed', {
             id: this.currentZoneId, name: zone.name, city: zoneData.city,
             flag: zone.flag, subtitle: zone.subtitle,
-            progress: this.player.x / 14000,
+            progress: this.player.x / 16500,
         });
     }
 
@@ -381,7 +458,9 @@ export default class Level1Scene extends Phaser.Scene {
         this.isMoving = Math.abs(moveX) > 10;
 
         // Manual jump
-        if (Phaser.Input.Keyboard.JustDown(this.cursors.up) && this.player.body.blocked.down)
+        const wantJump = Phaser.Input.Keyboard.JustDown(this.cursors.up) || this.mobileJumpRequested;
+        this.mobileJumpRequested = false;
+        if (wantJump && this.player.body.blocked.down)
             this.player.body.setVelocityY(PLAYER_JUMP_VELOCITY);
 
         // Auto-jump at terrain transitions

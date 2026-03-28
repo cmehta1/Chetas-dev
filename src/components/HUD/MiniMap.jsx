@@ -9,10 +9,11 @@ const ZONE_NODES = [
     { label: 'Midway', icon: '💼', level: 4 },
     { label: 'Cerner', icon: '💼', level: 4 },
     { label: 'Oracle', icon: '🔴', level: 4 },
+    { label: 'Hobbies', icon: '🎯', level: 5 },
 ];
 
 // Level bracket boundaries (zone indices where each level starts)
-const LEVEL_STARTS = [0, 2, 4, 5];
+const LEVEL_STARTS = [0, 2, 4, 5, 8];
 
 export default function MiniMap() {
     const zoneData = useGameEvent('zone-changed', { id: 0, progress: 0 });

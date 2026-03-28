@@ -42,10 +42,19 @@ export default function ProjectsPanel() {
 
     if (items.length === 0) return null;
 
+    const HEADER_MAP = {
+        2: 'GTU: Projects',
+        4: 'SUNY BU: Projects',
+        5: 'Midway Dental: Experience',
+        6: 'Cerner Corp: Experience',
+        7: 'Oracle Health: Experience',
+        8: 'Hobbies & Interests',
+    };
+
     return (
         <div className="projects-panel">
             <div className="projects-header">
-                {isWorkZone ? 'Experience' : 'Projects'}
+                {HEADER_MAP[currentZone] || (isWorkZone ? 'Experience' : 'Projects')}
             </div>
             <div className="projects-list">
                 {items.slice(0, visibleCount).map((item, i) => (
@@ -72,6 +81,12 @@ export default function ProjectsPanel() {
 }
 
 function getItems(zoneId) {
+    if (zoneId === 8) {
+        return [
+            { title: 'Sports', bullets: ['Cricket', 'Football', 'Boxing', 'Tennis', 'Chess'] },
+            { title: 'Interests', bullets: ['Space Science', 'Drawing', 'Coding', 'Gaming'] },
+        ];
+    }
     if (zoneId >= 5) {
         return EXPERIENCE_DATA.filter(e => e.zone === zoneId);
     }

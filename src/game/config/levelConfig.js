@@ -44,6 +44,17 @@ export const LEVELS = [
         endX: 14000,
         playerStageStart: 5,
         playerStageEnd: 6,
+        nextScene: 'LevelTransition',
+    },
+    {
+        id: 5,
+        name: 'Hobbies',
+        subtitle: 'Things I Love',
+        zoneIds: [8],
+        startX: 14000,
+        endX: 16500,
+        playerStageStart: 6,
+        playerStageEnd: 6,
         nextScene: null,
     },
 ];
@@ -79,6 +90,13 @@ export const AUTO_JUMP_TRIGGERS = [
     { x: 12650, velocity: -400, level: 4 },
     { x: 13200, velocity: -380, level: 4 },
     { x: 13700, velocity: -350, level: 4 },
+
+    // Level 5: Hobbies
+    { x: 14500, velocity: -380, level: 5 },
+    { x: 14900, velocity: -350, level: 5 },
+    { x: 15100, velocity: -370, level: 5 },
+    { x: 15700, velocity: -380, level: 5 },
+    { x: 16100, velocity: -350, level: 5 },
 ];
 
 /** Get level config for a given level id */

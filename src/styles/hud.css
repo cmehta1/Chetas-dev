@@ -454,14 +454,22 @@
 /* ─── JOYSTICK ───────────────────────────────────── */
 .joystick-container {
     position: fixed;
-    bottom: 100px;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
     left: 0;
     right: 0;
     display: flex;
     justify-content: space-between;
-    padding: 0 24px;
+    align-items: flex-end;
+    padding: 0 20px;
     pointer-events: none;
     z-index: 50;
+}
+
+.joystick-right-group {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    pointer-events: auto;
 }
 
 .joystick-btn {
@@ -486,6 +494,10 @@
     border-color: rgba(255, 215, 0, 0.7);
 }
 
+.joystick-jump {
+    border-color: rgba(255, 215, 0, 0.4);
+}
+
 /* ─── ANIMATIONS ──────────────────────────────── */
 @keyframes skillSlideIn {
     from { transform: translateX(-20px); opacity: 0; }
@@ -507,15 +519,71 @@
     50% { box-shadow: 0 0 18px rgba(255, 215, 0, 0.7); }
 }
 
+/* ─── MOBILE TOGGLE BUTTONS ─────────────────────── */
+.mobile-panel-toggles {
+    position: absolute;
+    top: 60px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    pointer-events: none;
+    z-index: 15;
+}
+
+.panel-toggle {
+    pointer-events: auto;
+    background: rgba(0, 0, 0, 0.7);
+    color: #ccc;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    backdrop-filter: blur(6px);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.toggle-active {
+    color: #FFD700;
+    border-color: rgba(255, 215, 0, 0.5);
+    background: rgba(0, 0, 0, 0.85);
+}
+
+.mobile-hidden {
+    display: none !important;
+}
+
 /* ─── MOBILE (portrait-friendly) ─────────────────── */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .hud-left {
-        display: none;
+        top: 85px;
+        left: 8px;
+        max-height: calc(100% - 200px);
+        z-index: 14;
     }
 
     .hud-right {
-        display: none;
+        top: 85px;
+        right: 8px;
+        max-height: calc(100% - 200px);
+        z-index: 14;
     }
+
+    .skills-panel, .projects-panel {
+        min-width: 150px;
+        max-width: 180px;
+        font-size: 11px;
+    }
+
+    .skill-name { font-size: 10px; }
+    .skill-stars { font-size: 9px; }
+    .skills-header { font-size: 12px; }
+    .projects-header { font-size: 12px; }
+    .project-title { font-size: 10px; }
+    .project-bullets li { font-size: 9px; }
 
     .hud-top {
         padding: 8px 12px;
@@ -602,7 +670,7 @@
     }
 
     .hud-bottom {
-        bottom: 80px;
+        bottom: calc(76px + env(safe-area-inset-bottom, 0px));
     }
 
     .skill-toast {
@@ -615,16 +683,41 @@
         padding: 10px 16px;
     }
 
+    .joystick-btn {
+        width: 56px;
+        height: 56px;
+    }
+
     .joystick-container {
-        bottom: 16px;
+        bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+        padding: 0 16px;
+    }
+
+    .joystick-right-group {
+        gap: 8px;
     }
 }
 
-/* Ensure game fills viewport in portrait on mobile */
-@media (max-width: 768px) and (orientation: portrait) {
-    #game-container canvas {
-        width: 100vw !important;
-        height: auto !important;
-        max-height: 100vh !important;
+/* ─── CHETAS WATERMARK ──────────────────────────── */
+.chetas-watermark {
+    position: fixed;
+    bottom: 16px;
+    right: 20px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 700;
+    letter-spacing: 2px;
+    z-index: 20;
+    pointer-events: none;
+    user-select: none;
+    text-transform: uppercase;
+}
+
+/* Mobile portrait: let Phaser ENVELOP handle canvas scaling */
+@media (max-width: 1024px) and (orientation: portrait) {
+    .chetas-watermark {
+        font-size: 16px;
+        bottom: calc(10px + env(safe-area-inset-bottom, 0px));
     }
 }

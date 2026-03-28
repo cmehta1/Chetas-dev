@@ -4,13 +4,13 @@ import { LANGUAGES } from '../../game/config/journeyData';
 
 export default function SkillsPanel() {
     const [skills, setSkills] = useState({});
-    const [latestSkill, setLatestSkill] = useState(null);
+    const [latestSkillId, setLatestSkillId] = useState(null);
 
     useEffect(() => {
         const handler = (data) => {
             setSkills(data.allSkills || {});
-            setLatestSkill({ id: data.id, label: data.label, proficiency: data.proficiency, isUpgrade: data.isUpgrade });
-            setTimeout(() => setLatestSkill(null), 2500);
+            setLatestSkillId(data.id);
+            setTimeout(() => setLatestSkillId(null), 1200);
         };
         EventBus.on('skill-collected', handler);
         return () => EventBus.off('skill-collected', handler);
@@ -42,7 +42,7 @@ export default function SkillsPanel() {
                 {skillEntries.map(([id, data]) => (
                     <div
                         key={id}
-                        className={`skill-item ${latestSkill?.id === id ? 'skill-new' : ''}`}
+                        className={`skill-item ${latestSkillId === id ? 'skill-new' : ''}`}
                     >
                         <span className="skill-name">{data.label}</span>
                         <span className="skill-stars">
@@ -52,13 +52,6 @@ export default function SkillsPanel() {
                     </div>
                 ))}
             </div>
-            {latestSkill && (
-                <div className={`skill-toast ${latestSkill.isUpgrade ? 'toast-upgrade' : ''}`}>
-                    {latestSkill.isUpgrade ? '↑ ' : '+ '}
-                    {latestSkill.label} {'★'.repeat(latestSkill.proficiency)}
-                    {latestSkill.isUpgrade ? ' Upgraded!' : ' Acquired!'}
-                </div>
-            )}
         </div>
     );
 }

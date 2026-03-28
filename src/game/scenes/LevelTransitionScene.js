@@ -80,6 +80,7 @@ export default class LevelTransitionScene extends Phaser.Scene {
             case 2: return 'Level2Scene';
             case 3: return 'Level3Scene';
             case 4: return 'Level4Scene';
+            case 5: return 'Level5Scene';
             default: return 'Level1Scene';
         }
     }

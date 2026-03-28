@@ -12,6 +12,7 @@ export const JOURNEY = {
         { id: 5, name: 'Midway Dental Supply', city: 'Livonia, MI', yearStart: 2016, yearEnd: 2017, description: 'Software Developer' },
         { id: 6, name: 'Cerner Corporation', city: 'Kansas City, MO', yearStart: 2017, yearEnd: 2022, description: 'Software Engineer II' },
         { id: 7, name: 'Oracle Health', city: 'Overland Park, KS', yearStart: 2022, yearEnd: 2026, description: 'Member of Technical Staff' },
+        { id: 8, name: 'Hobbies', city: 'Life', yearStart: 2026, yearEnd: 2026, description: 'Beyond the code...' },
     ],
 };
 
@@ -72,6 +73,19 @@ export const SKILLS_DATA = [
     { key: 'agents_7', id: 'agents', label: 'Agents', zone: 7, proficiency: 4 },
     { key: 'codex_7', id: 'codex', label: 'Codex', zone: 7, proficiency: 4 },
     { key: 'a2ui_7', id: 'a2ui', label: 'A2UI', zone: 7, proficiency: 4 },
+];
+
+// Hobbies — displayed in Level 5
+export const HOBBIES_DATA = [
+    { id: 'cricket', label: 'Cricket', category: 'Sports' },
+    { id: 'football', label: 'Football', category: 'Sports' },
+    { id: 'boxing', label: 'Boxing', category: 'Sports' },
+    { id: 'tennis', label: 'Tennis', category: 'Sports' },
+    { id: 'chess', label: 'Chess', category: 'Sports' },
+    { id: 'space', label: 'Space Science', category: 'Interests' },
+    { id: 'drawing', label: 'Drawing', category: 'Interests' },
+    { id: 'coding', label: 'Coding', category: 'Interests' },
+    { id: 'gaming', label: 'Gaming', category: 'Interests' },
 ];
 
 // Projects — shown on right side panel, grouped by zone
@@ -191,6 +205,7 @@ export const EXPERIENCE_DATA = [
             'Created Jenkins pipelines & managed CI/CD infrastructure',
             'Built Postman collections with Newman for automated API testing',
             'Wrote integration tests with JUnit; established release server processes',
+            'Built AI-enabled apps & agents using MCP, DeepAgents & A2UI',
             'Mentored associates on tools, technologies & team workflows',
         ],
     },

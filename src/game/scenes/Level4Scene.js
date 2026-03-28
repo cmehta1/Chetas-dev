@@ -63,7 +63,8 @@ export default class Level4Scene extends Phaser.Scene {
         this.createAutoJumpIndicators();
 
         this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
-        this.cameras.main.setFollowOffset(-200, 50);
+        const isPortrait = window.innerWidth < window.innerHeight && window.innerWidth < 1024;
+        this.cameras.main.setFollowOffset(isPortrait ? -50 : -200, 50);
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -76,6 +77,8 @@ export default class Level4Scene extends Phaser.Scene {
 
         this.joystickState = { left: false, right: false };
         EventBus.on('joystick-input', (state) => { this.joystickState = state; });
+        this.mobileJumpRequested = false;
+        EventBus.on('joystick-jump', () => { this.mobileJumpRequested = true; });
 
         this.createParallaxClouds();
         this.updateHUD();
@@ -120,33 +123,217 @@ export default class Level4Scene extends Phaser.Scene {
             const bx = b.x;
             const groundY = getTerrainY(bx);
             const g = this.add.graphics().setDepth(2);
-            const w = b.width, h = 180;
+            const w = b.width;
+            let h;
 
-            g.fillStyle(0xBCAAA4);
-            g.fillRect(bx - w / 2, groundY - h, w, h);
-            g.lineStyle(0.5, 0x8D6E63, 0.2);
-            for (let r = 0; r < h / 10; r++)
-                g.lineBetween(bx - w / 2, groundY - h + r * 10, bx + w / 2, groundY - h + r * 10);
-            g.fillStyle(0x5D4037);
-            g.fillRect(bx - w / 2 - 8, groundY - h - 8, w + 16, 12);
+            if (zone.id === 5) {
+                // ===== MIDWAY DENTAL SUPPLY =====
+                h = 150;
 
-            g.fillStyle(0xFFF9C4, 0.9);
-            const cols = Math.floor(w / 50);
-            for (let r = 0; r < 3; r++)
-                for (let c = 0; c < cols; c++) {
-                    const wx = bx - w / 2 + 20 + c * (w / cols), wy = groundY - h + 20 + r * 50;
-                    g.fillRect(wx, wy, 24, 30);
-                    g.lineStyle(1.5, 0x795548);
-                    g.strokeRect(wx, wy, 24, 30);
+                // Warm brick body
+                g.fillStyle(0x8D4E3C);
+                g.fillRect(bx - w / 2, groundY - h, w, h);
+
+                // Brick texture
+                g.lineStyle(0.5, 0x6D3A2E, 0.3);
+                for (let r = 0; r < Math.floor(h / 12); r++) {
+                    const ly = groundY - h + r * 12;
+                    g.lineBetween(bx - w / 2, ly, bx + w / 2, ly);
+                    const offset = (r % 2 === 0) ? 0 : 18;
+                    for (let vx = bx - w / 2 + offset; vx < bx + w / 2; vx += 36) {
+                        g.lineBetween(vx, ly, vx, ly + 12);
+                    }
                 }
 
-            g.fillStyle(0x3E2723);
-            g.fillRoundedRect(bx - 18, groundY - 55, 36, 55, { tl: 18, tr: 18, bl: 0, br: 0 });
-            g.fillStyle(0xFFC107);
-            g.fillCircle(bx + 8, groundY - 25, 3);
-            g.fillStyle(0x9E9E9E);
-            for (let s = 0; s < 3; s++)
-                g.fillRect(bx - 25 - s * 5, groundY - 3 - s * 5, 50 + s * 10, 5);
+                // Roof
+                g.fillStyle(0x5D4037);
+                g.fillRect(bx - w / 2 - 6, groundY - h - 6, w + 12, 10);
+
+                // Windows: 2 rows of 4
+                const mWinCols = 4;
+                const mWinRows = 2;
+                const mWinW = 26;
+                const mWinH = 30;
+                const mSpacingX = (w - 60) / mWinCols;
+                const mSpacingY = 50;
+                for (let r = 0; r < mWinRows; r++) {
+                    for (let c = 0; c < mWinCols; c++) {
+                        const wx = bx - w / 2 + 30 + c * mSpacingX;
+                        const wy = groundY - h + 20 + r * mSpacingY;
+                        g.fillStyle(0xECEFF1);
+                        g.fillRect(wx - 2, wy - 2, mWinW + 4, mWinH + 4);
+                        g.fillStyle(0xFFF9C4, 0.85);
+                        g.fillRect(wx, wy, mWinW, mWinH);
+                        g.lineStyle(1, 0xECEFF1);
+                        g.lineBetween(wx + mWinW / 2, wy, wx + mWinW / 2, wy + mWinH);
+                        g.lineBetween(wx, wy + mWinH / 2, wx + mWinW, wy + mWinH / 2);
+                    }
+                }
+
+                // Clean entrance with awning
+                g.fillStyle(0x3E2723);
+                g.fillRect(bx - 16, groundY - 45, 32, 45);
+                g.fillStyle(0xFFC107);
+                g.fillCircle(bx + 8, groundY - 22, 2.5);
+                // Awning
+                g.fillStyle(0xB71C1C, 0.8);
+                g.fillTriangle(bx - 28, groundY - 45, bx + 28, groundY - 45, bx - 28, groundY - 35);
+                g.fillTriangle(bx - 28, groundY - 45, bx + 28, groundY - 45, bx + 28, groundY - 35);
+                g.fillRect(bx - 28, groundY - 48, 56, 5);
+
+                // Tooth logo at top-center
+                g.fillStyle(0xFFFFFF);
+                // Tooth crown (rounded rect)
+                g.fillRoundedRect(bx - 10, groundY - h + 6, 20, 16, 6);
+                // Tooth roots
+                g.fillRoundedRect(bx - 8, groundY - h + 18, 7, 10, 2);
+                g.fillRoundedRect(bx + 1, groundY - h + 18, 7, 10, 2);
+                // Tooth outline
+                g.lineStyle(1, 0xBDBDBD);
+                g.strokeRoundedRect(bx - 10, groundY - h + 6, 20, 16, 6);
+
+            } else if (zone.id === 6) {
+                // ===== CERNER CORPORATION =====
+                h = 280;
+
+                // Blue-gray glass body
+                g.fillStyle(0x546E7A);
+                g.fillRect(bx - w / 2, groundY - h, w, h);
+
+                // Glass panel grid windows
+                const cWinCols = 7;
+                const cWinRows = 8;
+                const cWinW = (w - 40) / cWinCols - 4;
+                const cWinH = (h - 50) / cWinRows - 4;
+                for (let r = 0; r < cWinRows; r++) {
+                    for (let c = 0; c < cWinCols; c++) {
+                        const wx = bx - w / 2 + 20 + c * ((w - 40) / cWinCols);
+                        const wy = groundY - h + 25 + r * ((h - 50) / cWinRows);
+                        g.fillStyle(0x90CAF9, 0.45);
+                        g.fillRect(wx, wy, cWinW, cWinH);
+                        g.lineStyle(0.5, 0x37474F);
+                        g.strokeRect(wx, wy, cWinW, cWinH);
+                    }
+                }
+
+                // Modern roof
+                g.fillStyle(0x37474F);
+                g.fillRect(bx - w / 2 - 4, groundY - h - 6, w + 8, 10);
+
+                // Roof antenna
+                g.lineStyle(2, 0x90A4AE);
+                g.lineBetween(bx + w / 4, groundY - h - 6, bx + w / 4, groundY - h - 30);
+                g.fillStyle(0xE0E0E0);
+                g.fillCircle(bx + w / 4, groundY - h - 30, 3);
+
+                // Entrance: wide glass doors
+                g.fillStyle(0x37474F);
+                g.fillRect(bx - 28, groundY - 55, 56, 55);
+                g.fillStyle(0x90CAF9, 0.6);
+                g.fillRect(bx - 24, groundY - 50, 22, 46);
+                g.fillRect(bx + 2, groundY - 50, 22, 46);
+                g.lineStyle(1, 0x263238);
+                g.strokeRect(bx - 24, groundY - 50, 22, 46);
+                g.strokeRect(bx + 2, groundY - 50, 22, 46);
+
+                // Cerner logo: healthcare cross at top-center
+                // Circle behind
+                g.fillStyle(0x37474F);
+                g.fillCircle(bx, groundY - h + 14, 18);
+                g.lineStyle(1, 0x263238);
+                g.strokeCircle(bx, groundY - h + 14, 18);
+                // Green cross
+                g.fillStyle(0x4CAF50);
+                g.fillRect(bx - 4, groundY - h + 14 - 12, 8, 24); // vertical bar
+                g.fillRect(bx - 12, groundY - h + 14 - 4, 24, 8); // horizontal bar
+
+            } else if (zone.id === 7) {
+                // ===== ORACLE HEALTH =====
+                h = 320;
+
+                // Dark glass body
+                g.fillStyle(0x263238);
+                g.fillRect(bx - w / 2, groundY - h, w, h);
+
+                // Red accent strips on sides
+                g.fillStyle(0xC62828);
+                g.fillRect(bx - w / 2, groundY - h, 6, h);
+                g.fillRect(bx + w / 2 - 6, groundY - h, 6, h);
+
+                // Red-tinted window grid
+                const oWinCols = 7;
+                const oWinRows = 10;
+                const oWinW = (w - 60) / oWinCols - 4;
+                const oWinH = (h - 60) / oWinRows - 4;
+                for (let r = 0; r < oWinRows; r++) {
+                    for (let c = 0; c < oWinCols; c++) {
+                        const wx = bx - w / 2 + 30 + c * ((w - 60) / oWinCols);
+                        const wy = groundY - h + 30 + r * ((h - 60) / oWinRows);
+                        g.fillStyle(0xE74C3C, 0.35);
+                        g.fillRect(wx, wy, oWinW, oWinH);
+                        g.lineStyle(0.5, 0x1B2631);
+                        g.strokeRect(wx, wy, oWinW, oWinH);
+                    }
+                }
+
+                // Dark roof with red trim
+                g.fillStyle(0x1B2631);
+                g.fillRect(bx - w / 2 - 4, groundY - h - 6, w + 8, 10);
+                g.fillStyle(0xC62828);
+                g.fillRect(bx - w / 2 - 4, groundY - h - 2, w + 8, 4);
+
+                // Antenna on top with red light
+                g.lineStyle(2, 0x546E7A);
+                g.lineBetween(bx, groundY - h - 6, bx, groundY - h - 35);
+                g.lineStyle(1, 0x546E7A);
+                g.lineBetween(bx - 8, groundY - h - 20, bx + 8, groundY - h - 20);
+                g.fillStyle(0xFF1744);
+                g.fillCircle(bx, groundY - h - 35, 3);
+
+                // Entrance: wide glass doors
+                g.fillStyle(0x1B2631);
+                g.fillRect(bx - 30, groundY - 60, 60, 60);
+                g.fillStyle(0xE74C3C, 0.25);
+                g.fillRect(bx - 26, groundY - 55, 24, 50);
+                g.fillRect(bx + 2, groundY - 55, 24, 50);
+                g.lineStyle(1, 0xC62828);
+                g.strokeRect(bx - 26, groundY - 55, 24, 50);
+                g.strokeRect(bx + 2, groundY - 55, 24, 50);
+
+                // Oracle logo: red "O" circle outline at top-center
+                g.lineStyle(4, 0xC62828);
+                g.strokeCircle(bx, groundY - h + 16, 18);
+                // "ORACLE" text below circle
+                this.add.text(bx, groundY - h + 38, 'ORACLE', {
+                    fontFamily: 'Poppins, sans-serif', fontSize: '10px',
+                    color: '#ffffff', fontStyle: 'bold',
+                }).setOrigin(0.5).setDepth(3);
+
+            } else {
+                // ===== FALLBACK GENERIC =====
+                h = 180;
+
+                g.fillStyle(0xBCAAA4);
+                g.fillRect(bx - w / 2, groundY - h, w, h);
+                g.lineStyle(0.5, 0x8D6E63, 0.2);
+                for (let r = 0; r < h / 10; r++)
+                    g.lineBetween(bx - w / 2, groundY - h + r * 10, bx + w / 2, groundY - h + r * 10);
+                g.fillStyle(0x5D4037);
+                g.fillRect(bx - w / 2 - 8, groundY - h - 8, w + 16, 12);
+                g.fillStyle(0xFFF9C4, 0.9);
+                const cols = Math.floor(w / 50);
+                for (let r = 0; r < 3; r++)
+                    for (let c = 0; c < cols; c++) {
+                        const wx = bx - w / 2 + 20 + c * (w / cols), wy = groundY - h + 20 + r * 50;
+                        g.fillRect(wx, wy, 24, 30);
+                        g.lineStyle(1.5, 0x795548);
+                        g.strokeRect(wx, wy, 24, 30);
+                    }
+                g.fillStyle(0x3E2723);
+                g.fillRoundedRect(bx - 18, groundY - 55, 36, 55, { tl: 18, tr: 18, bl: 0, br: 0 });
+                g.fillStyle(0xFFC107);
+                g.fillCircle(bx + 8, groundY - 25, 3);
+            }
 
             const signBg = this.add.graphics().setDepth(3);
             signBg.fillStyle(0x1A237E, 0.9);
@@ -244,12 +431,12 @@ export default class Level4Scene extends Phaser.Scene {
             : `+ ${skill.label} ${'★'.repeat(skill.proficiency)}`;
         const color = isUpgrade ? '#FF9800' : '#FFD700';
 
-        const flash = this.add.text(starObj.shape.x, starObj.shape.y - 40, msg, {
+        const flash = this.add.text(this.player.x, this.player.y - 70, msg, {
             fontFamily: 'Poppins, sans-serif', fontSize: '16px',
             color, stroke: '#000000', strokeThickness: 4, fontStyle: 'bold',
         }).setOrigin(0.5).setDepth(20);
         this.tweens.add({
-            targets: flash, y: flash.y - 60, alpha: 0, duration: 1500,
+            targets: flash, y: flash.y - 40, alpha: 0, duration: 800,
             ease: 'Cubic.easeOut', onComplete: () => flash.destroy(),
         });
 
@@ -291,7 +478,7 @@ export default class Level4Scene extends Phaser.Scene {
         EventBus.emit('zone-changed', {
             id: this.currentZoneId, name: zone.name, city: zoneData.city,
             flag: zone.flag, subtitle: zone.subtitle,
-            progress: this.player.x / 14000,
+            progress: this.player.x / 16500,
         });
     }
 
@@ -346,6 +533,7 @@ export default class Level4Scene extends Phaser.Scene {
         this.cameras.main.once('camerafadeoutcomplete', () => {
             const zoneData = JOURNEY.zones.find(z => z.id === building.zone.id);
             const nextZone = ZONES.find(z => z.id === building.zone.id + 1);
+            const isNextInLevel = nextZone && this.levelZones.some(z => z.id === nextZone.id);
 
             const overlay = this.add.rectangle(
                 this.cameras.main.scrollX + GAME_WIDTH / 2, GAME_HEIGHT / 2,
@@ -375,14 +563,22 @@ export default class Level4Scene extends Phaser.Scene {
 
             this.time.delayedCall(2000, () => {
                 overlay.destroy(); city.destroy(); yr.destroy(); desc.destroy();
-                if (nextZone) {
+                if (isNextInLevel) {
                     this.player.x = nextZone.startX + 100;
                     this.player.y = GROUND_Y - 80;
                     this.player.body.setVelocity(0, 0);
                     this.growPlayer(nextZone.playerStage);
+                    this.cameras.main.fadeIn(800);
+                    this.isTransitioning = false;
+                } else {
+                    // Last building in level — transition to next level
+                    this.scene.start('LevelTransition', {
+                        levelId: 5,
+                        collectedKeys: this.collectedKeys,
+                        skillProficiency: this.skillProficiency,
+                        playerStage: this.playerStage,
+                    });
                 }
-                this.cameras.main.fadeIn(800);
-                this.isTransitioning = false;
             });
         });
     }
@@ -414,7 +610,9 @@ export default class Level4Scene extends Phaser.Scene {
         this.player.body.setVelocityX(moveX);
         this.isMoving = Math.abs(moveX) > 10;
 
-        if (Phaser.Input.Keyboard.JustDown(this.cursors.up) && this.player.body.blocked.down)
+        const wantJump = Phaser.Input.Keyboard.JustDown(this.cursors.up) || this.mobileJumpRequested;
+        this.mobileJumpRequested = false;
+        if (wantJump && this.player.body.blocked.down)
             this.player.body.setVelocityY(PLAYER_JUMP_VELOCITY);
 
         // Auto-jump
@@ -463,12 +661,17 @@ export default class Level4Scene extends Phaser.Scene {
         this.updateHUD();
         this.handleBuildingInteraction();
 
-        // End of game — reached the end of Oracle zone
+        // End of Level 4 — transition to Level 5 (Hobbies)
         if (this.player.x >= this.worldEndX - 80 && !this.isTransitioning) {
             this.isTransitioning = true;
             this.cameras.main.fadeOut(1000, 0, 0, 0);
             this.cameras.main.once('camerafadeoutcomplete', () => {
-                this.scene.start('EndScene', { playerStage: this.playerStage });
+                this.scene.start('LevelTransition', {
+                    levelId: 5,
+                    collectedKeys: this.collectedKeys,
+                    skillProficiency: this.skillProficiency,
+                    playerStage: this.playerStage,
+                });
             });
         }
     }

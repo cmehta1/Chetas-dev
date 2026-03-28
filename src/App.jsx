@@ -9,10 +9,18 @@ function App() {
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
-        const check = () => setIsMobile('ontouchstart' in window && window.innerWidth < 900);
+        const check = () => {
+            const touchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            const smallScreen = window.innerWidth < 1024;
+            setIsMobile(touchDevice && smallScreen);
+        };
         check();
         window.addEventListener('resize', check);
-        return () => window.removeEventListener('resize', check);
+        window.addEventListener('orientationchange', check);
+        return () => {
+            window.removeEventListener('resize', check);
+            window.removeEventListener('orientationchange', check);
+        };
     }, []);
 
     return (

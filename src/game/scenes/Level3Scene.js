@@ -63,7 +63,8 @@ export default class Level3Scene extends Phaser.Scene {
         this.createWeatherEffects();
 
         this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
-        this.cameras.main.setFollowOffset(-200, 50);
+        const isPortrait = window.innerWidth < window.innerHeight && window.innerWidth < 1024;
+        this.cameras.main.setFollowOffset(isPortrait ? -50 : -200, 50);
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -76,6 +77,8 @@ export default class Level3Scene extends Phaser.Scene {
 
         this.joystickState = { left: false, right: false };
         EventBus.on('joystick-input', (state) => { this.joystickState = state; });
+        this.mobileJumpRequested = false;
+        EventBus.on('joystick-jump', () => { this.mobileJumpRequested = true; });
 
         this.createParallaxClouds();
         this.updateHUD();
@@ -153,30 +156,123 @@ export default class Level3Scene extends Phaser.Scene {
             const bx = b.x;
             const groundY = getTerrainY(bx);
             const g = this.add.graphics().setDepth(2);
-            const w = b.width, h = 180;
+            const w = 380, h = 260;
 
-            g.fillStyle(0xBCAAA4);
+            // Main brick body
+            g.fillStyle(0x8D6E63);
             g.fillRect(bx - w / 2, groundY - h, w, h);
-            g.lineStyle(0.5, 0x8D6E63, 0.2);
-            for (let r = 0; r < h / 10; r++)
-                g.lineBetween(bx - w / 2, groundY - h + r * 10, bx + w / 2, groundY - h + r * 10);
+
+            // Brick texture: horizontal lines every 12px with vertical offsets
+            g.lineStyle(0.6, 0x6D4C41, 0.3);
+            for (let r = 0; r < Math.floor(h / 12); r++) {
+                const ly = groundY - h + r * 12;
+                g.lineBetween(bx - w / 2, ly, bx + w / 2, ly);
+                // Vertical brick offsets
+                const offset = (r % 2 === 0) ? 0 : 20;
+                for (let vx = bx - w / 2 + offset; vx < bx + w / 2; vx += 40) {
+                    g.lineBetween(vx, ly, vx, ly + 12);
+                }
+            }
+
+            // Flat roof with green trim strip
             g.fillStyle(0x5D4037);
             g.fillRect(bx - w / 2 - 8, groundY - h - 8, w + 16, 12);
+            g.fillStyle(0x005A43);
+            g.fillRect(bx - w / 2 - 8, groundY - h - 2, w + 16, 5);
 
-            g.fillStyle(0xFFF9C4, 0.9);
-            const cols = Math.floor(w / 50);
-            for (let r = 0; r < 3; r++)
-                for (let c = 0; c < cols; c++) {
-                    const wx = bx - w / 2 + 20 + c * (w / cols), wy = groundY - h + 20 + r * 50;
-                    g.fillRect(wx, wy, 24, 30);
-                    g.lineStyle(1.5, 0x795548);
-                    g.strokeRect(wx, wy, 24, 30);
+            // Clock tower on left side
+            const towerX = bx - w / 2 + 25;
+            const towerW = 50;
+            const towerH = 70;
+            // Tower body
+            g.fillStyle(0x795548);
+            g.fillRect(towerX, groundY - h - towerH, towerW, towerH);
+            // Tower brick lines
+            g.lineStyle(0.5, 0x5D4037, 0.3);
+            for (let r = 0; r < Math.floor(towerH / 10); r++) {
+                g.lineBetween(towerX, groundY - h - towerH + r * 10, towerX + towerW, groundY - h - towerH + r * 10);
+            }
+            // Pointed gray cap roof
+            g.fillStyle(0x757575);
+            g.fillTriangle(
+                towerX - 5, groundY - h - towerH,
+                towerX + towerW + 5, groundY - h - towerH,
+                towerX + towerW / 2, groundY - h - towerH - 30
+            );
+            // Clock face
+            const clockCX = towerX + towerW / 2;
+            const clockCY = groundY - h - towerH + 25;
+            g.fillStyle(0xFFF9C4);
+            g.fillCircle(clockCX, clockCY, 14);
+            g.lineStyle(1.5, 0x3E2723);
+            g.strokeCircle(clockCX, clockCY, 14);
+            // Hour markers
+            for (let i = 0; i < 12; i++) {
+                const angle = (Math.PI * 2 * i) / 12 - Math.PI / 2;
+                const mx = clockCX + Math.cos(angle) * 11;
+                const my = clockCY + Math.sin(angle) * 11;
+                g.fillStyle(0x3E2723);
+                g.fillCircle(mx, my, 1.5);
+            }
+            // Clock hands
+            g.lineStyle(1.5, 0x3E2723);
+            g.lineBetween(clockCX, clockCY, clockCX, clockCY - 9); // minute
+            g.lineBetween(clockCX, clockCY, clockCX + 6, clockCY + 3); // hour
+
+            // Green accent trim under roof
+            g.fillStyle(0x005A43);
+            g.fillRect(bx - w / 2, groundY - h, w, 4);
+
+            // Windows: 3 rows of 6
+            const winCols = 6;
+            const winRows = 3;
+            const winW = 28;
+            const winH = 34;
+            const winSpacingX = (w - 80) / winCols;
+            const winSpacingY = 65;
+            for (let r = 0; r < winRows; r++) {
+                for (let c = 0; c < winCols; c++) {
+                    const wx = bx - w / 2 + 40 + c * winSpacingX;
+                    const wy = groundY - h + 30 + r * winSpacingY;
+                    // Window frame (white)
+                    g.fillStyle(0xECEFF1);
+                    g.fillRect(wx - 2, wy - 2, winW + 4, winH + 4);
+                    // Window glass (warm yellow)
+                    g.fillStyle(0xFFF9C4, 0.9);
+                    g.fillRect(wx, wy, winW, winH);
+                    // Cross-hatch panes
+                    g.lineStyle(1.5, 0xECEFF1);
+                    g.lineBetween(wx + winW / 2, wy, wx + winW / 2, wy + winH); // vertical
+                    g.lineBetween(wx, wy + winH / 2, wx + winW, wy + winH / 2); // horizontal
                 }
+            }
 
+            // Grand arched entrance
             g.fillStyle(0x3E2723);
-            g.fillRoundedRect(bx - 18, groundY - 55, 36, 55, { tl: 18, tr: 18, bl: 0, br: 0 });
+            g.fillRoundedRect(bx - 22, groundY - 65, 44, 65, { tl: 22, tr: 22, bl: 0, br: 0 });
+            // Door detail
+            g.fillStyle(0x5D4037);
+            g.fillRect(bx - 1, groundY - 55, 2, 50);
+            // Door handle
             g.fillStyle(0xFFC107);
-            g.fillCircle(bx + 8, groundY - 25, 3);
+            g.fillCircle(bx + 10, groundY - 30, 3);
+
+            // Steps
+            g.fillStyle(0x9E9E9E);
+            for (let s = 0; s < 3; s++) {
+                g.fillRect(bx - 30 - s * 6, groundY - 3 - s * 4, 60 + s * 12, 5);
+            }
+
+            // BU Logo: green circle at top-center
+            g.fillStyle(0x005A43);
+            g.fillCircle(bx, groundY - h + 12, 18);
+            g.lineStyle(1.5, 0x004D40);
+            g.strokeCircle(bx, groundY - h + 12, 18);
+            // BU text
+            this.add.text(bx, groundY - h + 12, 'BU', {
+                fontFamily: 'Poppins, sans-serif', fontSize: '16px',
+                color: '#ffffff', fontStyle: 'bold',
+            }).setOrigin(0.5).setDepth(3);
 
             const signBg = this.add.graphics().setDepth(3);
             signBg.fillStyle(0x1A237E, 0.9);
@@ -265,12 +361,12 @@ export default class Level3Scene extends Phaser.Scene {
             : `+ ${skill.label} ${'★'.repeat(skill.proficiency)}`;
         const color = isUpgrade ? '#FF9800' : '#FFD700';
 
-        const flash = this.add.text(starObj.shape.x, starObj.shape.y - 40, msg, {
+        const flash = this.add.text(this.player.x, this.player.y - 70, msg, {
             fontFamily: 'Poppins, sans-serif', fontSize: '16px',
             color, stroke: '#000000', strokeThickness: 4, fontStyle: 'bold',
         }).setOrigin(0.5).setDepth(20);
         this.tweens.add({
-            targets: flash, y: flash.y - 60, alpha: 0, duration: 1500,
+            targets: flash, y: flash.y - 40, alpha: 0, duration: 800,
             ease: 'Cubic.easeOut', onComplete: () => flash.destroy(),
         });
 
@@ -312,7 +408,7 @@ export default class Level3Scene extends Phaser.Scene {
         EventBus.emit('zone-changed', {
             id: this.currentZoneId, name: zone.name, city: zoneData.city,
             flag: zone.flag, subtitle: zone.subtitle,
-            progress: this.player.x / 14000,
+            progress: this.player.x / 16500,
         });
     }
 
@@ -395,7 +491,9 @@ export default class Level3Scene extends Phaser.Scene {
         this.player.body.setVelocityX(moveX);
         this.isMoving = Math.abs(moveX) > 10;
 
-        if (Phaser.Input.Keyboard.JustDown(this.cursors.up) && this.player.body.blocked.down)
+        const wantJump = Phaser.Input.Keyboard.JustDown(this.cursors.up) || this.mobileJumpRequested;
+        this.mobileJumpRequested = false;
+        if (wantJump && this.player.body.blocked.down)
             this.player.body.setVelocityY(PLAYER_JUMP_VELOCITY);
 
         // Auto-jump
