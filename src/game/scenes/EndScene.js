@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, getMobileMargin } from '../config/constants';
+import { GAME_WIDTH, GAME_HEIGHT, isMobilePortrait } from '../config/constants';
 import { createCharacter } from '../utils/CharacterRenderer';
 import EventBus from '../EventBus';
 
@@ -74,7 +74,7 @@ export default class EndScene extends Phaser.Scene {
 
         this.danceTimer = 0;
 
-        const mobilePortrait = getMobileMargin() > 0;
+        const mobilePortrait = isMobilePortrait();
 
         // "Thanks for visiting!" text
         const thanks = this.add.text(GAME_WIDTH / 2, 80, 'Thanks for visiting!', {
@@ -139,15 +139,15 @@ export default class EndScene extends Phaser.Scene {
         ];
 
         const startY = GAME_HEIGHT - 140;
-        const isMobilePortrait = getMobileMargin() > 0;
-        const spacing = isMobilePortrait ? 70 : 130;
+        const isMobile = isMobilePortrait();
+        const spacing = isMobile ? 70 : 130;
         const startX = GAME_WIDTH / 2 - ((socials.length - 1) * spacing) / 2;
 
         socials.forEach((social, i) => {
             const x = startX + i * spacing;
 
             // Circle background
-            const circleR = isMobilePortrait ? 24 : 32;
+            const circleR = isMobile ? 24 : 32;
             const circle = this.add.graphics().setDepth(10);
             circle.fillStyle(0x1a1a2e, 0.95);
             circle.lineStyle(2.5, 0x444466, 0.8);
@@ -161,7 +161,7 @@ export default class EndScene extends Phaser.Scene {
             // Label
             const lbl = this.add.text(x, startY + 48, social.label, {
                 fontFamily: 'Poppins, sans-serif',
-                fontSize: isMobilePortrait ? '10px' : '14px',
+                fontSize: isMobile ? '10px' : '14px',
                 color: '#bbbbbb',
                 fontStyle: 'bold',
             }).setOrigin(0.5).setDepth(11).setAlpha(0);
@@ -197,8 +197,9 @@ export default class EndScene extends Phaser.Scene {
                 lbl.setColor('#bbbbbb');
             });
 
-            hitArea.on('pointerdown', () => {
-                window.open(social.url, '_blank');
+            hitArea.on('pointerup', () => {
+                const w = window.open(social.url, '_blank');
+                if (!w) window.location.href = social.url;
             });
         });
     }

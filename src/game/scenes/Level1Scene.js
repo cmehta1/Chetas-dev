@@ -3,7 +3,7 @@ import EventBus from '../EventBus';
 import {
     GAME_WIDTH, GAME_HEIGHT, GROUND_Y,
     PLAYER_SPEED, PLAYER_JUMP_VELOCITY, PLAYER_GRAVITY,
-    PLAYER_STAGES, ZONES, getTerrainY, getMobileMargin,
+    PLAYER_STAGES, ZONES, getTerrainY, getCameraMargin, isMobilePortrait,
 } from '../config/constants';
 import { JOURNEY, SKILLS_DATA } from '../config/journeyData';
 import { AUTO_JUMP_TRIGGERS } from '../config/levelConfig';
@@ -44,7 +44,7 @@ export default class Level1Scene extends Phaser.Scene {
         gfx.destroy();
 
         this.physics.world.setBounds(0, 0, this.worldWidth, GAME_HEIGHT);
-        const margin = getMobileMargin();
+        const margin = getCameraMargin();
         this.cameras.main.setBounds(-margin, 0, this.worldWidth + margin * 2, GAME_HEIGHT);
 
         // Render backgrounds for our zones
@@ -63,7 +63,8 @@ export default class Level1Scene extends Phaser.Scene {
         this.createAutoJumpIndicators();
 
         this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
-        this.cameras.main.setFollowOffset(margin > 0 ? 0 : -200, margin > 0 ? 30 : 50);
+        const mobile = isMobilePortrait();
+        this.cameras.main.setFollowOffset(mobile ? 0 : -200, mobile ? 30 : 50);
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -324,7 +325,7 @@ export default class Level1Scene extends Phaser.Scene {
             color, stroke: '#000000', strokeThickness: 4, fontStyle: 'bold',
         }).setOrigin(0.5).setDepth(20);
         this.tweens.add({
-            targets: flash, y: flash.y - 40, alpha: 0, duration: 800,
+            targets: flash, y: flash.y - 40, alpha: 0, duration: 1200,
             ease: 'Cubic.easeOut', onComplete: () => flash.destroy(),
         });
 

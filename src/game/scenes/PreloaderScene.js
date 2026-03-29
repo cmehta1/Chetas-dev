@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../config/constants';
+import { GAME_WIDTH, GAME_HEIGHT, isMobilePortrait } from '../config/constants';
 
 export default class PreloaderScene extends Phaser.Scene {
     constructor() {
@@ -7,8 +7,22 @@ export default class PreloaderScene extends Phaser.Scene {
     }
 
     create() {
+        const mobile = isMobilePortrait();
+        const visibleWidth = mobile
+            ? window.innerWidth / (window.innerHeight / GAME_HEIGHT)
+            : GAME_WIDTH;
+
         // Retro boot-up text
-        const lines = [
+        const lines = mobile ? [
+            'CHETAS MEHTA BIOS v1.0',
+            'Checking memory... OK',
+            'Loading personality... OK',
+            'Loading 40+ skills... OK',
+            'Mapping journey... OK',
+            'Career engine... OK',
+            '',
+            'TAP to begin',
+        ] : [
             'CHETAS MEHTA BIOS v1.0',
             'Checking memory... 640K OK',
             'Loading personality... OK',
@@ -23,9 +37,10 @@ export default class PreloaderScene extends Phaser.Scene {
 
         const textStyle = {
             fontFamily: 'Courier New, monospace',
-            fontSize: '18px',
+            fontSize: mobile ? '12px' : '18px',
             color: '#00ff00',
             lineSpacing: 8,
+            wordWrap: mobile ? { width: visibleWidth - 40 } : undefined,
         };
 
         // Black background

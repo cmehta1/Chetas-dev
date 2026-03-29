@@ -2,11 +2,13 @@ import { useRef, useState, useEffect } from 'react';
 import PhaserGame from './game/PhaserGame';
 import HUD from './components/HUD/HUD';
 import Joystick from './components/HUD/Joystick';
+import EventBus from './game/EventBus';
 import './styles/hud.css';
 
 function App() {
     const phaserRef = useRef(null);
     const [isMobile, setIsMobile] = useState(false);
+    const [gameEnded, setGameEnded] = useState(false);
 
     useEffect(() => {
         const check = () => {
@@ -23,11 +25,17 @@ function App() {
         };
     }, []);
 
+    useEffect(() => {
+        const onGameEnded = () => setGameEnded(true);
+        EventBus.on('game-ended', onGameEnded);
+        return () => EventBus.off('game-ended', onGameEnded);
+    }, []);
+
     return (
         <div id="app-container">
             <PhaserGame ref={phaserRef} />
             <HUD />
-            {isMobile && <Joystick />}
+            {isMobile && !gameEnded && <Joystick />}
         </div>
     );
 }

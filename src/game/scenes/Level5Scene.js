@@ -3,7 +3,7 @@ import EventBus from '../EventBus';
 import {
     GAME_WIDTH, GAME_HEIGHT, GROUND_Y,
     PLAYER_SPEED, PLAYER_JUMP_VELOCITY, PLAYER_GRAVITY,
-    PLAYER_STAGES, ZONES, getTerrainY, getMobileMargin,
+    PLAYER_STAGES, ZONES, getTerrainY, getCameraMargin, isMobilePortrait,
 } from '../config/constants';
 import { JOURNEY, HOBBIES_DATA } from '../config/journeyData';
 import { AUTO_JUMP_TRIGGERS } from '../config/levelConfig';
@@ -46,7 +46,7 @@ export default class Level5Scene extends Phaser.Scene {
         gfx.destroy();
 
         this.physics.world.setBounds(this.worldStartX, 0, this.worldWidth, GAME_HEIGHT);
-        const margin = getMobileMargin();
+        const margin = getCameraMargin();
         this.cameras.main.setBounds(this.worldStartX - margin, 0, this.worldWidth + margin * 2, GAME_HEIGHT);
 
         renderZoneBackground(this, this.levelZone);
@@ -63,7 +63,8 @@ export default class Level5Scene extends Phaser.Scene {
         this.createAutoJumpIndicators();
 
         this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
-        this.cameras.main.setFollowOffset(margin > 0 ? 0 : -200, margin > 0 ? 30 : 50);
+        const mobile = isMobilePortrait();
+        this.cameras.main.setFollowOffset(mobile ? 0 : -200, mobile ? 30 : 50);
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);

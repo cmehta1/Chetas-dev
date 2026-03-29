@@ -110,7 +110,11 @@ export const TERRAIN = [
  * Returns the margin (in game units) that the camera bounds need to be
  * extended on each side so the player can stay centered in the visible area.
  */
-export function getMobileMargin() {
+export function isMobilePortrait() {
+    return window.innerWidth < window.innerHeight && window.innerWidth < 1024;
+}
+
+export function getCameraMargin() {
     const isPortrait = window.innerWidth < window.innerHeight && window.innerWidth < 1024;
     if (!isPortrait) return 0;
     const scaleY = window.innerHeight / GAME_HEIGHT;
