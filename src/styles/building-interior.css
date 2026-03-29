@@ -427,12 +427,22 @@
 
     .bi-intro-blurb {
         max-width: 80%;
+        background: rgba(10, 10, 26, 0.75);
+        backdrop-filter: blur(8px);
+        padding: 14px 16px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .bi-intro-left,
     .bi-intro-right {
         text-align: center;
         padding: 0;
+    }
+
+    .bi-card {
+        background: rgba(10, 10, 26, 0.8);
+        backdrop-filter: blur(10px);
     }
 
     .bi-intro-left .bi-intro-heading::after,
