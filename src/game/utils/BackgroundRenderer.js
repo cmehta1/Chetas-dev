@@ -589,58 +589,154 @@ function drawGround(scene, zone) {
 
 // === INDIAN VILLAGE ===
 function drawIndianVillage(scene, zone, rng) {
+    const width = zone.endX - zone.startX;
     const g = scene.add.graphics();
     g.setDepth(-5);
 
-    const houseColors = [0xE74C3C, 0xF39C12, 0x3498DB, 0xE91E63, 0x9C27B0, 0xFF9800];
-    for (let i = 0; i < 5; i++) {
-        const hx = zone.startX + 150 + i * 300;
-        const hw = rng.between(70, 110);
-        const hh = rng.between(80, 140);
+    // Indian town buildings — multi-story, colorful, with balconies
+    const townColors = [0xE74C3C, 0xF39C12, 0x3498DB, 0xE91E63, 0x2196F3, 0xFF9800];
+    for (let i = 0; i < 6; i++) {
+        const hx = zone.startX + 120 + i * (width / 7);
         const gy = getTerrainY(hx);
-        const color = houseColors[i % houseColors.length];
-        drawColorfulHouse(g, hx, gy, hw, hh, color);
+        const hw = rng.between(80, 120);
+        const hh = rng.between(110, 180);
+        const color = townColors[i % townColors.length];
+        drawTownHouse(g, hx, gy, hw, hh, color);
     }
 
-    drawTemple(g, zone.startX + zone.endX - zone.startX - 300, getTerrainY(zone.endX - 300));
+    // Two temples
+    drawTemple(g, zone.startX + width * 0.35, getTerrainY(zone.startX + width * 0.35));
+    drawTemple(g, zone.endX - 250, getTerrainY(zone.endX - 250));
+
+    // Small shop fronts
+    drawShopFront(g, zone.startX + 500, getTerrainY(zone.startX + 500), 0x4CAF50);
+    drawShopFront(g, zone.startX + width * 0.6, getTerrainY(zone.startX + width * 0.6), 0xFF5722);
 
     for (let i = 0; i < 4; i++) {
-        const tx = zone.startX + rng.between(80, zone.endX - zone.startX - 80);
+        const tx = zone.startX + rng.between(80, width - 80);
         drawBanyanTree(scene, tx, getTerrainY(tx));
     }
 
     drawAutoRickshaw(scene, zone.startX + 600, getTerrainY(zone.startX + 600) + 5);
 }
 
-function drawColorfulHouse(g, x, groundY, w, h, color) {
+function drawTownHouse(g, x, groundY, w, h, color) {
+    // Multi-story Indian town building
+    const floors = Math.floor(h / 50);
     g.fillStyle(color);
     g.fillRect(x - w / 2, groundY - h, w, h);
-    g.fillStyle(0x795548);
-    g.fillTriangle(x - w / 2 - 10, groundY - h, x + w / 2 + 10, groundY - h, x, groundY - h - 30);
+    // Darker trim lines between floors
+    g.lineStyle(1.5, 0x000000, 0.15);
+    for (let f = 1; f < floors; f++) {
+        const fy = groundY - f * 50;
+        g.lineBetween(x - w / 2, fy, x + w / 2, fy);
+        // Decorative ledge
+        g.fillStyle(0xFFFFFF, 0.15);
+        g.fillRect(x - w / 2, fy - 2, w, 3);
+    }
+    // Windows — arched style
+    g.fillStyle(0xFFF9C4);
+    for (let f = 0; f < floors; f++) {
+        const fy = groundY - h + f * 50 + 12;
+        const cols = Math.floor(w / 35);
+        for (let c = 0; c < cols; c++) {
+            const wx = x - w / 2 + 12 + c * (w / cols);
+            g.fillRoundedRect(wx, fy, 14, 22, { tl: 7, tr: 7, bl: 0, br: 0 });
+            g.lineStyle(0.8, 0x5D4037, 0.3);
+            g.strokeRoundedRect(wx, fy, 14, 22, { tl: 7, tr: 7, bl: 0, br: 0 });
+        }
+    }
+    // Balcony on second floor (if tall enough)
+    if (h > 120) {
+        const balY = groundY - 50;
+        g.fillStyle(0x8D6E63);
+        g.fillRect(x - w / 2 - 3, balY, w + 6, 3);
+        // Railing
+        g.lineStyle(1.5, 0x5D4037);
+        g.lineBetween(x - w / 2 - 3, balY - 15, x + w / 2 + 3, balY - 15);
+        g.lineBetween(x - w / 2 - 3, balY, x - w / 2 - 3, balY - 15);
+        g.lineBetween(x + w / 2 + 3, balY, x + w / 2 + 3, balY - 15);
+        for (let r = 0; r < 4; r++)
+            g.lineBetween(x - w / 2 + 5 + r * (w / 4), balY, x - w / 2 + 5 + r * (w / 4), balY - 15);
+    }
+    // Flat roof with parapet
+    g.fillStyle(0x000000, 0.1);
+    g.fillRect(x - w / 2, groundY - h, w, 4);
+    // Door
     g.fillStyle(0x5D4037);
     g.fillRoundedRect(x - 10, groundY - 35, 20, 35, { tl: 10, tr: 10, bl: 0, br: 0 });
-    g.fillStyle(0xFFF9C4);
-    g.fillRoundedRect(x - w / 2 + 8, groundY - h + 15, 15, 20, { tl: 8, tr: 8, bl: 0, br: 0 });
-    g.fillRoundedRect(x + w / 2 - 23, groundY - h + 15, 15, 20, { tl: 8, tr: 8, bl: 0, br: 0 });
+    g.fillStyle(0xFFC107);
+    g.fillCircle(x + 5, groundY - 18, 1.5);
+}
+
+function drawShopFront(g, x, groundY, awningColor) {
+    const w = 70, h = 55;
+    g.fillStyle(0xFFF8E1);
+    g.fillRect(x - w / 2, groundY - h, w, h);
+    // Awning
+    g.fillStyle(awningColor, 0.85);
+    g.fillRect(x - w / 2 - 5, groundY - h, w + 10, 8);
+    // Scalloped awning edge
+    for (let s = 0; s < 6; s++) {
+        g.fillTriangle(
+            x - w / 2 - 5 + s * ((w + 10) / 6), groundY - h + 8,
+            x - w / 2 - 5 + (s + 0.5) * ((w + 10) / 6), groundY - h + 14,
+            x - w / 2 - 5 + (s + 1) * ((w + 10) / 6), groundY - h + 8
+        );
+    }
+    // Open front
+    g.fillStyle(0x3E2723);
+    g.fillRect(x - w / 2 + 5, groundY - h + 12, w - 10, h - 12);
+    // Wares (colored rectangles)
+    g.fillStyle(0xFFEB3B, 0.6);
+    g.fillRect(x - w / 2 + 8, groundY - h + 15, 12, 8);
+    g.fillStyle(0xFF5722, 0.6);
+    g.fillRect(x - w / 2 + 24, groundY - h + 15, 12, 8);
+    g.fillStyle(0x4CAF50, 0.6);
+    g.fillRect(x + w / 2 - 22, groundY - h + 15, 12, 8);
 }
 
 function drawTemple(g, x, groundY) {
+    // Main mandapa
     g.fillStyle(0xFFCC80);
-    g.fillRect(x - 40, groundY - 100, 80, 100);
+    g.fillRect(x - 45, groundY - 110, 90, 110);
+    // Stepped base
     g.fillStyle(0xFFB74D);
-    for (let s = 0; s < 3; s++) {
-        g.fillRect(x - 45 - s * 5, groundY - 5 - s * 8, 90 + s * 10, 8);
-    }
+    for (let s = 0; s < 3; s++)
+        g.fillRect(x - 50 - s * 5, groundY - 5 - s * 8, 100 + s * 10, 8);
+    // Pillar detail
+    g.fillStyle(0xDEB887);
+    g.fillRect(x - 40, groundY - 100, 6, 90);
+    g.fillRect(x + 34, groundY - 100, 6, 90);
+    // Shikhara (tower top)
     g.fillStyle(0xFFCC80);
-    g.fillTriangle(x - 25, groundY - 100, x + 25, groundY - 100, x, groundY - 170);
+    g.fillTriangle(x - 30, groundY - 110, x + 30, groundY - 110, x, groundY - 185);
+    // Horizontal bands on shikhara
+    g.lineStyle(1, 0xDEB887, 0.5);
+    for (let b = 0; b < 4; b++) {
+        const by = groundY - 120 - b * 16;
+        const bw = 26 - b * 5;
+        g.lineBetween(x - bw, by, x + bw, by);
+    }
+    // Kalash on top
     g.fillStyle(0xFFA726);
-    g.fillCircle(x, groundY - 170, 10);
+    g.fillCircle(x, groundY - 185, 8);
     g.fillStyle(0xFF5722);
-    g.fillTriangle(x, groundY - 180, x, groundY - 195, x + 18, groundY - 188);
+    g.fillTriangle(x, groundY - 193, x, groundY - 210, x + 16, groundY - 200);
     g.lineStyle(1.5, 0x795548);
-    g.lineBetween(x, groundY - 180, x, groundY - 200);
+    g.lineBetween(x, groundY - 193, x, groundY - 215);
+    // Entrance archway
     g.fillStyle(0x4E342E);
-    g.fillRoundedRect(x - 10, groundY - 70, 20, 30, { tl: 10, tr: 10, bl: 0, br: 0 });
+    g.fillRoundedRect(x - 12, groundY - 75, 24, 40, { tl: 12, tr: 12, bl: 0, br: 0 });
+    // Decorative arch rings
+    g.lineStyle(1.5, 0xFFB74D);
+    g.beginPath();
+    g.arc(x, groundY - 75, 14, Math.PI, 0, false);
+    g.strokePath();
+    // Window circles on sides
+    g.fillStyle(0xFFF9C4, 0.8);
+    g.fillCircle(x - 25, groundY - 70, 6);
+    g.fillCircle(x + 25, groundY - 70, 6);
 }
 
 function drawBanyanTree(scene, x, groundY) {
@@ -679,181 +775,339 @@ function drawAutoRickshaw(scene, x, groundY) {
 
 // === INDIAN SCHOOL ===
 function drawIndianSchoolArea(scene, zone, rng) {
-    // One prominent school building + playground
-    const mainX = zone.startX + (zone.endX - zone.startX) * 0.5;
-    drawSchoolBuilding(scene, mainX, getTerrainY(mainX));
-    // Smaller annexe
-    const annexX = zone.startX + 400;
-    drawSmallSchoolAnnex(scene, annexX, getTerrainY(annexX));
-    drawPlayground(scene, zone.startX + 1600, getTerrainY(zone.startX + 1600));
+    const width = zone.endX - zone.startX;
+    const g = scene.add.graphics().setDepth(-5);
+
+    // Town houses along the school zone (decorative, no names)
+    const colors = [0xE8D5B7, 0xF5E6CC, 0xFFCC80, 0xE0C8A8, 0xDEB887];
+    for (let i = 0; i < 4; i++) {
+        const hx = zone.startX + 200 + i * (width / 5);
+        const gy = getTerrainY(hx);
+        const hw = rng.between(70, 100);
+        const hh = rng.between(90, 140);
+        drawTownHouse(g, hx, gy, hw, hh, colors[i % colors.length]);
+    }
+
+    // Small temple
+    drawTemple(g, zone.startX + width * 0.7, getTerrainY(zone.startX + width * 0.7));
+
+    // Playground
+    drawPlayground(scene, zone.startX + width * 0.85, getTerrainY(zone.startX + width * 0.85));
+
+    // Shop front
+    drawShopFront(g, zone.startX + width * 0.45, getTerrainY(zone.startX + width * 0.45), 0x1565C0);
+
     for (let i = 0; i < 6; i++) {
-        const tx = zone.startX + rng.between(80, zone.endX - zone.startX - 200);
+        const tx = zone.startX + rng.between(80, width - 200);
         drawNormalTree(scene, tx, getTerrainY(tx), rng);
     }
 }
 
-function drawSchoolBuilding(scene, x, groundY) {
-    const g = scene.add.graphics().setDepth(-5);
-    const w = 240, h = 170;
-    // Main body
-    g.fillStyle(0xFFF8E1);
-    g.fillRect(x - w / 2, groundY - h, w, h);
-    // Subtle brick lines
-    g.lineStyle(0.3, 0xE0D5C0, 0.3);
-    for (let r = 0; r < h / 8; r++)
-        g.lineBetween(x - w / 2, groundY - h + r * 8, x + w / 2, groundY - h + r * 8);
-    // Roof trim
-    g.fillStyle(0xBF360C);
-    g.fillRect(x - w / 2 - 5, groundY - h - 6, w + 10, 8);
-    // Bell tower
-    g.fillStyle(0xFFECB3);
-    g.fillRect(x - 18, groundY - h - 40, 36, 40);
-    g.fillStyle(0xBF360C);
-    g.fillTriangle(x - 22, groundY - h - 40, x + 22, groundY - h - 40, x, groundY - h - 65);
-    g.fillStyle(0xFFB300);
-    g.fillCircle(x, groundY - h - 25, 6);
-    // Windows (3 rows x 5 cols)
-    g.fillStyle(0x81D4FA);
-    for (let r = 0; r < 3; r++)
-        for (let c = 0; c < 5; c++) {
-            const wx = x - w / 2 + 20 + c * 45, wy = groundY - h + 18 + r * 45;
-            g.fillRect(wx, wy, 22, 28);
-            g.lineStyle(1, 0x5D4037);
-            g.strokeRect(wx, wy, 22, 28);
-            g.lineBetween(wx + 11, wy, wx + 11, wy + 28);
-        }
-    // Entrance
-    g.fillStyle(0x3E2723);
-    g.fillRoundedRect(x - 16, groundY - 48, 32, 48, { tl: 16, tr: 16, bl: 0, br: 0 });
-    // Steps
-    g.fillStyle(0x9E9E9E);
-    for (let s = 0; s < 3; s++)
-        g.fillRect(x - 22 - s * 4, groundY - 3 - s * 4, 44 + s * 8, 5);
-    // Indian flag
-    g.lineStyle(1.5, 0x5D4037);
-    g.lineBetween(x + 10, groundY - h - 58, x + 10, groundY - h - 38);
-    g.fillStyle(0xFF9933);
-    g.fillRect(x + 11, groundY - h - 58, 12, 4);
-    g.fillStyle(0xFFFFFF);
-    g.fillRect(x + 11, groundY - h - 54, 12, 4);
-    g.fillStyle(0x138808);
-    g.fillRect(x + 11, groundY - h - 50, 12, 4);
-}
-
-function drawSmallSchoolAnnex(scene, x, groundY) {
-    const g = scene.add.graphics().setDepth(-6);
-    const w = 90, h = 70;
-    g.fillStyle(0xFFF8E1);
-    g.fillRect(x - w / 2, groundY - h, w, h);
-    g.fillStyle(0xBF360C);
-    g.fillRect(x - w / 2 - 3, groundY - h - 5, w + 6, 7);
-    g.fillStyle(0x81D4FA);
-    for (let c = 0; c < 2; c++) {
-        g.fillRect(x - 28 + c * 40, groundY - h + 15, 18, 22);
-    }
-    g.fillStyle(0x4E342E);
-    g.fillRoundedRect(x - 10, groundY - 32, 20, 32, { tl: 10, tr: 10, bl: 0, br: 0 });
-}
-
 function drawPlayground(scene, x, groundY) {
     const g = scene.add.graphics().setDepth(-4);
+    // Swing set
     g.lineStyle(3, 0x616161);
     g.lineBetween(x - 20, groundY, x - 10, groundY - 50);
     g.lineBetween(x + 20, groundY, x + 10, groundY - 50);
     g.lineBetween(x - 10, groundY - 50, x + 10, groundY - 50);
     g.lineStyle(1.5, 0x795548);
-    g.lineBetween(x, groundY - 50, x - 5, groundY - 15);
-    g.lineBetween(x, groundY - 50, x + 5, groundY - 15);
+    g.lineBetween(x - 3, groundY - 50, x - 5, groundY - 15);
+    g.lineBetween(x + 3, groundY - 50, x + 5, groundY - 15);
     g.fillStyle(0x795548);
     g.fillRect(x - 8, groundY - 15, 16, 4);
+    // Slide nearby
+    g.lineStyle(2.5, 0x616161);
+    g.lineBetween(x + 30, groundY, x + 30, groundY - 40);
+    g.lineBetween(x + 28, groundY - 40, x + 50, groundY);
+    g.lineStyle(3, 0xFFC107);
+    g.lineBetween(x + 29, groundY - 38, x + 49, groundY);
 }
 
 // === INDIAN COLLEGE (GTU) ===
 function drawIndianCollege(scene, zone, rng) {
-    // Main GTU building
-    const mainX = zone.startX + (zone.endX - zone.startX) * 0.5;
-    drawGTUBuilding(scene, mainX, getTerrainY(mainX));
-    // Smaller department building
-    const deptX = zone.startX + 500;
-    drawCollegeDeptBuilding(scene, deptX, getTerrainY(deptX));
-    for (let i = 0; i < 7; i++) {
-        const tx = zone.startX + rng.between(100, zone.endX - zone.startX - 200);
+    const width = zone.endX - zone.startX;
+
+    // Campus hostel — 3-story with balconies
+    drawHostelBlock(scene, zone.startX + 400, getTerrainY(zone.startX + 400), 160, 130, 0xE8EAF6);
+    // Library wing — with small dome
+    drawLibraryWing(scene, zone.startX + width * 0.35, getTerrainY(zone.startX + width * 0.35), 120, 100, 0xF5F5F5);
+    // Canteen — open front with pillars
+    drawCanteen(scene, zone.startX + width * 0.7, getTerrainY(zone.startX + width * 0.7), 110, 70, 0xFFF8E1);
+    // Department building — L-shaped
+    drawDeptBlock(scene, zone.startX + width * 0.85, getTerrainY(zone.startX + width * 0.85), 140, 110, 0xE0E0E0);
+
+    // Grand campus entrance gate — brick pillars with arch
+    const gateX = zone.startX + 150;
+    const gateY = getTerrainY(gateX);
+    const gg = scene.add.graphics().setDepth(-4);
+    // Left pillar
+    gg.fillStyle(0x8D6E63);
+    gg.fillRect(gateX - 12, gateY - 75, 24, 75);
+    gg.fillStyle(0x6D4C41);
+    gg.fillRect(gateX - 14, gateY - 78, 28, 6);
+    gg.fillRect(gateX - 14, gateY - 3, 28, 6);
+    // Left pillar lamp
+    gg.fillStyle(0xFFD54F);
+    gg.fillCircle(gateX, gateY - 82, 5);
+    gg.fillStyle(0xFFD54F, 0.3);
+    gg.fillCircle(gateX, gateY - 82, 9);
+    // Right pillar
+    gg.fillStyle(0x8D6E63);
+    gg.fillRect(gateX + 68, gateY - 75, 24, 75);
+    gg.fillStyle(0x6D4C41);
+    gg.fillRect(gateX + 66, gateY - 78, 28, 6);
+    gg.fillRect(gateX + 66, gateY - 3, 28, 6);
+    gg.fillStyle(0xFFD54F);
+    gg.fillCircle(gateX + 80, gateY - 82, 5);
+    gg.fillStyle(0xFFD54F, 0.3);
+    gg.fillCircle(gateX + 80, gateY - 82, 9);
+    // Arch connecting pillars
+    gg.fillStyle(0x1A237E);
+    gg.fillRect(gateX + 12, gateY - 70, 56, 8);
+    // Semicircular arch
+    gg.lineStyle(4, 0x1A237E);
+    gg.beginPath();
+    gg.arc(gateX + 40, gateY - 70, 28, Math.PI, 0, false);
+    gg.strokePath();
+    gg.fillStyle(0x1A237E, 0.4);
+    gg.fillCircle(gateX + 40, gateY - 70, 26);
+    // Iron gate bars
+    gg.lineStyle(1.5, 0x5D4037, 0.5);
+    for (let i = 0; i < 5; i++) {
+        const barX = gateX + 18 + i * 11;
+        gg.lineBetween(barX, gateY - 62, barX, gateY);
+    }
+
+    // Notice board near gate
+    const nbX = zone.startX + 260;
+    const nbY = getTerrainY(nbX);
+    const nb = scene.add.graphics().setDepth(-4);
+    nb.fillStyle(0x5D4037);
+    nb.fillRect(nbX - 2, nbY - 50, 4, 50);
+    nb.fillRect(nbX + 30, nbY - 50, 4, 50);
+    nb.fillStyle(0xFFF9C4);
+    nb.fillRect(nbX - 4, nbY - 55, 40, 30);
+    nb.fillStyle(0x5D4037);
+    nb.fillRect(nbX - 6, nbY - 57, 44, 4);
+    // Paper notices
+    nb.fillStyle(0xFFFFFF);
+    nb.fillRect(nbX + 2, nbY - 50, 12, 16);
+    nb.fillRect(nbX + 18, nbY - 48, 10, 12);
+    nb.fillStyle(0xE3F2FD);
+    nb.fillRect(nbX + 4, nbY - 38, 14, 10);
+
+    // Cycle stand
+    const csX = zone.startX + width * 0.5;
+    const csY = getTerrainY(csX);
+    const cs = scene.add.graphics().setDepth(-4);
+    cs.lineStyle(1.5, 0x757575);
+    cs.fillStyle(0x9E9E9E);
+    cs.fillRect(csX - 30, csY - 4, 60, 4);
+    // Cycle outlines (3 bikes)
+    for (let i = 0; i < 3; i++) {
+        const cx2 = csX - 18 + i * 18;
+        // Wheels
+        cs.lineStyle(1, 0x424242);
+        cs.strokeCircle(cx2 - 4, csY - 10, 5);
+        cs.strokeCircle(cx2 + 4, csY - 10, 5);
+        // Frame
+        cs.lineBetween(cx2 - 4, csY - 10, cx2, csY - 18);
+        cs.lineBetween(cx2 + 4, csY - 10, cx2, csY - 18);
+        cs.lineBetween(cx2 - 4, csY - 10, cx2 + 4, csY - 10);
+        // Handlebar
+        cs.lineBetween(cx2 - 2, csY - 20, cx2 + 2, csY - 20);
+    }
+
+    // Flagpole
+    const fpX = zone.startX + width * 0.15;
+    const fpY = getTerrainY(fpX);
+    const fp = scene.add.graphics().setDepth(-4);
+    fp.lineStyle(2, 0xBDBDBD);
+    fp.lineBetween(fpX, fpY, fpX, fpY - 90);
+    fp.fillStyle(0xBDBDBD);
+    fp.fillCircle(fpX, fpY - 90, 3);
+    // Indian tricolor flag
+    fp.fillStyle(0xFF9933);
+    fp.fillRect(fpX + 2, fpY - 88, 22, 5);
+    fp.fillStyle(0xFFFFFF);
+    fp.fillRect(fpX + 2, fpY - 83, 22, 5);
+    fp.fillStyle(0x138808);
+    fp.fillRect(fpX + 2, fpY - 78, 22, 5);
+    // Ashoka chakra (tiny dot)
+    fp.fillStyle(0x000080);
+    fp.fillCircle(fpX + 13, fpY - 80.5, 2);
+
+    for (let i = 0; i < 8; i++) {
+        const tx = zone.startX + rng.between(100, width - 200);
         drawNormalTree(scene, tx, getTerrainY(tx), rng);
     }
-    drawBench(scene, zone.startX + 1200, getTerrainY(zone.startX + 1200));
+    drawBench(scene, zone.startX + 800, getTerrainY(zone.startX + 800));
+    drawBench(scene, zone.startX + 1500, getTerrainY(zone.startX + 1500));
     drawBench(scene, zone.startX + 2200, getTerrainY(zone.startX + 2200));
 }
 
-function drawGTUBuilding(scene, x, groundY) {
-    const g = scene.add.graphics().setDepth(-5);
-    const w = 300, h = 200;
-    // Main body
-    g.fillStyle(0xF5F5F5);
+function drawHostelBlock(scene, x, groundY, w, h, color) {
+    const g = scene.add.graphics().setDepth(-6);
+    g.fillStyle(color);
     g.fillRect(x - w / 2, groundY - h, w, h);
-    // Columns
-    g.fillStyle(0xBDBDBD);
-    for (let p = 0; p < 6; p++)
-        g.fillRect(x - w / 2 + 15 + p * 55, groundY - h, 8, h);
-    // Roof cornice
-    g.fillStyle(0x1A237E);
-    g.fillRect(x - w / 2 - 5, groundY - h - 6, w + 10, 8);
-    // Triangular pediment
-    g.fillStyle(0xE8EAF6);
-    g.fillTriangle(x - 60, groundY - h - 6, x + 60, groundY - h - 6, x, groundY - h - 40);
-    g.lineStyle(2, 0x1A237E, 0.8);
-    g.lineBetween(x - 60, groundY - h - 6, x, groundY - h - 40);
-    g.lineBetween(x + 60, groundY - h - 6, x, groundY - h - 40);
-    // Windows (4 rows x 6 cols)
-    g.fillStyle(0x90CAF9);
-    for (let r = 0; r < 4; r++)
-        for (let c = 0; c < 6; c++) {
-            const wx = x - w / 2 + 22 + c * 48, wy = groundY - h + 15 + r * 44;
-            g.fillRect(wx, wy, 20, 28);
-            g.lineStyle(1, 0x5D4037, 0.5);
-            g.strokeRect(wx, wy, 20, 28);
-        }
-    // Entrance
-    g.fillStyle(0x3E2723);
-    g.fillRoundedRect(x - 18, groundY - 55, 36, 55, { tl: 18, tr: 18, bl: 0, br: 0 });
-    // Steps
-    g.fillStyle(0x9E9E9E);
-    for (let s = 0; s < 3; s++)
-        g.fillRect(x - 28 - s * 5, groundY - 3 - s * 5, 56 + s * 10, 5);
-    // GTU Logo - gear circle
-    const logoG = scene.add.graphics().setDepth(-4);
-    const lx = x, ly = groundY - h - 22;
-    logoG.fillStyle(0x1A237E);
-    logoG.fillCircle(lx, ly, 16);
-    // Gear teeth
-    for (let t = 0; t < 8; t++) {
-        const angle = (t * Math.PI * 2) / 8;
-        logoG.fillRect(
-            lx + Math.cos(angle) * 14 - 3,
-            ly + Math.sin(angle) * 14 - 3,
-            6, 6
-        );
+    // Floor dividers
+    const floors = 3;
+    for (let f = 1; f < floors; f++) {
+        g.fillStyle(0xBDBDBD);
+        g.fillRect(x - w / 2, groundY - h + f * (h / floors) - 2, w, 4);
     }
-    logoG.fillStyle(0xFFFFFF);
-    logoG.fillCircle(lx, ly, 10);
-    scene.add.text(lx, ly, 'GTU', {
-        fontFamily: 'Arial', fontSize: '10px', color: '#1A237E', fontStyle: 'bold',
-    }).setOrigin(0.5).setDepth(-3);
+    // Roof cornice
+    g.fillStyle(0x7986CB);
+    g.fillRect(x - w / 2 - 4, groundY - h - 5, w + 8, 7);
+    // Windows with balcony railings
+    const cols = Math.floor(w / 38);
+    for (let f = 0; f < floors; f++) {
+        for (let c = 0; c < cols; c++) {
+            const wx = x - w / 2 + 12 + c * (w / cols);
+            const wy = groundY - h + 10 + f * (h / floors);
+            g.fillStyle(0x90CAF9, 0.6);
+            g.fillRect(wx, wy, 20, 26);
+            g.lineStyle(0.8, 0x546E7A, 0.4);
+            g.strokeRect(wx, wy, 20, 26);
+            // Balcony ledge
+            if (f > 0) {
+                g.fillStyle(0xBDBDBD);
+                g.fillRect(wx - 3, wy + 26, 26, 3);
+                // Railing bars
+                g.lineStyle(0.5, 0x9E9E9E);
+                g.lineBetween(wx - 2, wy + 29, wx - 2, wy + 36);
+                g.lineBetween(wx + 10, wy + 29, wx + 10, wy + 36);
+                g.lineBetween(wx + 22, wy + 29, wx + 22, wy + 36);
+                g.lineBetween(wx - 2, wy + 36, wx + 22, wy + 36);
+            }
+        }
+    }
+    // Stairwell at side
+    g.fillStyle(0xD1C4E9);
+    g.fillRect(x + w / 2 - 18, groundY - h, 18, h);
+    g.lineStyle(0.5, 0x9575CD, 0.4);
+    for (let s = 0; s < floors; s++) {
+        const sy = groundY - h + s * (h / floors) + 10;
+        g.lineBetween(x + w / 2 - 16, sy, x + w / 2 - 2, sy + 15);
+        g.lineBetween(x + w / 2 - 2, sy + 15, x + w / 2 - 16, sy + 30);
+    }
+    // Door
+    g.fillStyle(0x5D4037);
+    g.fillRoundedRect(x - 14, groundY - 42, 28, 42, { tl: 14, tr: 14, bl: 0, br: 0 });
 }
 
-function drawCollegeDeptBuilding(scene, x, groundY) {
+function drawLibraryWing(scene, x, groundY, w, h, color) {
     const g = scene.add.graphics().setDepth(-6);
-    const w = 120, h = 100;
-    g.fillStyle(0xE8EAF6);
+    g.fillStyle(color);
     g.fillRect(x - w / 2, groundY - h, w, h);
+    // Roof cornice
     g.fillStyle(0xBDBDBD);
-    for (let p = 0; p < 3; p++)
-        g.fillRect(x - w / 2 + 12 + p * 45, groundY - h, 6, h);
-    g.fillStyle(0x90CAF9);
-    for (let r = 0; r < 2; r++)
-        for (let c = 0; c < 3; c++)
-            g.fillRect(x - w / 2 + 18 + c * 38, groundY - h + 15 + r * 38, 16, 22);
+    g.fillRect(x - w / 2 - 4, groundY - h - 4, w + 8, 6);
+    // Small dome on top
+    g.fillStyle(0x7986CB, 0.7);
+    g.fillCircle(x, groundY - h - 4, 18);
+    g.fillStyle(color);
+    g.fillRect(x - 20, groundY - h, 40, 6);
+    // Tall arched windows (library style)
+    const cols = Math.floor(w / 30);
+    for (let c = 0; c < cols; c++) {
+        const wx = x - w / 2 + 10 + c * (w / cols);
+        const wy = groundY - h + 15;
+        const ww = 16, wh = h - 50;
+        g.fillStyle(0x90CAF9, 0.5);
+        g.fillRect(wx, wy + 8, ww, wh);
+        g.fillCircle(wx + ww / 2, wy + 8, ww / 2);
+        g.lineStyle(0.8, 0x546E7A, 0.4);
+        g.strokeRect(wx, wy + 8, ww, wh);
+        // Horizontal divider
+        g.lineBetween(wx, wy + 8 + wh / 2, wx + ww, wy + 8 + wh / 2);
+    }
+    // Pillared entrance
+    for (const s of [-1, 1]) {
+        g.fillStyle(0xBDBDBD);
+        g.fillRect(x + s * 16 - 3, groundY - 50, 6, 50);
+    }
     g.fillStyle(0x5D4037);
     g.fillRoundedRect(x - 12, groundY - 40, 24, 40, { tl: 12, tr: 12, bl: 0, br: 0 });
+}
+
+function drawCanteen(scene, x, groundY, w, h, color) {
+    const g = scene.add.graphics().setDepth(-6);
+    g.fillStyle(color);
+    g.fillRect(x - w / 2, groundY - h, w, h);
+    // Sloped roof
+    g.fillStyle(0xA1887F);
+    g.fillTriangle(x - w / 2 - 8, groundY - h, x + w / 2 + 8, groundY - h, x, groundY - h - 20);
+    g.fillRect(x - w / 2 - 8, groundY - h - 2, w + 16, 4);
+    // Open front pillars
+    const pillars = 4;
+    for (let p = 0; p < pillars; p++) {
+        const px = x - w / 2 + 10 + p * ((w - 20) / (pillars - 1));
+        g.fillStyle(0xBDBDBD);
+        g.fillRect(px - 3, groundY - h + 4, 6, h - 4);
+    }
+    // Counter at back
+    g.fillStyle(0x8D6E63);
+    g.fillRect(x - w / 2 + 8, groundY - h / 2 - 4, w - 16, 8);
+    // Menu board
+    g.fillStyle(0x1B5E20);
+    g.fillRect(x - 18, groundY - h + 8, 36, 20);
+    g.fillStyle(0xFFFFFF, 0.5);
+    g.fillRect(x - 14, groundY - h + 12, 28, 2);
+    g.fillRect(x - 14, groundY - h + 17, 20, 2);
+    g.fillRect(x - 14, groundY - h + 22, 24, 2);
+    // Chairs/stools in front
+    for (let s = 0; s < 3; s++) {
+        const sx = x - 20 + s * 20;
+        g.fillStyle(0x795548);
+        g.fillRect(sx - 4, groundY - 14, 8, 14);
+        g.fillRect(sx - 6, groundY - 16, 12, 3);
+    }
+}
+
+function drawDeptBlock(scene, x, groundY, w, h, color) {
+    const g = scene.add.graphics().setDepth(-6);
+    // Main block
+    g.fillStyle(color);
+    g.fillRect(x - w / 2, groundY - h, w, h);
+    // L-shape wing extending right
+    const wingW = w * 0.4, wingH = h * 0.6;
+    g.fillStyle(Phaser.Display.Color.IntegerToColor(color).brighten(5).color);
+    g.fillRect(x + w / 2, groundY - wingH, wingW, wingH);
+    // Roof cornice — both blocks
+    g.fillStyle(0x7986CB);
+    g.fillRect(x - w / 2 - 3, groundY - h - 4, w + 6, 6);
+    g.fillRect(x + w / 2 - 3, groundY - wingH - 4, wingW + 6, 6);
+    // Main block windows
+    const cols = Math.floor(w / 36);
+    const rows = Math.floor(h / 40);
+    g.fillStyle(0x90CAF9, 0.6);
+    for (let r = 0; r < rows; r++)
+        for (let c = 0; c < cols; c++) {
+            const wx = x - w / 2 + 12 + c * (w / cols);
+            const wy = groundY - h + 12 + r * 38;
+            g.fillRect(wx, wy, 20, 26);
+            g.lineStyle(0.8, 0x546E7A, 0.4);
+            g.strokeRect(wx, wy, 20, 26);
+        }
+    // Wing windows
+    const wCols = Math.floor(wingW / 36);
+    const wRows = Math.floor(wingH / 40);
+    for (let r = 0; r < wRows; r++)
+        for (let c = 0; c < wCols; c++) {
+            const wx = x + w / 2 + 10 + c * (wingW / wCols);
+            const wy = groundY - wingH + 12 + r * 38;
+            g.fillStyle(0x90CAF9, 0.6);
+            g.fillRect(wx, wy, 18, 24);
+            g.lineStyle(0.8, 0x546E7A, 0.4);
+            g.strokeRect(wx, wy, 18, 24);
+        }
+    // Covered walkway connecting blocks
+    g.fillStyle(0xBDBDBD, 0.6);
+    g.fillRect(x + w / 2 - 10, groundY - wingH - 2, 20, 4);
+    // Door
+    g.fillStyle(0x5D4037);
+    g.fillRoundedRect(x - 12, groundY - 38, 24, 38, { tl: 12, tr: 12, bl: 0, br: 0 });
 }
 
 // === FLIGHT SCENE ===
@@ -926,18 +1180,20 @@ function drawFlightScene(scene, zone, rng) {
 
 // === US CAMPUS (SUNY Binghamton) ===
 function drawUSCampus(scene, zone, rng) {
-    // Main Binghamton University building
-    const mainX = zone.startX + (zone.endX - zone.startX) * 0.5;
-    drawBinghamtonBuilding(scene, mainX, getTerrainY(mainX));
-    // Smaller campus buildings
-    const deptX1 = zone.startX + 400;
-    drawCampusDeptBuilding(scene, deptX1, getTerrainY(deptX1));
-    const deptX2 = zone.startX + 1600;
-    drawCampusDeptBuilding(scene, deptX2, getTerrainY(deptX2));
+    const width = zone.endX - zone.startX;
+
+    // Tall NY-style apartment buildings in background
+    drawTallBuilding(scene, zone.startX + 250, getTerrainY(zone.startX + 250), 80, 240, 0x8D6E63);
+    drawTallBuilding(scene, zone.startX + width * 0.3, getTerrainY(zone.startX + width * 0.3), 90, 200, 0x795548);
+    drawTallBuilding(scene, zone.startX + width * 0.75, getTerrainY(zone.startX + width * 0.75), 70, 220, 0x6D4C41);
+
+    // Dorm buildings
+    drawDormBuilding(scene, zone.startX + 500, getTerrainY(zone.startX + 500));
+    drawDormBuilding(scene, zone.startX + width * 0.6, getTerrainY(zone.startX + width * 0.6));
 
     const fallColors = [0xE65100, 0xBF360C, 0xF57F17, 0xFF6F00, 0xD84315];
     for (let i = 0; i < 8; i++) {
-        const tx = zone.startX + rng.between(80, zone.endX - zone.startX - 200);
+        const tx = zone.startX + rng.between(80, width - 200);
         drawFallTree(scene, tx, getTerrainY(tx), fallColors[i % fallColors.length]);
     }
     for (let i = 0; i < 5; i++) {
@@ -948,92 +1204,58 @@ function drawUSCampus(scene, zone, rng) {
     drawBench(scene, zone.startX + 1800, getTerrainY(zone.startX + 1800));
 }
 
-function drawBinghamtonBuilding(scene, x, groundY) {
-    const g = scene.add.graphics().setDepth(-5);
-    const w = 320, h = 210;
-    // Main brick body
-    g.fillStyle(0x8D6E63);
+function drawTallBuilding(scene, x, groundY, w, h, color) {
+    const g = scene.add.graphics().setDepth(-7);
+    // Body
+    g.fillStyle(color);
     g.fillRect(x - w / 2, groundY - h, w, h);
     // Brick texture
-    g.lineStyle(0.4, 0x6D4C41, 0.25);
-    for (let r = 0; r < h / 10; r++) {
-        g.lineBetween(x - w / 2, groundY - h + r * 10, x + w / 2, groundY - h + r * 10);
-        const offset = r % 2 === 0 ? 0 : 14;
-        for (let c = 0; c < w / 28; c++)
-            g.lineBetween(x - w / 2 + c * 28 + offset, groundY - h + r * 10, x - w / 2 + c * 28 + offset, groundY - h + (r + 1) * 10);
+    g.lineStyle(0.4, 0x000000, 0.1);
+    for (let r = 0; r < h / 12; r++) {
+        g.lineBetween(x - w / 2, groundY - h + r * 12, x + w / 2, groundY - h + r * 12);
+        const offset = (r % 2 === 0) ? 0 : 16;
+        for (let c = 0; c < w / 32; c++)
+            g.lineBetween(x - w / 2 + c * 32 + offset, groundY - h + r * 12, x - w / 2 + c * 32 + offset, groundY - h + (r + 1) * 12);
     }
-    // Green trim (Binghamton green)
-    g.fillStyle(0x005A43);
-    g.fillRect(x - w / 2, groundY - h - 5, w, 7);
-    g.fillRect(x - w / 2, groundY - h + h / 2 - 2, w, 4);
-    // Clock tower (left side)
-    const tx = x - w / 2 + 40;
-    g.fillStyle(0x795548);
-    g.fillRect(tx - 22, groundY - h - 55, 44, 55);
-    // Brick on tower
-    g.lineStyle(0.4, 0x5D4037, 0.3);
-    for (let r = 0; r < 5; r++)
-        g.lineBetween(tx - 22, groundY - h - 55 + r * 11, tx + 22, groundY - h - 55 + r * 11);
-    // Clock face
-    g.fillStyle(0xFFF8E1);
-    g.fillCircle(tx, groundY - h - 35, 14);
-    g.lineStyle(1.5, 0x3E2723);
-    g.strokeCircle(tx, groundY - h - 35, 14);
-    // Hour markers
-    for (let h2 = 0; h2 < 12; h2++) {
-        const angle = (h2 * Math.PI * 2) / 12 - Math.PI / 2;
-        g.fillStyle(0x3E2723);
-        g.fillCircle(tx + Math.cos(angle) * 10, groundY - h - 35 + Math.sin(angle) * 10, 1.5);
-    }
-    // Clock hands
-    g.lineStyle(1.5, 0x3E2723);
-    g.lineBetween(tx, groundY - h - 35, tx, groundY - h - 44);
-    g.lineBetween(tx, groundY - h - 35, tx + 7, groundY - h - 32);
-    // Tower cap
-    g.fillStyle(0x546E7A);
-    g.fillTriangle(tx - 25, groundY - h - 55, tx + 25, groundY - h - 55, tx, groundY - h - 75);
-    // Windows (3 rows x 6 cols)
-    g.fillStyle(0xFFF9C4);
-    for (let r = 0; r < 3; r++)
-        for (let c = 0; c < 6; c++) {
-            const wx = x - w / 2 + 65 + c * 45, wy = groundY - h + 18 + r * 60;
-            g.fillRect(wx, wy, 22, 35);
-            g.lineStyle(1.2, 0xECEFF1);
-            g.strokeRect(wx, wy, 22, 35);
-            g.lineBetween(wx + 11, wy, wx + 11, wy + 35);
-            g.lineBetween(wx, wy + 17, wx + 22, wy + 17);
+    // Windows
+    const cols = Math.floor(w / 22);
+    const rows = Math.floor(h / 28);
+    for (let r = 0; r < rows; r++)
+        for (let c = 0; c < cols; c++) {
+            const lit = ((r + c) % 3 !== 0);
+            g.fillStyle(lit ? 0xFFF9C4 : 0x546E7A, lit ? 0.9 : 0.5);
+            g.fillRect(x - w / 2 + 6 + c * (w / cols), groundY - h + 8 + r * 26, 12, 18);
         }
-    // Entrance
-    g.fillStyle(0x3E2723);
-    g.fillRoundedRect(x - 18, groundY - 55, 36, 55, { tl: 18, tr: 18, bl: 0, br: 0 });
-    // Steps
-    g.fillStyle(0xBDBDBD);
-    for (let s = 0; s < 3; s++)
-        g.fillRect(x - 25 - s * 5, groundY - 3 - s * 5, 50 + s * 10, 5);
-    // BU Logo
-    const logoG = scene.add.graphics().setDepth(-4);
-    logoG.fillStyle(0x005A43);
-    logoG.fillCircle(x, groundY - h - 16, 15);
-    scene.add.text(x, groundY - h - 16, 'BU', {
-        fontFamily: 'Arial', fontSize: '14px', color: '#ffffff', fontStyle: 'bold',
-    }).setOrigin(0.5).setDepth(-3);
+    // Roof cap
+    g.fillStyle(0x37474F);
+    g.fillRect(x - w / 2 - 2, groundY - h - 4, w + 4, 6);
+    // Water tank on roof
+    g.fillStyle(0x546E7A);
+    g.fillRect(x - 8, groundY - h - 20, 16, 16);
+    g.fillRect(x - 10, groundY - h - 22, 20, 4);
 }
 
-function drawCampusDeptBuilding(scene, x, groundY) {
+function drawDormBuilding(scene, x, groundY) {
     const g = scene.add.graphics().setDepth(-6);
-    const w = 110, h = 90;
+    const w = 120, h = 100;
     g.fillStyle(0x8D6E63);
     g.fillRect(x - w / 2, groundY - h, w, h);
+    // Brick lines
     g.lineStyle(0.3, 0x6D4C41, 0.2);
     for (let r = 0; r < h / 10; r++)
         g.lineBetween(x - w / 2, groundY - h + r * 10, x + w / 2, groundY - h + r * 10);
+    // Roof
     g.fillStyle(0xECEFF1);
     g.fillRect(x - w / 2 - 2, groundY - h - 4, w + 4, 6);
+    // Windows
     g.fillStyle(0xFFF9C4);
-    for (let c = 0; c < 3; c++) {
-        g.fillRect(x - 38 + c * 30, groundY - h + 15, 18, 25);
-        g.fillRect(x - 38 + c * 30, groundY - h + 50, 18, 25);
-    }
+    for (let r = 0; r < 2; r++)
+        for (let c = 0; c < 3; c++) {
+            g.fillRect(x - 38 + c * 30, groundY - h + 15 + r * 40, 18, 25);
+            g.lineStyle(0.8, 0xECEFF1);
+            g.strokeRect(x - 38 + c * 30, groundY - h + 15 + r * 40, 18, 25);
+        }
+    // Door
     g.fillStyle(0x3E2723);
     g.fillRoundedRect(x - 10, groundY - 35, 20, 35, { tl: 10, tr: 10, bl: 0, br: 0 });
 }
@@ -1042,50 +1264,36 @@ function drawCampusDeptBuilding(scene, x, groundY) {
 function drawMichiganOffice(scene, zone, rng) {
     const width = zone.endX - zone.startX;
 
-    // Single main Midway Dental building
-    const mainX = zone.startX + width * 0.5;
-    const mainY = getTerrainY(mainX);
-    const mg = scene.add.graphics().setDepth(-5);
-    const mw = 180, mh = 130;
-    // Brick body
-    mg.fillStyle(0x8D4E3C);
-    mg.fillRect(mainX - mw / 2, mainY - mh, mw, mh);
-    // Brick texture
-    mg.lineStyle(0.4, 0x6D3A2E, 0.25);
-    for (let r = 0; r < mh / 8; r++) {
-        mg.lineBetween(mainX - mw / 2, mainY - mh + r * 8, mainX + mw / 2, mainY - mh + r * 8);
-        const offset = r % 2 === 0 ? 0 : 12;
-        for (let c = 0; c < mw / 24; c++)
-            mg.lineBetween(mainX - mw / 2 + c * 24 + offset, mainY - mh + r * 8, mainX - mw / 2 + c * 24 + offset, mainY - mh + (r + 1) * 8);
+    // Suburban strip mall (decorative, no names)
+    const stripX = zone.startX + width * 0.35;
+    const stripY = getTerrainY(stripX);
+    const sg = scene.add.graphics().setDepth(-5);
+    sg.fillStyle(0xE8D5B7);
+    sg.fillRect(stripX - 100, stripY - 80, 200, 80);
+    sg.fillStyle(0x5D4037);
+    sg.fillRect(stripX - 104, stripY - 84, 208, 6);
+    // Storefronts
+    for (let i = 0; i < 3; i++) {
+        const sx = stripX - 70 + i * 65;
+        sg.fillStyle(0x90CAF9, 0.5);
+        sg.fillRect(sx, stripY - 65, 45, 40);
+        sg.lineStyle(1, 0x546E7A);
+        sg.strokeRect(sx, stripY - 65, 45, 40);
+        sg.fillStyle(0x3E2723);
+        sg.fillRect(sx + 16, stripY - 22, 14, 22);
     }
-    // Roof
-    mg.fillStyle(0x5D4037);
-    mg.fillRect(mainX - mw / 2 - 4, mainY - mh - 5, mw + 8, 7);
-    // Windows
-    mg.fillStyle(0xB3E5FC, 0.7);
-    for (let r = 0; r < 2; r++)
-        for (let c = 0; c < 4; c++)
-            mg.fillRect(mainX - mw / 2 + 15 + c * 42, mainY - mh + 18 + r * 45, 22, 28);
-    // Door with awning
-    mg.fillStyle(0x3E2723);
-    mg.fillRoundedRect(mainX - 14, mainY - 45, 28, 45, { tl: 14, tr: 14, bl: 0, br: 0 });
-    mg.fillStyle(0xBF360C, 0.8);
-    mg.fillTriangle(mainX - 25, mainY - 45, mainX + 25, mainY - 45, mainX, mainY - 55);
-    // Tooth logo
-    const toothG = scene.add.graphics().setDepth(-4);
-    toothG.fillStyle(0xFFFFFF, 0.9);
-    toothG.fillRoundedRect(mainX - 10, mainY - mh - 30, 20, 18, 6);
-    toothG.fillRect(mainX - 8, mainY - mh - 14, 7, 10);
-    toothG.fillRect(mainX + 1, mainY - mh - 14, 7, 10);
+    // Awning
+    sg.fillStyle(0xBF360C, 0.7);
+    sg.fillRect(stripX - 100, stripY - 68, 200, 5);
 
     // Residential houses in background
-    for (let i = 0; i < 3; i++) {
-        const hx = zone.startX + 150 + i * (width / 3);
+    const houseColors = [0xE8D5B7, 0xD7CCC8, 0xF5F5DC, 0xECE0D0];
+    for (let i = 0; i < 4; i++) {
+        const hx = zone.startX + 120 + i * (width / 4.5);
         const gy = getTerrainY(hx);
         const g = scene.add.graphics().setDepth(-7);
-        const hw = 55, hh = 45;
-        const colors = [0xE8D5B7, 0xD7CCC8, 0xF5F5DC];
-        g.fillStyle(colors[i % 3]);
+        const hw = rng.between(55, 75), hh = rng.between(50, 65);
+        g.fillStyle(houseColors[i % 4]);
         g.fillRect(hx - hw / 2, gy - hh, hw, hh);
         g.fillStyle(0x5D4037);
         g.fillTriangle(hx - hw / 2 - 6, gy - hh, hx + hw / 2 + 6, gy - hh, hx, gy - hh - 22);
@@ -1094,6 +1302,9 @@ function drawMichiganOffice(scene, zone, rng) {
         g.fillStyle(0xFFF9C4);
         g.fillRect(hx - 18, gy - hh + 10, 12, 14);
         g.fillRect(hx + 6, gy - hh + 10, 12, 14);
+        // Chimney
+        g.fillStyle(0x8D6E63);
+        g.fillRect(hx + hw / 4, gy - hh - 22 - 12, 8, 14);
     }
 
     // Trees + street lights
@@ -1116,59 +1327,30 @@ function drawMichiganOffice(scene, zone, rng) {
 function drawKansasCityCorporate(scene, zone, rng) {
     const width = zone.endX - zone.startX;
 
-    // Main large Cerner headquarters building
-    const mainX = zone.startX + width * 0.5;
-    const mainY = getTerrainY(mainX);
-    const cg = scene.add.graphics().setDepth(-5);
-    const cw = 300, ch = 260;
-    // Glass body
-    cg.fillStyle(0x546E7A);
-    cg.fillRect(mainX - cw / 2, mainY - ch, cw, ch);
-    // Glass panel grid
-    cg.fillStyle(0x90CAF9, 0.35);
-    for (let r = 0; r < 12; r++)
-        for (let c = 0; c < 14; c++)
-            cg.fillRect(mainX - cw / 2 + 6 + c * 21, mainY - ch + 6 + r * 21, 16, 17);
-    // Roof
-    cg.fillStyle(0x37474F);
-    cg.fillRect(mainX - cw / 2, mainY - ch - 5, cw, 7);
-    // Entrance
-    cg.fillStyle(0x90CAF9, 0.6);
-    cg.fillRect(mainX - 22, mainY - 50, 44, 50);
-    cg.lineStyle(1, 0xB0BEC5, 0.5);
-    cg.lineBetween(mainX, mainY - 50, mainX, mainY);
-    // Cerner cross logo
-    const logoG = scene.add.graphics().setDepth(-4);
-    logoG.fillStyle(0x37474F);
-    logoG.fillCircle(mainX, mainY - ch - 18, 18);
-    logoG.fillStyle(0x4CAF50, 0.9);
-    logoG.fillRect(mainX - 4, mainY - ch - 30, 8, 24);
-    logoG.fillRect(mainX - 12, mainY - ch - 22, 24, 8);
-    scene.add.text(mainX, mainY - ch - 40, 'CERNER', {
-        fontFamily: 'Arial', fontSize: '9px', color: '#90CAF9', fontStyle: 'bold',
-    }).setOrigin(0.5).setDepth(-3);
-
-    // Supporting glass buildings
-    for (let i = 0; i < 2; i++) {
-        const bx = zone.startX + 350 + i * (width - 700);
+    // Decorative glass office towers (no branding)
+    for (let i = 0; i < 3; i++) {
+        const bx = zone.startX + 300 + i * (width / 3.5);
         const gy = getTerrainY(bx);
-        const bw = rng.between(100, 140);
-        const bh = rng.between(150, 200);
-        const g = scene.add.graphics().setDepth(-6);
-        g.fillStyle(0x546E7A);
-        g.fillRect(bx - bw / 2, gy - bh, bw, bh);
-        g.fillStyle(0x90CAF9, 0.3);
-        const cols2 = Math.floor(bw / 18);
-        const rows2 = Math.floor(bh / 20);
-        for (let r = 0; r < rows2; r++)
-            for (let c = 0; c < cols2; c++)
-                g.fillRect(bx - bw / 2 + 4 + c * 18, gy - bh + 4 + r * 20, 14, 16);
-        g.fillStyle(0x37474F);
-        g.fillRect(bx - bw / 2, gy - bh - 4, bw, 6);
+        const bw = rng.between(90, 130);
+        const bh = rng.between(160, 230);
+        drawGlassTower(scene, bx, gy, bw, bh, 0x546E7A, 0x90CAF9);
     }
 
+    // Parking garage
+    const pgX = zone.startX + width * 0.2;
+    const pgY = getTerrainY(pgX);
+    const pg = scene.add.graphics().setDepth(-6);
+    pg.fillStyle(0x9E9E9E);
+    pg.fillRect(pgX - 50, pgY - 60, 100, 60);
+    for (let f = 0; f < 3; f++) {
+        pg.fillStyle(0x757575);
+        pg.fillRect(pgX - 50, pgY - 60 + f * 20, 100, 2);
+    }
+    pg.fillStyle(0x616161);
+    pg.fillRect(pgX - 50, pgY - 62, 100, 4);
+
     // Fountain
-    const ftnX = zone.startX + width * 0.35;
+    const ftnX = zone.startX + width * 0.5;
     const ftnY = getTerrainY(ftnX);
     const ftnG = scene.add.graphics().setDepth(-3);
     ftnG.fillStyle(0x78909C);
@@ -1202,69 +1384,43 @@ function drawKansasCityCorporate(scene, zone, rng) {
     }
 }
 
+function drawGlassTower(scene, x, groundY, w, h, bodyColor, windowColor) {
+    const g = scene.add.graphics().setDepth(-6);
+    g.fillStyle(bodyColor);
+    g.fillRect(x - w / 2, groundY - h, w, h);
+    // Glass panel grid
+    const cols = Math.floor(w / 18);
+    const rows = Math.floor(h / 20);
+    g.fillStyle(windowColor, 0.3);
+    for (let r = 0; r < rows; r++)
+        for (let c = 0; c < cols; c++)
+            g.fillRect(x - w / 2 + 4 + c * 18, groundY - h + 4 + r * 20, 14, 16);
+    // Glass reflections (diagonal highlights)
+    g.fillStyle(0xFFFFFF, 0.06);
+    g.fillRect(x - w / 2, groundY - h, w / 3, h);
+    // Roof cap
+    g.fillStyle(0x37474F);
+    g.fillRect(x - w / 2, groundY - h - 4, w, 6);
+    // Antenna for tall ones
+    if (h > 180) {
+        g.lineStyle(2, 0x78909C);
+        g.lineBetween(x, groundY - h - 4, x, groundY - h - 28);
+        g.fillStyle(0xE0E0E0);
+        g.fillCircle(x, groundY - h - 28, 3);
+    }
+}
+
 // === ORACLE TECH HUB ===
 function drawOracleTechHub(scene, zone, rng) {
     const width = zone.endX - zone.startX;
 
-    // Main Oracle headquarters tower
-    const mainX = zone.startX + width * 0.5;
-    const mainY = getTerrainY(mainX);
-    const og = scene.add.graphics().setDepth(-5);
-    const ow = 280, oh = 300;
-    // Dark sleek body
-    og.fillStyle(0x263238);
-    og.fillRect(mainX - ow / 2, mainY - oh, ow, oh);
-    // Red accent windows
-    og.fillStyle(0xE74C3C, 0.35);
-    for (let r = 0; r < 14; r++)
-        for (let c = 0; c < 14; c++)
-            og.fillRect(mainX - ow / 2 + 6 + c * 20, mainY - oh + 6 + r * 21, 16, 17);
-    // Red accent strips
-    og.fillStyle(0xC62828, 0.8);
-    og.fillRect(mainX - ow / 2, mainY - oh, 4, oh);
-    og.fillRect(mainX + ow / 2 - 4, mainY - oh, 4, oh);
-    // Roof
-    og.fillStyle(0x1A237E);
-    og.fillRect(mainX - ow / 2, mainY - oh - 5, ow, 7);
-    // Antenna
-    og.lineStyle(2, 0x78909C);
-    og.lineBetween(mainX, mainY - oh - 5, mainX, mainY - oh - 40);
-    og.fillStyle(0xF44336);
-    og.fillCircle(mainX, mainY - oh - 40, 4);
-    // Oracle "O" logo
-    const oLogoG = scene.add.graphics().setDepth(-4);
-    oLogoG.lineStyle(5, 0xC62828, 0.95);
-    oLogoG.strokeCircle(mainX, mainY - oh - 18, 16);
-    scene.add.text(mainX, mainY - oh - 48, 'ORACLE', {
-        fontFamily: 'Arial', fontSize: '10px', color: '#C62828', fontStyle: 'bold',
-    }).setOrigin(0.5).setDepth(-3);
-
-    // Supporting towers
-    for (let i = 0; i < 2; i++) {
-        const bx = zone.startX + 300 + i * (width - 600);
+    // Decorative dark glass towers (no branding)
+    for (let i = 0; i < 3; i++) {
+        const bx = zone.startX + 250 + i * (width / 3.5);
         const gy = getTerrainY(bx);
         const bw = rng.between(80, 120);
-        const bh = rng.between(180, 250);
-        const g = scene.add.graphics().setDepth(-6);
-        g.fillStyle(0x263238);
-        g.fillRect(bx - bw / 2, gy - bh, bw, bh);
-        g.fillStyle(0xE74C3C, 0.3);
-        const cols2 = Math.floor(bw / 16);
-        const rows2 = Math.floor(bh / 20);
-        for (let r = 0; r < rows2; r++)
-            for (let c = 0; c < cols2; c++)
-                g.fillRect(bx - bw / 2 + 4 + c * 16, gy - bh + 4 + r * 20, 12, 16);
-        g.fillStyle(0xC62828, 0.7);
-        g.fillRect(bx - bw / 2, gy - bh, 3, bh);
-        g.fillRect(bx + bw / 2 - 3, gy - bh, 3, bh);
-        g.fillStyle(0x1A237E);
-        g.fillRect(bx - bw / 2, gy - bh - 4, bw, 6);
-        if (bh > 200) {
-            g.lineStyle(2, 0x78909C);
-            g.lineBetween(bx, gy - bh - 4, bx, gy - bh - 30);
-            g.fillStyle(0xF44336);
-            g.fillCircle(bx, gy - bh - 30, 3);
-        }
+        const bh = rng.between(190, 260);
+        drawGlassTower(scene, bx, gy, bw, bh, 0x263238, 0xE74C3C);
     }
 
     // Data center motif
@@ -1280,6 +1436,18 @@ function drawOracleTechHub(scene, zone, rng) {
         dcG.fillCircle(dcX + 20, dcY - 51 + r * 11, 2);
     }
 
+    // Corporate plaza (flat area in front)
+    const plazaX = zone.startX + width * 0.6;
+    const plazaY = getTerrainY(plazaX);
+    const plG = scene.add.graphics().setDepth(-3);
+    plG.fillStyle(0x78909C, 0.2);
+    plG.fillEllipse(plazaX, plazaY - 3, 120, 12);
+    // Sculpture
+    plG.fillStyle(0xBDBDBD);
+    plG.fillRect(plazaX - 3, plazaY - 35, 6, 32);
+    plG.fillStyle(0x90A4AE);
+    plG.fillCircle(plazaX, plazaY - 40, 10);
+
     // Street lights
     for (let i = 0; i < 6; i++) {
         const lx = zone.startX + 150 + i * (width / 6);
@@ -1290,32 +1458,6 @@ function drawOracleTechHub(scene, zone, rng) {
     for (let i = 0; i < 4; i++) {
         const tx = zone.startX + rng.between(100, width - 100);
         drawNormalTree(scene, tx, getTerrainY(tx), rng);
-    }
-
-}
-
-function drawModernBuilding(scene, x, groundY, w, h, rng, isOracle) {
-    const g = scene.add.graphics();
-    g.setDepth(-6);
-    const baseColor = isOracle ? 0x37474F : 0x455A64;
-    g.fillStyle(baseColor);
-    g.fillRect(x - w / 2, groundY - h, w, h);
-    const windowColor = isOracle ? 0xE74C3C : 0x90CAF9;
-    g.fillStyle(windowColor, 0.4);
-    const cols = Math.floor(w / 18);
-    const rows = Math.floor(h / 22);
-    for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-            g.fillRect(x - w / 2 + 6 + c * 18, groundY - h + 6 + r * 22, 12, 16);
-        }
-    }
-    g.fillStyle(0x263238);
-    g.fillRect(x - w / 2, groundY - h - 4, w, 6);
-    if (h > 180) {
-        g.lineStyle(2, 0x78909C);
-        g.lineBetween(x, groundY - h - 4, x, groundY - h - 25);
-        g.fillStyle(0xF44336);
-        g.fillCircle(x, groundY - h - 25, 3);
     }
 }
 

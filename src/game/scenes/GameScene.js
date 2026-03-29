@@ -41,7 +41,7 @@ export default class GameScene extends Phaser.Scene {
         ZONES.forEach((zone) => renderZoneBackground(this, zone));
 
         // Ground platform — dynamic immovable body that follows terrain height
-        this.groundPlatform = this.add.rectangle(WORLD_WIDTH / 2, GROUND_Y + 10, WORLD_WIDTH, 20, 0x000000, 0);
+        this.groundPlatform = this.add.rectangle(WORLD_WIDTH / 2, GROUND_Y + 200, WORLD_WIDTH, 400, 0x000000, 0);
         this.physics.add.existing(this.groundPlatform, false);
         this.groundPlatform.body.setImmovable(true);
         this.groundPlatform.body.setAllowGravity(false);
@@ -482,8 +482,13 @@ export default class GameScene extends Phaser.Scene {
 
         // ── Move ground platform to terrain height at player position ──
         const terrainY = getTerrainY(this.player.x);
-        this.groundPlatform.y = terrainY + 10;
+        this.groundPlatform.y = terrainY + 200;
         this.groundPlatform.body.updateFromGameObject();
+
+        // Safety clamp: prevent falling through terrain on steep slopes
+        if (this.player.y > terrainY - 10) {
+            this.player.body.reset(this.player.x, terrainY - 45);
+        }
 
         // ── INPUT: keyboard + scroll wheel ──
         let moveX = 0;

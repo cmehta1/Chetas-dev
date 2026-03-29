@@ -62,7 +62,7 @@ export default class Level2Scene extends Phaser.Scene {
         renderZoneBackground(this, zone3);
 
         // Ground platform
-        this.groundPlatform = this.add.rectangle(zone2.startX + worldWidth / 2, GROUND_Y + 10, worldWidth, 20, 0x000000, 0);
+        this.groundPlatform = this.add.rectangle(zone2.startX + worldWidth / 2, GROUND_Y + 200, worldWidth, 400, 0x000000, 0);
         this.physics.add.existing(this.groundPlatform, false);
         this.groundPlatform.body.setImmovable(true);
         this.groundPlatform.body.setAllowGravity(false);
@@ -139,121 +139,130 @@ export default class Level2Scene extends Phaser.Scene {
             const bx = b.x;
             const groundY = getTerrainY(bx);
             const g = this.add.graphics().setDepth(2);
-            const w = 350, h = 250;
+            const w = 400, h = 270;
 
-            // Main building body - cream/white
-            g.fillStyle(0xF5F5F5);
-            g.fillRect(bx - w / 2, groundY - h, w, h);
+            // ── Left wing ──
+            g.fillStyle(0xF0EDE5);
+            g.fillRect(bx - w / 2, groundY - h + 40, (w - 100) / 2, h - 40);
+            // ── Right wing ──
+            g.fillRect(bx + 50, groundY - h + 40, (w - 100) / 2, h - 40);
 
-            // Subtle horizontal lines for texture
-            g.lineStyle(0.3, 0xE0E0E0, 0.4);
+            // ── Central block (taller) ──
+            g.fillStyle(0xF5F0E8);
+            g.fillRect(bx - 70, groundY - h, 140, h);
+            // Subtle stone texture
+            g.lineStyle(0.3, 0xD7CCC8, 0.25);
             for (let r = 0; r < h / 10; r++)
-                g.lineBetween(bx - w / 2, groundY - h + r * 10, bx + w / 2, groundY - h + r * 10);
+                g.lineBetween(bx - 70, groundY - h + r * 10, bx + 70, groundY - h + r * 10);
 
-            // Roof cornice - dark blue strip
+            // ── Dome on central block ──
+            g.fillStyle(0xBDBDBD);
+            g.fillEllipse(bx, groundY - h - 20, 80, 50);
+            g.fillStyle(0xE0E0E0, 0.4);
+            g.fillEllipse(bx - 8, groundY - h - 25, 40, 30);
+            // Dome spire
             g.fillStyle(0x1A237E);
-            g.fillRect(bx - w / 2 - 8, groundY - h - 6, w + 16, 10);
+            g.fillRect(bx - 3, groundY - h - 50, 6, 8);
+            g.fillCircle(bx, groundY - h - 53, 5);
 
-            // Triangular pediment above entrance
-            const pedW = 120, pedH = 35;
-            g.fillStyle(0xE0E0E0);
-            g.fillTriangle(bx - pedW / 2, groundY - h, bx + pedW / 2, groundY - h, bx, groundY - h - pedH);
-            // Pediment border
-            g.lineStyle(2, 0x1A237E);
-            g.lineBetween(bx - pedW / 2, groundY - h, bx, groundY - h - pedH);
-            g.lineBetween(bx, groundY - h - pedH, bx + pedW / 2, groundY - h);
-            g.lineBetween(bx - pedW / 2, groundY - h, bx + pedW / 2, groundY - h);
+            // ── Cornice on wings ──
+            g.fillStyle(0x1A237E);
+            g.fillRect(bx - w / 2 - 4, groundY - h + 36, (w - 100) / 2 + 8, 6);
+            g.fillRect(bx + 46, groundY - h + 36, (w - 100) / 2 + 8, 6);
+            // Central cornice
+            g.fillRect(bx - 74, groundY - h - 4, 148, 6);
 
-            // 4 columns at entrance (light gray pillars)
-            const colW = 10, colH = 100;
-            const colPositions = [-40, -15, 15, 40];
+            // ── 6 columns at entrance ──
+            const colPositions = [-50, -30, -10, 10, 30, 50];
             colPositions.forEach(offset => {
-                // Column base
                 g.fillStyle(0xBDBDBD);
-                g.fillRect(bx + offset - colW / 2 - 2, groundY - colH, colW + 4, 6);
-                g.fillRect(bx + offset - colW / 2 - 2, groundY - 6, colW + 4, 6);
-                // Column shaft
+                g.fillRect(bx + offset - 6, groundY - 108, 12, 5);
+                g.fillRect(bx + offset - 6, groundY - 5, 12, 5);
                 g.fillStyle(0xE0E0E0);
-                g.fillRect(bx + offset - colW / 2, groundY - colH + 6, colW, colH - 12);
-                // Column highlight
-                g.fillStyle(0xFFFFFF, 0.4);
-                g.fillRect(bx + offset - colW / 2 + 1, groundY - colH + 6, 3, colH - 12);
+                g.fillRect(bx + offset - 5, groundY - 103, 10, 98);
+                g.fillStyle(0xFFFFFF, 0.35);
+                g.fillRect(bx + offset - 4, groundY - 103, 3, 98);
             });
 
-            // Windows: 4 rows of 6
-            const winW = 20, winH = 26, winCols = 6, winRows = 4;
-            const winSpacingX = (w - 80) / (winCols - 1);
-            const winSpacingY = 45;
-            for (let r = 0; r < winRows; r++) {
-                for (let c = 0; c < winCols; c++) {
-                    const wx = bx - w / 2 + 40 + c * winSpacingX - winW / 2;
-                    const wy = groundY - h + 20 + r * winSpacingY;
-                    // Skip windows that overlap with columns area in lower rows
-                    if (r >= 2 && Math.abs((bx - w / 2 + 40 + c * winSpacingX) - bx) < 55) continue;
-                    // Window frame
-                    g.fillStyle(0x546E7A);
-                    g.fillRect(wx - 2, wy - 2, winW + 4, winH + 4);
-                    // Window glass (light blue)
-                    g.fillStyle(0x81D4FA);
-                    g.fillRect(wx, wy, winW, winH);
-                    // Window cross divider
-                    g.lineStyle(0.8, 0x546E7A);
-                    g.lineBetween(wx + winW / 2, wy, wx + winW / 2, wy + winH);
-                    g.lineBetween(wx, wy + winH / 2, wx + winW, wy + winH / 2);
-                }
+            // ── Windows on wings ──
+            const wingLeftX = bx - w / 2;
+            const wingRightX = bx + 50;
+            const wingW2 = (w - 100) / 2;
+            for (let wing = 0; wing < 2; wing++) {
+                const wx0 = wing === 0 ? wingLeftX : wingRightX;
+                const cols2 = 3, rows2 = 3;
+                for (let r = 0; r < rows2; r++)
+                    for (let c = 0; c < cols2; c++) {
+                        const wx = wx0 + 14 + c * (wingW2 / cols2);
+                        const wy = groundY - h + 55 + r * 55;
+                        g.fillStyle(0x546E7A);
+                        g.fillRoundedRect(wx - 2, wy - 2, 24, 34, { tl: 12, tr: 12, bl: 0, br: 0 });
+                        g.fillStyle(0x90CAF9, 0.8);
+                        g.fillRoundedRect(wx, wy, 20, 30, { tl: 10, tr: 10, bl: 0, br: 0 });
+                        g.lineStyle(0.8, 0x546E7A);
+                        g.lineBetween(wx + 10, wy, wx + 10, wy + 30);
+                    }
             }
 
-            // Grand entrance door
-            const doorW = 36, doorH = 55;
-            g.fillStyle(0x3E2723);
-            g.fillRoundedRect(bx - doorW / 2, groundY - doorH, doorW, doorH, { tl: 18, tr: 18, bl: 0, br: 0 });
-            // Door divider
-            g.lineStyle(1, 0x4E342E);
-            g.lineBetween(bx, groundY - doorH + 8, bx, groundY);
-            // Door handles
-            g.fillStyle(0xFFC107);
-            g.fillCircle(bx - 4, groundY - doorH / 2 + 5, 2);
-            g.fillCircle(bx + 4, groundY - doorH / 2 + 5, 2);
+            // ── Windows on central block ──
+            for (let r = 0; r < 4; r++)
+                for (let c = 0; c < 2; c++) {
+                    const wx = bx - 55 + c * 90;
+                    const wy = groundY - h + 18 + r * 52;
+                    if (r >= 3 && c === 0) continue;
+                    g.fillStyle(0x546E7A);
+                    g.fillRoundedRect(wx - 2, wy - 2, 24, 34, { tl: 12, tr: 12, bl: 0, br: 0 });
+                    g.fillStyle(0x81D4FA, 0.8);
+                    g.fillRoundedRect(wx, wy, 20, 30, { tl: 10, tr: 10, bl: 0, br: 0 });
+                    g.lineStyle(0.8, 0x546E7A);
+                    g.lineBetween(wx + 10, wy, wx + 10, wy + 30);
+                }
 
-            // Steps
+            // ── Grand arched entrance ──
+            g.fillStyle(0x3E2723);
+            g.fillRoundedRect(bx - 22, groundY - 65, 44, 65, { tl: 22, tr: 22, bl: 0, br: 0 });
+            g.fillStyle(0x5D4037);
+            g.fillRect(bx - 1, groundY - 55, 2, 50);
+            g.fillStyle(0xFFC107);
+            g.fillCircle(bx - 6, groundY - 30, 2.5);
+            g.fillCircle(bx + 6, groundY - 30, 2.5);
+            // Arch detail
+            g.lineStyle(2, 0x8D6E63);
+            g.beginPath();
+            g.arc(bx, groundY - 65, 24, Math.PI, 0, false);
+            g.strokePath();
+
+            // ── Steps ──
             g.fillStyle(0xBDBDBD);
             for (let s = 0; s < 4; s++)
-                g.fillRect(bx - doorW / 2 - 8 - s * 4, groundY - 3 - s * 4, doorW + 16 + s * 8, 5);
+                g.fillRect(bx - 30 - s * 5, groundY - 3 - s * 4, 60 + s * 10, 5);
 
-            // GTU Logo - gear/cog shape with "GTU" text at top-center
-            const logoX = bx, logoY = groundY - h - pedH - 10;
-            const logoR = 20;
-            // Gear circle (dark blue)
+            // ── GTU Logo at dome base ──
+            const logoX = bx, logoY = groundY - h - 8;
             g.fillStyle(0x1A237E);
-            g.fillCircle(logoX, logoY, logoR);
-            // Gear teeth - 8 bumps radiating out (approximated as circles)
+            g.fillCircle(logoX, logoY, 18);
             for (let i = 0; i < 8; i++) {
                 const angle = (Math.PI * 2 * i) / 8;
-                g.fillStyle(0x1A237E);
-                g.fillCircle(logoX + Math.cos(angle) * (logoR + 3), logoY + Math.sin(angle) * (logoR + 3), 5);
+                g.fillCircle(logoX + Math.cos(angle) * 20, logoY + Math.sin(angle) * 20, 4);
             }
-            // Inner circle (slightly lighter)
             g.fillStyle(0x283593);
-            g.fillCircle(logoX, logoY, logoR - 6);
-            // Inner ring
-            g.lineStyle(1.5, 0x3F51B5);
-            g.strokeCircle(logoX, logoY, logoR - 8);
-
-            // GTU text on the logo (using Phaser text object)
+            g.fillCircle(logoX, logoY, 12);
+            g.lineStyle(1.5, 0x5C6BC0);
+            g.strokeCircle(logoX, logoY, 9);
             this.add.text(logoX, logoY, 'GTU', {
-                fontFamily: 'Poppins, sans-serif', fontSize: '12px',
+                fontFamily: 'Poppins, sans-serif', fontSize: '11px',
                 color: '#ffffff', fontStyle: 'bold',
             }).setOrigin(0.5).setDepth(3);
 
-            // Sign placed on the building facade (below roof line)
+            // ── Sign ──
             const signBg = this.add.graphics().setDepth(3);
             signBg.fillStyle(0x1A237E, 0.9);
-            signBg.fillRoundedRect(bx - w / 2 + 10, groundY - h + 8, w - 20, 24, 6);
-            this.add.text(bx, groundY - h + 20, b.name, {
-                fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ffffff', fontStyle: 'bold',
+            signBg.fillRoundedRect(bx - 80, groundY - h + 42, 160, 22, 5);
+            this.add.text(bx, groundY - h + 53, b.name, {
+                fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#ffffff', fontStyle: 'bold',
             }).setOrigin(0.5).setDepth(4);
 
-            // Prompt above the logo/pediment
+            // ── Prompt ──
             const promptText = isMobilePortrait() ? '[ Tap to Enter ]' : '[ SPACE to Enter ]';
             const prompt = this.add.text(bx, groundY - h - 75, promptText, {
                 fontFamily: 'Poppins, sans-serif', fontSize: '15px',
@@ -494,8 +503,13 @@ export default class Level2Scene extends Phaser.Scene {
 
         // Terrain following
         const terrainY = getTerrainY(this.player.x);
-        this.groundPlatform.y = terrainY + 10;
+        this.groundPlatform.y = terrainY + 200;
         this.groundPlatform.body.updateFromGameObject();
+
+        // Safety clamp: prevent falling through terrain on steep slopes
+        if (this.player.y > terrainY - 10) {
+            this.player.body.reset(this.player.x, terrainY - 45);
+        }
 
         // Input (keyboard + joystick)
         let moveX = 0;

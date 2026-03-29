@@ -1,6 +1,7 @@
 /**
- * Bigger, rotation-based animated character inspired by Leonardi's interactive resume.
- * ~40% larger proportions, pivot-based limb animation, expressive face.
+ * Improved character with multi-joint limbs (knee/elbow bends),
+ * belt detail, better shoes, and natural walk animation.
+ * Stage progression 1-6 with growing scale preserved.
  */
 export function createCharacter(scene, stage) {
     const c = scene.add.container(0, 0);
@@ -13,40 +14,55 @@ export function createCharacter(scene, stage) {
     const BLACK = 0x111111;
 
     const outfits = {
-        1: { shirt: 0xE53935, shirtHi: 0xEF5350, pants: 0x5D4037, pantsHi: 0x6D4C41, shoe: 0x4E342E },
-        2: { shirt: 0xFAFAFA, shirtHi: 0xFFFFFF, pants: 0x263238, pantsHi: 0x37474F, shoe: 0x212121 },
-        3: { shirt: 0x1E88E5, shirtHi: 0x42A5F5, pants: 0x37474F, pantsHi: 0x455A64, shoe: 0x3E2723 },
-        4: { shirt: 0x2E7D32, shirtHi: 0x43A047, pants: 0x37474F, pantsHi: 0x455A64, shoe: 0x4E342E },
-        5: { shirt: 0x1565C0, shirtHi: 0x1E88E5, pants: 0x212121, pantsHi: 0x333333, shoe: 0x1A1A1A },
-        6: { shirt: 0xC62828, shirtHi: 0xE53935, pants: 0x1A1A2E, pantsHi: 0x252540, shoe: 0x111111 },
+        1: { shirt: 0xE53935, shirtHi: 0xEF5350, pants: 0x5D4037, pantsHi: 0x6D4C41, shoe: 0x4E342E, belt: 0x4E342E },
+        2: { shirt: 0xFAFAFA, shirtHi: 0xFFFFFF, pants: 0x263238, pantsHi: 0x37474F, shoe: 0x212121, belt: 0x1A1A1A },
+        3: { shirt: 0x1E88E5, shirtHi: 0x42A5F5, pants: 0x37474F, pantsHi: 0x455A64, shoe: 0x3E2723, belt: 0x263238 },
+        4: { shirt: 0x2E7D32, shirtHi: 0x43A047, pants: 0x37474F, pantsHi: 0x455A64, shoe: 0x4E342E, belt: 0x263238 },
+        5: { shirt: 0x1565C0, shirtHi: 0x1E88E5, pants: 0x212121, pantsHi: 0x333333, shoe: 0x1A1A1A, belt: 0x111111 },
+        6: { shirt: 0xC62828, shirtHi: 0xE53935, pants: 0x1A1A2E, pantsHi: 0x252540, shoe: 0x111111, belt: 0x0A0A14 },
     };
     const o = outfits[stage] || outfits[1];
 
     // ── SHADOW ──
     c.add(scene.add.ellipse(0, 78, 50, 14, 0x000000, 0.18));
 
-    // ── LEGS (pivot at hip — rotation-based animation) ──
-    const legH = 33, legW = 18;
-    const leftLegC = scene.add.container(-10, 40);
-    const llg = scene.add.graphics();
-    llg.fillStyle(o.pants); llg.fillRoundedRect(-legW / 2, 0, legW, legH, 4);
-    llg.fillStyle(o.pantsHi, 0.3); llg.fillRect(-legW / 2, 0, 5, legH);
-    leftLegC.add(llg);
-    const lsh = scene.add.graphics();
-    lsh.fillStyle(o.shoe); lsh.fillRoundedRect(-11, legH - 3, 22, 12, { tl: 2, tr: 2, bl: 5, br: 5 });
-    lsh.fillStyle(WHITE, 0.15); lsh.fillRect(-9, legH - 3, 18, 4);
-    leftLegC.add(lsh);
+    // ── LEGS (two-part: thigh pivots at hip, shin pivots at knee) ──
+    const thighH = 17, shinH = 16, legW = 16;
+
+    // Left leg
+    const leftLegC = scene.add.container(-9, 40);
+    const ltg = scene.add.graphics();
+    ltg.fillStyle(o.pants); ltg.fillRoundedRect(-legW / 2, 0, legW, thighH, 3);
+    ltg.fillStyle(o.pantsHi, 0.3); ltg.fillRect(-legW / 2, 0, 4, thighH);
+    leftLegC.add(ltg);
+
+    const leftShinC = scene.add.container(0, thighH);
+    const lsg = scene.add.graphics();
+    lsg.fillStyle(o.pants); lsg.fillRoundedRect(-legW / 2, 0, legW, shinH, { tl: 0, tr: 0, bl: 3, br: 3 });
+    lsg.fillStyle(o.pantsHi, 0.25); lsg.fillRect(-legW / 2, 0, 4, shinH);
+    lsg.fillStyle(o.shoe); lsg.fillRoundedRect(-10, shinH - 2, 20, 10, { tl: 2, tr: 2, bl: 4, br: 4 });
+    lsg.fillStyle(WHITE, 0.12); lsg.fillRect(-8, shinH - 2, 16, 3);
+    lsg.fillStyle(0x000000, 0.3); lsg.fillRect(-10, shinH + 6, 20, 2);
+    leftShinC.add(lsg);
+    leftLegC.add(leftShinC);
     c.add(leftLegC);
 
-    const rightLegC = scene.add.container(10, 40);
-    const rlg = scene.add.graphics();
-    rlg.fillStyle(o.pants); rlg.fillRoundedRect(-legW / 2, 0, legW, legH, 4);
-    rlg.fillStyle(o.pantsHi, 0.3); rlg.fillRect(legW / 2 - 5, 0, 5, legH);
-    rightLegC.add(rlg);
-    const rsh = scene.add.graphics();
-    rsh.fillStyle(o.shoe); rsh.fillRoundedRect(-11, legH - 3, 22, 12, { tl: 2, tr: 2, bl: 5, br: 5 });
-    rsh.fillStyle(WHITE, 0.15); rsh.fillRect(-9, legH - 3, 18, 4);
-    rightLegC.add(rsh);
+    // Right leg
+    const rightLegC = scene.add.container(9, 40);
+    const rtg = scene.add.graphics();
+    rtg.fillStyle(o.pants); rtg.fillRoundedRect(-legW / 2, 0, legW, thighH, 3);
+    rtg.fillStyle(o.pantsHi, 0.3); rtg.fillRect(legW / 2 - 4, 0, 4, thighH);
+    rightLegC.add(rtg);
+
+    const rightShinC = scene.add.container(0, thighH);
+    const rsg = scene.add.graphics();
+    rsg.fillStyle(o.pants); rsg.fillRoundedRect(-legW / 2, 0, legW, shinH, { tl: 0, tr: 0, bl: 3, br: 3 });
+    rsg.fillStyle(o.pantsHi, 0.25); rsg.fillRect(legW / 2 - 4, 0, 4, shinH);
+    rsg.fillStyle(o.shoe); rsg.fillRoundedRect(-10, shinH - 2, 20, 10, { tl: 2, tr: 2, bl: 4, br: 4 });
+    rsg.fillStyle(WHITE, 0.12); rsg.fillRect(-8, shinH - 2, 16, 3);
+    rsg.fillStyle(0x000000, 0.3); rsg.fillRect(-10, shinH + 6, 20, 2);
+    rightShinC.add(rsg);
+    rightLegC.add(rightShinC);
     c.add(rightLegC);
 
     // ── TORSO ──
@@ -76,38 +92,63 @@ export function createCharacter(scene, stage) {
         torso.fillEllipse(8, -1, 14, 8);
     } else if (stage >= 5) {
         torso.lineStyle(1, o.shirtHi, 0.5);
-        torso.lineBetween(0, 3, 0, th - 3);
-        for (let by = 8; by <= 36; by += 9) {
+        torso.lineBetween(0, 3, 0, th - 8);
+        for (let by = 8; by <= 32; by += 8) {
             torso.fillStyle(0xE0E0E0); torso.fillCircle(0, by, 2.5);
         }
         torso.fillStyle(SKIN);
         torso.fillTriangle(-10, 0, 0, 0, -3, 10);
         torso.fillTriangle(10, 0, 0, 0, 3, 10);
     }
+
+    // Belt
+    torso.fillStyle(o.belt);
+    torso.fillRect(-tw / 2, th - 5, tw, 4);
+    torso.fillStyle(0xD0D0D0);
+    torso.fillRoundedRect(-4, th - 6, 8, 5, 1);
+
     c.add(torso);
     torso.setPosition(0, -4);
 
-    // ── ARMS (pivot at shoulder — rotation-based animation) ──
-    const armW = 14, armH = 36;
+    // ── ARMS (two-part: upper arm pivots at shoulder, forearm at elbow) ──
+    const uArmH = 18, fArmH = 16, armW = 13;
 
-    const leftArmC = scene.add.container(-tw / 2 - 4, 2);
-    const lag = scene.add.graphics();
-    lag.fillStyle(stage >= 3 ? o.shirt : SKIN);
-    lag.fillRoundedRect(-armW / 2, 0, armW, armH, 5);
-    if (stage >= 3) { lag.fillStyle(o.shirtHi, 0.3); lag.fillRect(-armW / 2, 0, 4, armH); }
-    lag.fillStyle(SKIN); lag.fillCircle(0, armH + 2, 7);
-    lag.fillStyle(SKIN_HI, 0.3); lag.fillCircle(-1, armH + 1, 3);
-    leftArmC.add(lag);
+    // Left arm
+    const leftArmC = scene.add.container(-tw / 2 - 3, 2);
+    const luag = scene.add.graphics();
+    luag.fillStyle(stage >= 3 ? o.shirt : SKIN);
+    luag.fillRoundedRect(-armW / 2, 0, armW, uArmH, 4);
+    if (stage >= 3) { luag.fillStyle(o.shirtHi, 0.3); luag.fillRect(-armW / 2, 0, 4, uArmH); }
+    leftArmC.add(luag);
+
+    const leftForearmC = scene.add.container(0, uArmH);
+    const lfag = scene.add.graphics();
+    lfag.fillStyle(SKIN);
+    lfag.fillRoundedRect(-armW / 2 + 1, 0, armW - 2, fArmH, 4);
+    lfag.fillStyle(SKIN_HI, 0.25); lfag.fillRect(-armW / 2 + 1, 0, 3, fArmH);
+    lfag.fillStyle(SKIN); lfag.fillCircle(0, fArmH + 1, 6);
+    lfag.fillStyle(SKIN_HI, 0.3); lfag.fillCircle(-1, fArmH, 2.5);
+    leftForearmC.add(lfag);
+    leftArmC.add(leftForearmC);
     c.add(leftArmC);
 
-    const rightArmC = scene.add.container(tw / 2 + 4, 2);
-    const rag = scene.add.graphics();
-    rag.fillStyle(stage >= 3 ? o.shirt : SKIN);
-    rag.fillRoundedRect(-armW / 2, 0, armW, armH, 5);
-    if (stage >= 3) { rag.fillStyle(o.shirtHi, 0.3); rag.fillRect(armW / 2 - 4, 0, 4, armH); }
-    rag.fillStyle(SKIN); rag.fillCircle(0, armH + 2, 7);
-    rag.fillStyle(SKIN_HI, 0.3); rag.fillCircle(1, armH + 1, 3);
-    rightArmC.add(rag);
+    // Right arm
+    const rightArmC = scene.add.container(tw / 2 + 3, 2);
+    const ruag = scene.add.graphics();
+    ruag.fillStyle(stage >= 3 ? o.shirt : SKIN);
+    ruag.fillRoundedRect(-armW / 2, 0, armW, uArmH, 4);
+    if (stage >= 3) { ruag.fillStyle(o.shirtHi, 0.3); ruag.fillRect(armW / 2 - 4, 0, 4, uArmH); }
+    rightArmC.add(ruag);
+
+    const rightForearmC = scene.add.container(0, uArmH);
+    const rfag = scene.add.graphics();
+    rfag.fillStyle(SKIN);
+    rfag.fillRoundedRect(-armW / 2 + 1, 0, armW - 2, fArmH, 4);
+    rfag.fillStyle(SKIN_HI, 0.25); rfag.fillRect(armW / 2 - 4, 0, 3, fArmH);
+    rfag.fillStyle(SKIN); rfag.fillCircle(0, fArmH + 1, 6);
+    rfag.fillStyle(SKIN_HI, 0.3); rfag.fillCircle(1, fArmH, 2.5);
+    rightForearmC.add(rfag);
+    rightArmC.add(rightForearmC);
     c.add(rightArmC);
 
     // ── NECK ──
@@ -237,8 +278,12 @@ export function createCharacter(scene, stage) {
     // Store animated parts
     c.leftLeg = leftLegC;
     c.rightLeg = rightLegC;
+    c.leftShin = leftShinC;
+    c.rightShin = rightShinC;
     c.leftArm = leftArmC;
     c.rightArm = rightArmC;
+    c.leftForearm = leftForearmC;
+    c.rightForearm = rightForearmC;
     c.headGfx = head;
     c.torsoGfx = torso;
     c.shadow = c.list[0];
@@ -247,44 +292,100 @@ export function createCharacter(scene, stage) {
 }
 
 /**
- * Rotation-based walk animation — legs and arms pivot at hips/shoulders
+ * Multi-joint walk animation — realistic gait with stride phases,
+ * knee drive, arm pump, torso twist, and vertical bounce.
  */
 export function animateWalk(container, walkTimer, isMoving, isGrounded, time) {
     if (isMoving && isGrounded) {
-        const legAngle = Math.sin(walkTimer) * 0.35;   // ~20 degrees
-        const armAngle = Math.sin(walkTimer) * 0.3;     // counter-swing
-        const bounce = Math.abs(Math.sin(walkTimer * 2)) * 3;
-        const torsoLean = 0.04;  // ~2.5 degrees forward lean
+        const t = walkTimer;
 
-        // Legs rotate at hip pivot
-        container.leftLeg.rotation = legAngle;
-        container.rightLeg.rotation = -legAngle;
+        // === LEGS: hip swing with asymmetric knee drive ===
+        const stride = Math.sin(t) * 0.55;
+        container.leftLeg.rotation = stride;
+        container.rightLeg.rotation = -stride;
 
-        // Arms counter-rotate at shoulder pivot
-        container.leftArm.rotation = -armAngle;
-        container.rightArm.rotation = armAngle;
+        // Knee bend: shin kicks back as leg pushes off, drives forward on swing
+        if (container.leftShin) {
+            // Back leg bends more (push-off), front leg straightens (reaching)
+            const leftPhase = Math.sin(t);
+            container.leftShin.rotation = leftPhase > 0
+                ? leftPhase * 0.75  // back leg: strong knee bend
+                : Math.abs(leftPhase) * 0.15; // front leg: slight bend on contact
+        }
+        if (container.rightShin) {
+            const rightPhase = -Math.sin(t);
+            container.rightShin.rotation = rightPhase > 0
+                ? rightPhase * 0.75
+                : Math.abs(rightPhase) * 0.15;
+        }
 
-        // Torso lean forward slightly when moving
-        if (container.torsoGfx) container.torsoGfx.rotation = torsoLean;
+        // === ARMS: opposite to legs, with elbow pump ===
+        const armSwing = Math.sin(t) * 0.45;
+        container.leftArm.rotation = -armSwing;
+        container.rightArm.rotation = armSwing;
 
-        // Head bob + slight sway
+        // Forearm bends on backward swing (like a runner pumping arms)
+        if (container.leftForearm) {
+            const leftArmBack = Math.sin(t);
+            container.leftForearm.rotation = leftArmBack > 0
+                ? leftArmBack * 0.55  // arm swinging back: elbow bends
+                : 0.05; // arm forward: nearly straight
+        }
+        if (container.rightForearm) {
+            const rightArmBack = -Math.sin(t);
+            container.rightForearm.rotation = rightArmBack > 0
+                ? rightArmBack * 0.55
+                : 0.05;
+        }
+
+        // === TORSO: lean forward + slight twist with each step ===
+        if (container.torsoGfx) {
+            container.torsoGfx.rotation = 0.05 + Math.sin(t) * 0.025;
+            // Vertical torso bounce: dips at mid-stride, rises at step contact
+            container.torsoGfx.y = -4 + Math.abs(Math.sin(t)) * 1.5;
+        }
+
+        // === HEAD: smooth bob following body rhythm, slight counter-tilt ===
+        const stepBounce = Math.abs(Math.sin(t)) * 3;
         if (container.headGfx) {
-            container.headGfx.y = -42 - bounce;
-            container.headGfx.x = Math.sin(walkTimer * 0.5) * 1;
+            container.headGfx.y = -42 - stepBounce;
+            container.headGfx.rotation = Math.sin(t) * -0.03; // subtle counter-tilt
+            container.headGfx.x = Math.sin(t * 0.5) * 0.8;
+        }
+
+        // === SHADOW: pulses with footfalls ===
+        if (container.shadow) {
+            const shadowPulse = 1 + Math.abs(Math.sin(t)) * 0.08;
+            container.shadow.setScale(shadowPulse, 1);
         }
     } else {
-        // Idle: gentle breathing + subtle sway
-        const breathe = Math.sin((time || 0) * 0.003) * 2;
+        // === IDLE: breathing, weight shift, subtle life ===
+        const breathe = Math.sin((time || 0) * 0.003) * 1.5;
+        const shift = Math.sin((time || 0) * 0.0015) * 0.015;
 
         container.leftLeg.rotation = 0;
         container.rightLeg.rotation = 0;
-        container.leftArm.rotation = 0;
-        container.rightArm.rotation = 0;
+        if (container.leftShin) container.leftShin.rotation = 0;
+        if (container.rightShin) container.rightShin.rotation = 0;
 
-        if (container.torsoGfx) container.torsoGfx.rotation = 0;
+        // Arms hang with slight sway
+        const armIdle = Math.sin((time || 0) * 0.002) * 0.03;
+        container.leftArm.rotation = armIdle;
+        container.rightArm.rotation = -armIdle;
+        if (container.leftForearm) container.leftForearm.rotation = 0.02;
+        if (container.rightForearm) container.rightForearm.rotation = 0.02;
+
+        if (container.torsoGfx) {
+            container.torsoGfx.rotation = shift;
+            container.torsoGfx.y = -4;
+        }
         if (container.headGfx) {
             container.headGfx.y = -42 + breathe;
             container.headGfx.x = 0;
+            container.headGfx.rotation = 0;
+        }
+        if (container.shadow) {
+            container.shadow.setScale(1, 1);
         }
     }
 }
@@ -295,22 +396,18 @@ export function animateWalk(container, walkTimer, isMoving, isGrounded, time) {
 export function createParachuteCharacter(scene, stage) {
     const c = createCharacter(scene, stage);
 
-    // Parachute canopy above head
     const chute = scene.add.graphics();
     chute.fillStyle(0xFF5722, 0.9);
     chute.fillEllipse(0, 0, 100, 50);
-    // Stripes
     chute.fillStyle(0xFFC107, 0.7);
     chute.fillEllipse(-20, 0, 25, 45);
     chute.fillEllipse(20, 0, 25, 45);
-    // Re-fill edges
     chute.fillStyle(0xFF5722, 0.9);
     chute.fillEllipse(-40, 0, 25, 40);
     chute.fillEllipse(40, 0, 25, 40);
     chute.setPosition(0, -110);
     c.add(chute);
 
-    // Strings from canopy to shoulders
     const strings = scene.add.graphics();
     strings.lineStyle(1.5, 0x8D6E63, 0.8);
     strings.lineBetween(-20, -4, -40, -85);

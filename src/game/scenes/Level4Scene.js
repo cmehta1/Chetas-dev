@@ -54,7 +54,7 @@ export default class Level4Scene extends Phaser.Scene {
         this.levelZones.forEach(zone => renderZoneBackground(this, zone));
 
         // Ground platform
-        this.groundPlatform = this.add.rectangle(this.worldStartX + this.worldWidth / 2, GROUND_Y + 10, this.worldWidth, 20, 0x000000, 0);
+        this.groundPlatform = this.add.rectangle(this.worldStartX + this.worldWidth / 2, GROUND_Y + 200, this.worldWidth, 400, 0x000000, 0);
         this.physics.add.existing(this.groundPlatform, false);
         this.groundPlatform.body.setImmovable(true);
         this.groundPlatform.body.setAllowGravity(false);
@@ -160,185 +160,352 @@ export default class Level4Scene extends Phaser.Scene {
 
             if (zone.id === 5) {
                 // ===== MIDWAY DENTAL SUPPLY =====
-                h = 150;
+                h = 180;
+                const mw = w + 40; // wider building
 
-                // Warm brick body
-                g.fillStyle(0x8D4E3C);
-                g.fillRect(bx - w / 2, groundY - h, w, h);
+                // Foundation / base stone
+                g.fillStyle(0x8D8D8D);
+                g.fillRect(bx - mw / 2, groundY - 8, mw, 8);
 
-                // Brick texture
-                g.lineStyle(0.5, 0x6D3A2E, 0.3);
-                for (let r = 0; r < Math.floor(h / 12); r++) {
-                    const ly = groundY - h + r * 12;
-                    g.lineBetween(bx - w / 2, ly, bx + w / 2, ly);
-                    const offset = (r % 2 === 0) ? 0 : 18;
-                    for (let vx = bx - w / 2 + offset; vx < bx + w / 2; vx += 36) {
-                        g.lineBetween(vx, ly, vx, ly + 12);
+                // Main body — warm sandstone
+                g.fillStyle(0xD4C4A8);
+                g.fillRect(bx - mw / 2, groundY - h, mw, h - 8);
+
+                // Stone block texture
+                g.lineStyle(0.4, 0xBDB19A, 0.35);
+                for (let r = 0; r < Math.floor(h / 16); r++) {
+                    const ly = groundY - h + r * 16;
+                    g.lineBetween(bx - mw / 2, ly, bx + mw / 2, ly);
+                    const off = (r % 2 === 0) ? 0 : 24;
+                    for (let vx = bx - mw / 2 + off; vx < bx + mw / 2; vx += 48) {
+                        g.lineBetween(vx, ly, vx, ly + 16);
                     }
                 }
 
-                // Roof
-                g.fillStyle(0x5D4037);
-                g.fillRect(bx - w / 2 - 6, groundY - h - 6, w + 12, 10);
+                // Decorative horizontal band at mid-height
+                g.fillStyle(0x5D8AA8, 0.7);
+                g.fillRect(bx - mw / 2, groundY - h / 2 - 3, mw, 6);
 
-                // Windows: 2 rows of 4
-                const mWinCols = 4;
-                const mWinRows = 2;
-                const mWinW = 26;
-                const mWinH = 30;
-                const mSpacingX = (w - 60) / mWinCols;
-                const mSpacingY = 50;
-                for (let r = 0; r < mWinRows; r++) {
-                    for (let c = 0; c < mWinCols; c++) {
-                        const wx = bx - w / 2 + 30 + c * mSpacingX;
-                        const wy = groundY - h + 20 + r * mSpacingY;
-                        g.fillStyle(0xECEFF1);
-                        g.fillRect(wx - 2, wy - 2, mWinW + 4, mWinH + 4);
-                        g.fillStyle(0xFFF9C4, 0.85);
-                        g.fillRect(wx, wy, mWinW, mWinH);
-                        g.lineStyle(1, 0xECEFF1);
-                        g.lineBetween(wx + mWinW / 2, wy, wx + mWinW / 2, wy + mWinH);
-                        g.lineBetween(wx, wy + mWinH / 2, wx + mWinW, wy + mWinH / 2);
-                    }
+                // Roof: flat with parapet
+                g.fillStyle(0x6D4C41);
+                g.fillRect(bx - mw / 2 - 6, groundY - h - 5, mw + 12, 8);
+                // Parapet crenellations
+                for (let px = bx - mw / 2 - 4; px < bx + mw / 2 + 4; px += 20) {
+                    g.fillRect(px, groundY - h - 11, 10, 6);
                 }
 
-                // Clean entrance with awning
-                g.fillStyle(0x3E2723);
-                g.fillRect(bx - 16, groundY - 45, 32, 45);
-                g.fillStyle(0xFFC107);
-                g.fillCircle(bx + 8, groundY - 22, 2.5);
-                // Awning
-                g.fillStyle(0xB71C1C, 0.8);
-                g.fillTriangle(bx - 28, groundY - 45, bx + 28, groundY - 45, bx - 28, groundY - 35);
-                g.fillTriangle(bx - 28, groundY - 45, bx + 28, groundY - 45, bx + 28, groundY - 35);
-                g.fillRect(bx - 28, groundY - 48, 56, 5);
+                // Upper windows — arched, 5 across
+                for (let c = 0; c < 5; c++) {
+                    const wx = bx - mw / 2 + 22 + c * (mw - 44) / 5;
+                    const wy = groundY - h + 22;
+                    const ww = 24, wh = 32;
+                    // Arch top
+                    g.fillStyle(0x5D8AA8);
+                    g.fillRect(wx - 2, wy + 8, ww + 4, wh - 4);
+                    g.fillCircle(wx + ww / 2, wy + 8, ww / 2 + 2);
+                    // Glass
+                    g.fillStyle(0xB3E5FC, 0.8);
+                    g.fillRect(wx, wy + 10, ww, wh - 6);
+                    g.fillCircle(wx + ww / 2, wy + 10, ww / 2);
+                    // Mullion
+                    g.lineStyle(1, 0xECEFF1);
+                    g.lineBetween(wx + ww / 2, wy + 2, wx + ww / 2, wy + wh + 4);
+                }
 
-                // Tooth logo at top-center
+                // Lower windows — rectangular, 5 across
+                for (let c = 0; c < 5; c++) {
+                    const wx = bx - mw / 2 + 22 + c * (mw - 44) / 5;
+                    const wy = groundY - h / 2 + 12;
+                    const ww = 24, wh = 30;
+                    g.fillStyle(0xECEFF1);
+                    g.fillRect(wx - 2, wy - 2, ww + 4, wh + 4);
+                    g.fillStyle(0xFFF9C4, 0.85);
+                    g.fillRect(wx, wy, ww, wh);
+                    g.lineStyle(1, 0xECEFF1);
+                    g.lineBetween(wx + ww / 2, wy, wx + ww / 2, wy + wh);
+                    g.lineBetween(wx, wy + wh / 2, wx + ww, wy + wh / 2);
+                    // Sill
+                    g.fillStyle(0xBDB19A);
+                    g.fillRect(wx - 3, wy + wh + 2, ww + 6, 3);
+                }
+
+                // Grand entrance — recessed with columns
+                const doorW = 48, doorH = 58;
+                // Recess
+                g.fillStyle(0xA1887F);
+                g.fillRect(bx - doorW / 2 - 8, groundY - doorH - 8, doorW + 16, doorH + 8);
+                // Door frame
+                g.fillStyle(0x4E342E);
+                g.fillRect(bx - doorW / 2, groundY - doorH, doorW, doorH);
+                // Glass doors
+                g.fillStyle(0xB3E5FC, 0.6);
+                g.fillRect(bx - doorW / 2 + 4, groundY - doorH + 4, doorW / 2 - 6, doorH - 8);
+                g.fillRect(bx + 2, groundY - doorH + 4, doorW / 2 - 6, doorH - 8);
+                g.lineStyle(1, 0x5D4037);
+                g.strokeRect(bx - doorW / 2 + 4, groundY - doorH + 4, doorW / 2 - 6, doorH - 8);
+                g.strokeRect(bx + 2, groundY - doorH + 4, doorW / 2 - 6, doorH - 8);
+                // Door handles
+                g.fillStyle(0xFFD700);
+                g.fillCircle(bx - 4, groundY - doorH / 2, 2);
+                g.fillCircle(bx + 4, groundY - doorH / 2, 2);
+                // Mini columns flanking door
+                for (const side of [-1, 1]) {
+                    const cx2 = bx + side * (doorW / 2 + 12);
+                    g.fillStyle(0xECEFF1);
+                    g.fillRect(cx2 - 4, groundY - doorH - 8, 8, doorH + 8);
+                    // Column capital
+                    g.fillRect(cx2 - 6, groundY - doorH - 12, 12, 5);
+                    // Column base
+                    g.fillRect(cx2 - 6, groundY - 4, 12, 4);
+                }
+                // Pediment above door
+                g.fillStyle(0x6D4C41);
+                g.fillTriangle(bx - doorW / 2 - 18, groundY - doorH - 8, bx + doorW / 2 + 18, groundY - doorH - 8, bx, groundY - doorH - 26);
+
+                // Tooth logo — centered above pediment
                 g.fillStyle(0xFFFFFF);
-                // Tooth crown (rounded rect)
-                g.fillRoundedRect(bx - 10, groundY - h + 6, 20, 16, 6);
-                // Tooth roots
-                g.fillRoundedRect(bx - 8, groundY - h + 18, 7, 10, 2);
-                g.fillRoundedRect(bx + 1, groundY - h + 18, 7, 10, 2);
-                // Tooth outline
-                g.lineStyle(1, 0xBDBDBD);
-                g.strokeRoundedRect(bx - 10, groundY - h + 6, 20, 16, 6);
+                g.fillRoundedRect(bx - 12, groundY - h + 6, 24, 18, 7);
+                g.fillRoundedRect(bx - 10, groundY - h + 20, 8, 12, 2);
+                g.fillRoundedRect(bx + 2, groundY - h + 20, 8, 12, 2);
+                g.lineStyle(1.5, 0x5D8AA8);
+                g.strokeRoundedRect(bx - 12, groundY - h + 6, 24, 18, 7);
+                // Sparkle on tooth
+                g.fillStyle(0xFFFFFF);
+                g.fillCircle(bx - 5, groundY - h + 11, 2);
+                g.fillStyle(0xFFFFFF, 0.5);
+                g.fillCircle(bx - 5, groundY - h + 11, 3.5);
 
             } else if (zone.id === 6) {
                 // ===== CERNER CORPORATION =====
-                h = 280;
+                h = 300;
+                const cw = w + 60;
 
-                // Blue-gray glass body
-                g.fillStyle(0x546E7A);
-                g.fillRect(bx - w / 2, groundY - h, w, h);
-
-                // Glass panel grid windows
-                const cWinCols = 7;
-                const cWinRows = 8;
-                const cWinW = (w - 40) / cWinCols - 4;
-                const cWinH = (h - 50) / cWinRows - 4;
-                for (let r = 0; r < cWinRows; r++) {
-                    for (let c = 0; c < cWinCols; c++) {
-                        const wx = bx - w / 2 + 20 + c * ((w - 40) / cWinCols);
-                        const wy = groundY - h + 25 + r * ((h - 50) / cWinRows);
-                        g.fillStyle(0x90CAF9, 0.45);
-                        g.fillRect(wx, wy, cWinW, cWinH);
+                // Left wing (shorter)
+                const lwW = 100, lwH = 200;
+                g.fillStyle(0x455A64);
+                g.fillRect(bx - cw / 2, groundY - lwH, lwW, lwH);
+                // Left wing windows
+                for (let r = 0; r < 6; r++) {
+                    for (let c = 0; c < 2; c++) {
+                        const wx = bx - cw / 2 + 12 + c * 44;
+                        const wy = groundY - lwH + 18 + r * 30;
+                        g.fillStyle(0x81D4FA, 0.5);
+                        g.fillRect(wx, wy, 32, 20);
                         g.lineStyle(0.5, 0x37474F);
-                        g.strokeRect(wx, wy, cWinW, cWinH);
+                        g.strokeRect(wx, wy, 32, 20);
                     }
                 }
 
-                // Modern roof
-                g.fillStyle(0x37474F);
-                g.fillRect(bx - w / 2 - 4, groundY - h - 6, w + 8, 10);
+                // Right wing (shorter)
+                g.fillStyle(0x455A64);
+                g.fillRect(bx + cw / 2 - lwW, groundY - lwH, lwW, lwH);
+                for (let r = 0; r < 6; r++) {
+                    for (let c = 0; c < 2; c++) {
+                        const wx = bx + cw / 2 - lwW + 12 + c * 44;
+                        const wy = groundY - lwH + 18 + r * 30;
+                        g.fillStyle(0x81D4FA, 0.5);
+                        g.fillRect(wx, wy, 32, 20);
+                        g.lineStyle(0.5, 0x37474F);
+                        g.strokeRect(wx, wy, 32, 20);
+                    }
+                }
 
-                // Roof antenna
-                g.lineStyle(2, 0x90A4AE);
-                g.lineBetween(bx + w / 4, groundY - h - 6, bx + w / 4, groundY - h - 30);
-                g.fillStyle(0xE0E0E0);
-                g.fillCircle(bx + w / 4, groundY - h - 30, 3);
+                // Central tower — taller
+                const ctW = cw - lwW * 2 + 40;
+                g.fillStyle(0x546E7A);
+                g.fillRect(bx - ctW / 2, groundY - h, ctW, h);
 
-                // Entrance: wide glass doors
-                g.fillStyle(0x37474F);
-                g.fillRect(bx - 28, groundY - 55, 56, 55);
-                g.fillStyle(0x90CAF9, 0.6);
-                g.fillRect(bx - 24, groundY - 50, 22, 46);
-                g.fillRect(bx + 2, groundY - 50, 22, 46);
-                g.lineStyle(1, 0x263238);
-                g.strokeRect(bx - 24, groundY - 50, 22, 46);
-                g.strokeRect(bx + 2, groundY - 50, 22, 46);
+                // Horizontal accent bands
+                g.fillStyle(0x4DB6AC, 0.6);
+                g.fillRect(bx - ctW / 2, groundY - h + 30, ctW, 4);
+                g.fillRect(bx - ctW / 2, groundY - h / 2, ctW, 4);
+                g.fillRect(bx - ctW / 2, groundY - 80, ctW, 4);
 
-                // Cerner logo: healthcare cross at top-center
-                // Circle behind
+                // Central tower windows — curtain wall grid
+                const cRows = 9, cCols = 6;
+                const cWinW2 = (ctW - 30) / cCols - 3;
+                const cWinH2 = (h - 60) / cRows - 3;
+                for (let r = 0; r < cRows; r++) {
+                    for (let c = 0; c < cCols; c++) {
+                        const wx = bx - ctW / 2 + 15 + c * ((ctW - 30) / cCols);
+                        const wy = groundY - h + 18 + r * ((h - 60) / cRows);
+                        g.fillStyle(0x80DEEA, 0.45);
+                        g.fillRect(wx, wy, cWinW2, cWinH2);
+                        g.lineStyle(0.5, 0x37474F);
+                        g.strokeRect(wx, wy, cWinW2, cWinH2);
+                    }
+                }
+
+                // Roof: flat top with mechanical penthouse
                 g.fillStyle(0x37474F);
-                g.fillCircle(bx, groundY - h + 14, 18);
-                g.lineStyle(1, 0x263238);
-                g.strokeCircle(bx, groundY - h + 14, 18);
-                // Green cross
+                g.fillRect(bx - ctW / 2 - 4, groundY - h - 5, ctW + 8, 8);
+                // Penthouse
+                g.fillStyle(0x455A64);
+                g.fillRect(bx - 30, groundY - h - 22, 60, 18);
+                g.fillStyle(0x37474F);
+                g.fillRect(bx - 32, groundY - h - 25, 64, 5);
+                // Antenna array
+                g.lineStyle(1.5, 0x90A4AE);
+                g.lineBetween(bx - 10, groundY - h - 25, bx - 10, groundY - h - 42);
+                g.lineBetween(bx + 10, groundY - h - 25, bx + 10, groundY - h - 42);
+                g.lineBetween(bx, groundY - h - 25, bx, groundY - h - 50);
+                g.fillStyle(0x4DB6AC);
+                g.fillCircle(bx, groundY - h - 50, 3);
+
+                // Wing roofs
+                g.fillStyle(0x37474F);
+                g.fillRect(bx - cw / 2 - 3, groundY - lwH - 4, lwW + 6, 6);
+                g.fillRect(bx + cw / 2 - lwW - 3, groundY - lwH - 4, lwW + 6, 6);
+
+                // Grand entrance — glass atrium
+                const eW = 70, eH = 65;
+                g.fillStyle(0x37474F);
+                g.fillRect(bx - eW / 2, groundY - eH, eW, eH);
+                // Atrium glass panels (3 sections)
+                for (let c = 0; c < 3; c++) {
+                    const px = bx - eW / 2 + 5 + c * (eW - 10) / 3;
+                    g.fillStyle(0x80DEEA, 0.55);
+                    g.fillRect(px, groundY - eH + 5, (eW - 20) / 3, eH - 10);
+                    g.lineStyle(1, 0x263238);
+                    g.strokeRect(px, groundY - eH + 5, (eW - 20) / 3, eH - 10);
+                }
+                // Canopy above entrance
+                g.fillStyle(0x4DB6AC, 0.8);
+                g.fillRect(bx - eW / 2 - 10, groundY - eH - 4, eW + 20, 6);
+
+                // Cerner logo: green cross on white circle
+                g.fillStyle(0xFFFFFF);
+                g.fillCircle(bx, groundY - h + 50, 22);
+                g.lineStyle(1.5, 0x4DB6AC);
+                g.strokeCircle(bx, groundY - h + 50, 22);
                 g.fillStyle(0x4CAF50);
-                g.fillRect(bx - 4, groundY - h + 14 - 12, 8, 24); // vertical bar
-                g.fillRect(bx - 12, groundY - h + 14 - 4, 24, 8); // horizontal bar
+                g.fillRect(bx - 5, groundY - h + 50 - 14, 10, 28);
+                g.fillRect(bx - 14, groundY - h + 50 - 5, 28, 10);
+                // Heartbeat line through cross
+                g.lineStyle(1.5, 0xFFFFFF);
+                g.beginPath();
+                g.moveTo(bx - 14, groundY - h + 50);
+                g.lineTo(bx - 6, groundY - h + 50);
+                g.lineTo(bx - 3, groundY - h + 50 - 6);
+                g.lineTo(bx, groundY - h + 50 + 4);
+                g.lineTo(bx + 3, groundY - h + 50 - 6);
+                g.lineTo(bx + 6, groundY - h + 50);
+                g.lineTo(bx + 14, groundY - h + 50);
+                g.strokePath();
 
             } else if (zone.id === 7) {
                 // ===== ORACLE HEALTH =====
-                h = 320;
+                h = 340;
+                const ow = w + 80;
 
-                // Dark glass body
-                g.fillStyle(0x263238);
-                g.fillRect(bx - w / 2, groundY - h, w, h);
+                // Base podium (2-story plinth)
+                const podH = 80;
+                g.fillStyle(0x37474F);
+                g.fillRect(bx - ow / 2, groundY - podH, ow, podH);
+                // Podium stone texture
+                g.lineStyle(0.4, 0x263238, 0.3);
+                for (let r = 0; r < 5; r++) {
+                    g.lineBetween(bx - ow / 2, groundY - podH + r * 16, bx + ow / 2, groundY - podH + r * 16);
+                }
+                // Podium windows
+                for (let c = 0; c < 9; c++) {
+                    const wx = bx - ow / 2 + 18 + c * (ow - 36) / 9;
+                    g.fillStyle(0x455A64, 0.6);
+                    g.fillRect(wx, groundY - podH + 10, 28, 24);
+                    g.fillStyle(0xFFCC80, 0.3);
+                    g.fillRect(wx + 2, groundY - podH + 12, 24, 20);
+                }
 
-                // Red accent strips on sides
+                // Main tower — dark glass with subtle blue tint
+                const twrW = ow - 60;
+                const twrH = h - podH;
+                g.fillStyle(0x1B2631);
+                g.fillRect(bx - twrW / 2, groundY - h, twrW, twrH);
+
+                // Red vertical accent pillars at edges
                 g.fillStyle(0xC62828);
-                g.fillRect(bx - w / 2, groundY - h, 6, h);
-                g.fillRect(bx + w / 2 - 6, groundY - h, 6, h);
+                g.fillRect(bx - twrW / 2, groundY - h, 8, twrH);
+                g.fillRect(bx + twrW / 2 - 8, groundY - h, 8, twrH);
+                // Center red accent stripe
+                g.fillStyle(0xC62828, 0.4);
+                g.fillRect(bx - 2, groundY - h, 4, twrH);
 
-                // Red-tinted window grid
-                const oWinCols = 7;
-                const oWinRows = 10;
-                const oWinW = (w - 60) / oWinCols - 4;
-                const oWinH = (h - 60) / oWinRows - 4;
-                for (let r = 0; r < oWinRows; r++) {
-                    for (let c = 0; c < oWinCols; c++) {
-                        const wx = bx - w / 2 + 30 + c * ((w - 60) / oWinCols);
-                        const wy = groundY - h + 30 + r * ((h - 60) / oWinRows);
-                        g.fillStyle(0xE74C3C, 0.35);
-                        g.fillRect(wx, wy, oWinW, oWinH);
-                        g.lineStyle(0.5, 0x1B2631);
-                        g.strokeRect(wx, wy, oWinW, oWinH);
+                // Window grid — two halves separated by center stripe
+                const halfCols = 4, oRows = 10;
+                const oWinW2 = (twrW / 2 - 24) / halfCols - 3;
+                const oWinH2 = (twrH - 50) / oRows - 3;
+                for (let r = 0; r < oRows; r++) {
+                    for (let c = 0; c < halfCols; c++) {
+                        // Left half
+                        const lwx = bx - twrW / 2 + 16 + c * ((twrW / 2 - 24) / halfCols);
+                        const wy = groundY - h + 20 + r * ((twrH - 50) / oRows);
+                        g.fillStyle(0x90CAF9, 0.2);
+                        g.fillRect(lwx, wy, oWinW2, oWinH2);
+                        g.lineStyle(0.5, 0x263238);
+                        g.strokeRect(lwx, wy, oWinW2, oWinH2);
+                        // Right half
+                        const rwx = bx + 8 + c * ((twrW / 2 - 24) / halfCols);
+                        g.fillStyle(0x90CAF9, 0.2);
+                        g.fillRect(rwx, wy, oWinW2, oWinH2);
+                        g.lineStyle(0.5, 0x263238);
+                        g.strokeRect(rwx, wy, oWinW2, oWinH2);
                     }
                 }
 
-                // Dark roof with red trim
+                // Roof crown — stepped
                 g.fillStyle(0x1B2631);
-                g.fillRect(bx - w / 2 - 4, groundY - h - 6, w + 8, 10);
+                g.fillRect(bx - twrW / 2 - 4, groundY - h - 5, twrW + 8, 8);
                 g.fillStyle(0xC62828);
-                g.fillRect(bx - w / 2 - 4, groundY - h - 2, w + 8, 4);
-
-                // Antenna on top with red light
-                g.lineStyle(2, 0x546E7A);
-                g.lineBetween(bx, groundY - h - 6, bx, groundY - h - 35);
-                g.lineStyle(1, 0x546E7A);
-                g.lineBetween(bx - 8, groundY - h - 20, bx + 8, groundY - h - 20);
+                g.fillRect(bx - twrW / 2 - 4, groundY - h - 2, twrW + 8, 3);
+                // Upper crown step
+                g.fillStyle(0x263238);
+                g.fillRect(bx - 50, groundY - h - 18, 100, 14);
+                g.fillStyle(0xC62828);
+                g.fillRect(bx - 50, groundY - h - 19, 100, 2);
+                // Spire
+                g.fillStyle(0x37474F);
+                g.fillRect(bx - 3, groundY - h - 18, 6, -25);
                 g.fillStyle(0xFF1744);
-                g.fillCircle(bx, groundY - h - 35, 3);
+                g.fillCircle(bx, groundY - h - 45, 4);
+                // Glow around beacon
+                g.fillStyle(0xFF1744, 0.2);
+                g.fillCircle(bx, groundY - h - 45, 8);
 
-                // Entrance: wide glass doors
+                // Grand entrance — revolving door style
+                const oeW = 80, oeH = 70;
                 g.fillStyle(0x1B2631);
-                g.fillRect(bx - 30, groundY - 60, 60, 60);
-                g.fillStyle(0xE74C3C, 0.25);
-                g.fillRect(bx - 26, groundY - 55, 24, 50);
-                g.fillRect(bx + 2, groundY - 55, 24, 50);
-                g.lineStyle(1, 0xC62828);
-                g.strokeRect(bx - 26, groundY - 55, 24, 50);
-                g.strokeRect(bx + 2, groundY - 55, 24, 50);
+                g.fillRect(bx - oeW / 2, groundY - podH - oeH, oeW, oeH + podH);
+                // Glass revolving door (circle)
+                g.fillStyle(0x263238);
+                g.fillCircle(bx, groundY - 36, 28);
+                g.fillStyle(0x90CAF9, 0.3);
+                g.fillCircle(bx, groundY - 36, 26);
+                // Door vanes
+                g.lineStyle(1.5, 0xC62828);
+                g.lineBetween(bx, groundY - 62, bx, groundY - 10);
+                g.lineBetween(bx - 26, groundY - 36, bx + 26, groundY - 36);
+                // Side panels
+                g.fillStyle(0x90CAF9, 0.2);
+                g.fillRect(bx - oeW / 2 + 4, groundY - podH - oeH + 8, 16, oeH + podH - 16);
+                g.fillRect(bx + oeW / 2 - 20, groundY - podH - oeH + 8, 16, oeH + podH - 16);
+                // Red canopy
+                g.fillStyle(0xC62828);
+                g.fillRect(bx - oeW / 2 - 12, groundY - podH - oeH - 4, oeW + 24, 6);
 
-                // Oracle logo: red "O" circle outline at top-center
-                g.lineStyle(4, 0xC62828);
-                g.strokeCircle(bx, groundY - h + 16, 18);
-                // "ORACLE" text below circle
-                this.add.text(bx, groundY - h + 38, 'ORACLE', {
-                    fontFamily: 'Poppins, sans-serif', fontSize: '10px',
-                    color: '#ffffff', fontStyle: 'bold',
+                // Oracle logo — red "O" with inner cutout
+                const logoY = groundY - h + 40;
+                g.fillStyle(0xC62828);
+                g.fillCircle(bx, logoY, 22);
+                g.fillStyle(0x1B2631);
+                g.fillCircle(bx, logoY, 15);
+                g.fillStyle(0xC62828);
+                g.fillCircle(bx, logoY, 13);
+                g.fillStyle(0x1B2631);
+                g.fillCircle(bx, logoY, 8);
+                // ORACLE text
+                this.add.text(bx, logoY + 28, 'ORACLE', {
+                    fontFamily: 'Poppins, sans-serif', fontSize: '11px',
+                    color: '#E53935', fontStyle: 'bold', letterSpacing: 3,
                 }).setOrigin(0.5).setDepth(3);
 
             } else {
@@ -676,8 +843,13 @@ export default class Level4Scene extends Phaser.Scene {
         if (this.isTransitioning) return;
 
         const terrainY = getTerrainY(this.player.x);
-        this.groundPlatform.y = terrainY + 10;
+        this.groundPlatform.y = terrainY + 200;
         this.groundPlatform.body.updateFromGameObject();
+
+        // Safety clamp: prevent falling through terrain on steep slopes
+        if (this.player.y > terrainY - 10) {
+            this.player.body.reset(this.player.x, terrainY - 45);
+        }
 
         let moveX = 0;
         if (this.cursors.left.isDown || this.joystickState.left) {

@@ -53,7 +53,7 @@ export default class Level1Scene extends Phaser.Scene {
         this.levelZones.forEach(zone => renderZoneBackground(this, zone));
 
         // Ground platform
-        this.groundPlatform = this.add.rectangle(this.worldWidth / 2, GROUND_Y + 10, this.worldWidth, 20, 0x000000, 0);
+        this.groundPlatform = this.add.rectangle(this.worldWidth / 2, GROUND_Y + 200, this.worldWidth, 400, 0x000000, 0);
         this.physics.add.existing(this.groundPlatform, false);
         this.groundPlatform.body.setImmovable(true);
         this.groundPlatform.body.setAllowGravity(false);
@@ -446,8 +446,13 @@ export default class Level1Scene extends Phaser.Scene {
 
         // Terrain following
         const terrainY = getTerrainY(this.player.x);
-        this.groundPlatform.y = terrainY + 10;
+        this.groundPlatform.y = terrainY + 200;
         this.groundPlatform.body.updateFromGameObject();
+
+        // Safety clamp: prevent falling through terrain on steep slopes
+        if (this.player.y > terrainY - 10) {
+            this.player.body.reset(this.player.x, terrainY - 45);
+        }
 
         // Input (keyboard + joystick)
         let moveX = 0;

@@ -53,7 +53,7 @@ export default class Level3Scene extends Phaser.Scene {
         renderZoneBackground(this, zone);
 
         // Ground platform
-        this.groundPlatform = this.add.rectangle(zone.startX + worldWidth / 2, GROUND_Y + 10, worldWidth, 20, 0x000000, 0);
+        this.groundPlatform = this.add.rectangle(zone.startX + worldWidth / 2, GROUND_Y + 200, worldWidth, 400, 0x000000, 0);
         this.physics.add.existing(this.groundPlatform, false);
         this.groundPlatform.body.setImmovable(true);
         this.groundPlatform.body.setAllowGravity(false);
@@ -174,138 +174,161 @@ export default class Level3Scene extends Phaser.Scene {
             const bx = b.x;
             const groundY = getTerrainY(bx);
             const g = this.add.graphics().setDepth(2);
-            const w = 380, h = 260;
+            const w = 420, h = 280;
 
-            // Main brick body
+            // ── Main brick body ──
             g.fillStyle(0x8D6E63);
             g.fillRect(bx - w / 2, groundY - h, w, h);
-
-            // Brick texture: horizontal lines every 12px with vertical offsets
-            g.lineStyle(0.6, 0x6D4C41, 0.3);
-            for (let r = 0; r < Math.floor(h / 12); r++) {
-                const ly = groundY - h + r * 12;
+            // Detailed brick texture
+            g.lineStyle(0.5, 0x6D4C41, 0.2);
+            for (let r = 0; r < Math.floor(h / 11); r++) {
+                const ly = groundY - h + r * 11;
                 g.lineBetween(bx - w / 2, ly, bx + w / 2, ly);
-                // Vertical brick offsets
-                const offset = (r % 2 === 0) ? 0 : 20;
-                for (let vx = bx - w / 2 + offset; vx < bx + w / 2; vx += 40) {
-                    g.lineBetween(vx, ly, vx, ly + 12);
-                }
+                const offset = (r % 2 === 0) ? 0 : 16;
+                for (let vx = bx - w / 2 + offset; vx < bx + w / 2; vx += 32)
+                    g.lineBetween(vx, ly, vx, ly + 11);
             }
 
-            // Flat roof with green trim strip
-            g.fillStyle(0x5D4037);
-            g.fillRect(bx - w / 2 - 8, groundY - h - 8, w + 16, 12);
+            // ── Side pavilions (stepped wings) ──
+            g.fillStyle(0x7B5B4C);
+            g.fillRect(bx - w / 2 - 30, groundY - h + 60, 35, h - 60);
+            g.fillRect(bx + w / 2 - 5, groundY - h + 60, 35, h - 60);
+            // Wing roofs
+            g.fillStyle(0x546E7A);
+            g.fillRect(bx - w / 2 - 34, groundY - h + 56, 43, 6);
+            g.fillRect(bx + w / 2 - 9, groundY - h + 56, 43, 6);
+
+            // ── Binghamton Green trim bands ──
             g.fillStyle(0x005A43);
-            g.fillRect(bx - w / 2 - 8, groundY - h - 2, w + 16, 5);
+            g.fillRect(bx - w / 2, groundY - h - 4, w, 6);
+            g.fillRect(bx - w / 2, groundY - h + h / 2 - 1, w, 3);
+            g.fillRect(bx - w / 2, groundY - 2, w, 3);
 
-            // Clock tower on left side
-            const towerX = bx - w / 2 + 25;
-            const towerW = 50;
-            const towerH = 70;
-            // Tower body
+            // ── Clock tower (centered) ──
+            const towerW2 = 56, towerH2 = 90;
             g.fillStyle(0x795548);
-            g.fillRect(towerX, groundY - h - towerH, towerW, towerH);
-            // Tower brick lines
-            g.lineStyle(0.5, 0x5D4037, 0.3);
-            for (let r = 0; r < Math.floor(towerH / 10); r++) {
-                g.lineBetween(towerX, groundY - h - towerH + r * 10, towerX + towerW, groundY - h - towerH + r * 10);
-            }
-            // Pointed gray cap roof
-            g.fillStyle(0x757575);
-            g.fillTriangle(
-                towerX - 5, groundY - h - towerH,
-                towerX + towerW + 5, groundY - h - towerH,
-                towerX + towerW / 2, groundY - h - towerH - 30
-            );
+            g.fillRect(bx - towerW2 / 2, groundY - h - towerH2, towerW2, towerH2);
+            g.lineStyle(0.4, 0x5D4037, 0.3);
+            for (let r = 0; r < Math.floor(towerH2 / 10); r++)
+                g.lineBetween(bx - towerW2 / 2, groundY - h - towerH2 + r * 10, bx + towerW2 / 2, groundY - h - towerH2 + r * 10);
+            // Tower windows
+            g.fillStyle(0xFFF9C4, 0.9);
+            g.fillRoundedRect(bx - 8, groundY - h - 65, 16, 22, { tl: 8, tr: 8, bl: 0, br: 0 });
+            // Copper spire roof
+            g.fillStyle(0x546E7A);
+            g.fillTriangle(bx - towerW2 / 2 - 4, groundY - h - towerH2, bx + towerW2 / 2 + 4, groundY - h - towerH2, bx, groundY - h - towerH2 - 45);
+            // Spire finial
+            g.fillStyle(0xFFC107);
+            g.fillCircle(bx, groundY - h - towerH2 - 45, 4);
+            g.lineStyle(2, 0x78909C);
+            g.lineBetween(bx, groundY - h - towerH2 - 49, bx, groundY - h - towerH2 - 60);
             // Clock face
-            const clockCX = towerX + towerW / 2;
-            const clockCY = groundY - h - towerH + 25;
-            g.fillStyle(0xFFF9C4);
-            g.fillCircle(clockCX, clockCY, 14);
+            const clockCX = bx, clockCY = groundY - h - towerH2 + 40;
+            g.fillStyle(0xFFF8E1);
+            g.fillCircle(clockCX, clockCY, 16);
+            g.lineStyle(2, 0x3E2723);
+            g.strokeCircle(clockCX, clockCY, 16);
             g.lineStyle(1.5, 0x3E2723);
-            g.strokeCircle(clockCX, clockCY, 14);
-            // Hour markers
             for (let i = 0; i < 12; i++) {
                 const angle = (Math.PI * 2 * i) / 12 - Math.PI / 2;
-                const mx = clockCX + Math.cos(angle) * 11;
-                const my = clockCY + Math.sin(angle) * 11;
                 g.fillStyle(0x3E2723);
-                g.fillCircle(mx, my, 1.5);
+                g.fillCircle(clockCX + Math.cos(angle) * 12, clockCY + Math.sin(angle) * 12, 1.5);
             }
-            // Clock hands
-            g.lineStyle(1.5, 0x3E2723);
-            g.lineBetween(clockCX, clockCY, clockCX, clockCY - 9); // minute
-            g.lineBetween(clockCX, clockCY, clockCX + 6, clockCY + 3); // hour
+            g.lineStyle(2, 0x3E2723);
+            g.lineBetween(clockCX, clockCY, clockCX, clockCY - 11);
+            g.lineBetween(clockCX, clockCY, clockCX + 7, clockCY + 3);
 
-            // Green accent trim under roof
-            g.fillStyle(0x005A43);
-            g.fillRect(bx - w / 2, groundY - h, w, 4);
-
-            // Windows: 3 rows of 6
-            const winCols = 6;
-            const winRows = 3;
-            const winW = 28;
-            const winH = 34;
-            const winSpacingX = (w - 80) / winCols;
-            const winSpacingY = 65;
-            for (let r = 0; r < winRows; r++) {
-                for (let c = 0; c < winCols; c++) {
-                    const wx = bx - w / 2 + 40 + c * winSpacingX;
-                    const wy = groundY - h + 30 + r * winSpacingY;
-                    // Window frame (white)
+            // ── Windows: 3 rows of 7 ──
+            for (let r = 0; r < 3; r++)
+                for (let c = 0; c < 7; c++) {
+                    const wx = bx - w / 2 + 30 + c * ((w - 60) / 7);
+                    const wy = groundY - h + 25 + r * 70;
+                    // Skip center windows behind tower in top row
+                    if (r === 0 && c >= 3 && c <= 3) continue;
                     g.fillStyle(0xECEFF1);
-                    g.fillRect(wx - 2, wy - 2, winW + 4, winH + 4);
-                    // Window glass (warm yellow)
+                    g.fillRect(wx - 2, wy - 2, 28, 42);
                     g.fillStyle(0xFFF9C4, 0.9);
-                    g.fillRect(wx, wy, winW, winH);
-                    // Cross-hatch panes
-                    g.lineStyle(1.5, 0xECEFF1);
-                    g.lineBetween(wx + winW / 2, wy, wx + winW / 2, wy + winH); // vertical
-                    g.lineBetween(wx, wy + winH / 2, wx + winW, wy + winH / 2); // horizontal
+                    g.fillRect(wx, wy, 24, 38);
+                    g.lineStyle(1.2, 0xECEFF1);
+                    g.lineBetween(wx + 12, wy, wx + 12, wy + 38);
+                    g.lineBetween(wx, wy + 19, wx + 24, wy + 19);
                 }
-            }
 
-            // Grand arched entrance
+            // ── Ivy/vines on walls ──
+            g.lineStyle(1.5, 0x2E7D32, 0.3);
+            const ivyPoints = [[-w / 2 + 10, -80], [w / 2 - 15, -120], [-w / 2 + 50, -180]];
+            ivyPoints.forEach(([ix, iy]) => {
+                for (let v = 0; v < 4; v++) {
+                    const vx = bx + ix + v * 6;
+                    g.lineBetween(vx, groundY + iy, vx + 3, groundY + iy + 30);
+                    g.lineBetween(vx + 3, groundY + iy + 30, vx - 2, groundY + iy + 55);
+                }
+            });
+
+            // ── Grand arched entrance with canopy ──
+            // Canopy
+            g.fillStyle(0x005A43, 0.9);
+            g.fillRect(bx - 40, groundY - 72, 80, 6);
+            g.fillStyle(0x004D40);
+            g.fillRect(bx - 42, groundY - 74, 84, 4);
+            // Door
             g.fillStyle(0x3E2723);
-            g.fillRoundedRect(bx - 22, groundY - 65, 44, 65, { tl: 22, tr: 22, bl: 0, br: 0 });
-            // Door detail
+            g.fillRoundedRect(bx - 24, groundY - 68, 48, 68, { tl: 24, tr: 24, bl: 0, br: 0 });
             g.fillStyle(0x5D4037);
-            g.fillRect(bx - 1, groundY - 55, 2, 50);
-            // Door handle
+            g.fillRect(bx - 1, groundY - 58, 2, 54);
             g.fillStyle(0xFFC107);
-            g.fillCircle(bx + 10, groundY - 30, 3);
+            g.fillCircle(bx - 8, groundY - 32, 3);
+            g.fillCircle(bx + 8, groundY - 32, 3);
+            // Transom window above door
+            g.fillStyle(0xFFF9C4, 0.6);
+            g.beginPath();
+            g.arc(bx, groundY - 68, 22, Math.PI, 0, false);
+            g.fillPath();
 
-            // Steps
-            g.fillStyle(0x9E9E9E);
-            for (let s = 0; s < 3; s++) {
-                g.fillRect(bx - 30 - s * 6, groundY - 3 - s * 4, 60 + s * 12, 5);
-            }
+            // ── Steps ──
+            g.fillStyle(0xBDBDBD);
+            for (let s = 0; s < 4; s++)
+                g.fillRect(bx - 34 - s * 5, groundY - 3 - s * 4, 68 + s * 10, 5);
 
-            // BU Logo: green circle at top-center
+            // ── American flag ──
+            const flagX = bx + w / 2 - 20;
+            g.lineStyle(2, 0x78909C);
+            g.lineBetween(flagX, groundY - h, flagX, groundY - h - 50);
+            g.fillStyle(0xB71C1C);
+            g.fillRect(flagX + 1, groundY - h - 50, 20, 3);
+            g.fillStyle(0xFFFFFF);
+            g.fillRect(flagX + 1, groundY - h - 47, 20, 2);
+            g.fillStyle(0xB71C1C);
+            g.fillRect(flagX + 1, groundY - h - 45, 20, 3);
+            g.fillStyle(0x1A237E);
+            g.fillRect(flagX + 1, groundY - h - 50, 8, 5);
+
+            // ── BU Logo ──
             g.fillStyle(0x005A43);
-            g.fillCircle(bx, groundY - h + 12, 18);
-            g.lineStyle(1.5, 0x004D40);
-            g.strokeCircle(bx, groundY - h + 12, 18);
-            // BU text
-            this.add.text(bx, groundY - h + 12, 'BU', {
+            g.fillCircle(bx, groundY - h + 14, 18);
+            g.lineStyle(2, 0x004D40);
+            g.strokeCircle(bx, groundY - h + 14, 18);
+            this.add.text(bx, groundY - h + 14, 'BU', {
                 fontFamily: 'Poppins, sans-serif', fontSize: '16px',
                 color: '#ffffff', fontStyle: 'bold',
             }).setOrigin(0.5).setDepth(3);
 
+            // ── Sign ──
             const signBg = this.add.graphics().setDepth(3);
-            signBg.fillStyle(0x1A237E, 0.9);
-            signBg.fillRoundedRect(bx - w / 2 + 10, groundY - h - 35, w - 20, 24, 6);
-            this.add.text(bx, groundY - h - 23, b.name, {
+            signBg.fillStyle(0x005A43, 0.95);
+            signBg.fillRoundedRect(bx - w / 2 + 15, groundY - h - 32, w - 30, 24, 5);
+            this.add.text(bx, groundY - h - 20, b.name, {
                 fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ffffff', fontStyle: 'bold',
             }).setOrigin(0.5).setDepth(4);
 
+            // ── Prompt ──
             const promptText = isMobilePortrait() ? '[ Tap to Enter ]' : '[ SPACE to Enter ]';
-            const prompt = this.add.text(bx, groundY - h - 55, promptText, {
+            const prompt = this.add.text(bx, groundY - h - towerH2 - 70, promptText, {
                 fontFamily: 'Poppins, sans-serif', fontSize: '15px',
                 color: '#FFD700', stroke: '#000000', strokeThickness: 4, fontStyle: 'bold',
             }).setOrigin(0.5).setDepth(10).setAlpha(0);
 
-            this.tweens.add({ targets: prompt, y: groundY - h - 62, duration: 800, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+            this.tweens.add({ targets: prompt, y: groundY - h - towerH2 - 77, duration: 800, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
             this.buildings.push({ zone, x: bx, prompt, entered: false });
         }
     }
@@ -480,8 +503,13 @@ export default class Level3Scene extends Phaser.Scene {
         if (this.isTransitioning) return;
 
         const terrainY = getTerrainY(this.player.x);
-        this.groundPlatform.y = terrainY + 10;
+        this.groundPlatform.y = terrainY + 200;
         this.groundPlatform.body.updateFromGameObject();
+
+        // Safety clamp: prevent falling through terrain on steep slopes
+        if (this.player.y > terrainY - 10) {
+            this.player.body.reset(this.player.x, terrainY - 45);
+        }
 
         let moveX = 0;
         if (this.cursors.left.isDown || this.joystickState.left) {
