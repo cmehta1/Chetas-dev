@@ -20,6 +20,7 @@ export default class Level5Scene extends Phaser.Scene {
     }
 
     init(data) {
+        this.targetZoneId = data.targetZoneId;
         this.currentZoneId = 8;
         this.playerStage = data.playerStage || 6;
         this.collectedKeys = data.collectedKeys || [];

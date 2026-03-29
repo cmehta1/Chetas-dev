@@ -20,7 +20,8 @@ export default class Level4Scene extends Phaser.Scene {
     }
 
     init(data) {
-        this.currentZoneId = 5;
+        this.targetZoneId = data.targetZoneId;
+        this.currentZoneId = (data.targetZoneId !== undefined && [5, 6, 7].includes(data.targetZoneId)) ? data.targetZoneId : 5;
         this.playerStage = data.playerStage || 5;
         this.collectedKeys = data.collectedKeys || [];
         this.skillProficiency = data.skillProficiency || {};
@@ -62,6 +63,7 @@ export default class Level4Scene extends Phaser.Scene {
         this.createStars();
         this.createPlayer();
         this.createAutoJumpIndicators();
+        this.createCertBanners();
 
         this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
         const mobile = isMobilePortrait();
@@ -385,7 +387,7 @@ export default class Level4Scene extends Phaser.Scene {
     }
 
     createPlayer() {
-        const startX = this.worldStartX + 100;
+        const startX = this.targetZoneId !== undefined ? ZONES[this.targetZoneId].startX + 100 : this.worldStartX + 100;
         const startY = GROUND_Y - 80;
 
         this.player = this.physics.add.sprite(startX, startY, 'playerBody4');
@@ -584,6 +586,111 @@ export default class Level4Scene extends Phaser.Scene {
         });
     }
 
+    createCertBanners() {
+        // Oracle certifications — ordered by date (oldest first)
+        const certs = [
+            { title: 'OCI Gen AI 2024', subtitle: 'Certified Professional', year: '2024' },
+            { title: 'OCI Foundations', subtitle: 'Certified Associate', year: '2025' },
+            { title: 'AI Vector Search', subtitle: 'Certified Professional', year: '2025' },
+        ];
+
+        // Place between buildings in Zone 7 (12200–14000)
+        // Background buildings: main tower ~13100, supporting ~12500/13400, data center ~12650
+        // Level4 Oracle building: 13700
+        // Good gaps: 12800, 13250, 13550
+        const positions = [12800, 13250, 13550];
+        const bannerW = 160, bannerH = 70;
+        const restY = 60;     // resting position (high up)
+        const dropY = 280;    // dropped position (near character level)
+        const triggerDist = 300; // distance at which banner starts dropping
+
+        this.certBanners = certs.map((cert, i) => {
+            const cx = positions[i];
+
+            // Container holds everything — we animate its Y
+            const container = this.add.container(cx, restY).setDepth(4);
+
+            // Cable graphics (drawn from top of screen down to container)
+            const cable = this.add.graphics().setDepth(3);
+
+            // Banner body
+            const g = this.add.graphics();
+            g.fillStyle(0x1B2631, 0.94);
+            g.fillRoundedRect(-bannerW / 2, 0, bannerW, bannerH, 6);
+            g.lineStyle(1.5, 0xC62828, 0.85);
+            g.strokeRoundedRect(-bannerW / 2, 0, bannerW, bannerH, 6);
+            // Red accent bar at top
+            g.fillStyle(0xC62828, 0.9);
+            g.fillRect(-bannerW / 2 + 6, 3, bannerW - 12, 4);
+            // Oracle "O" icon
+            g.lineStyle(2, 0xC62828, 0.9);
+            g.strokeCircle(-bannerW / 2 + 18, 22, 7);
+            // Gold badge at bottom-right
+            g.fillStyle(0xFFD700, 0.8);
+            g.fillCircle(bannerW / 2 - 16, bannerH - 14, 6);
+            g.fillStyle(0xFFA000);
+            g.fillCircle(bannerW / 2 - 16, bannerH - 14, 3);
+            container.add(g);
+
+            // "ORACLE" label
+            const oracleLabel = this.add.text(-bannerW / 2 + 32, 16, 'ORACLE', {
+                fontFamily: 'Poppins, sans-serif', fontSize: '8px',
+                color: '#C62828', fontStyle: 'bold',
+            });
+            container.add(oracleLabel);
+
+            // Cert title
+            const titleText = this.add.text(0, 30, cert.title, {
+                fontFamily: 'Poppins, sans-serif', fontSize: '12px',
+                color: '#FFFFFF', fontStyle: 'bold',
+            }).setOrigin(0.5);
+            container.add(titleText);
+
+            // Subtitle + year
+            const subText = this.add.text(0, 47, `${cert.subtitle} · ${cert.year}`, {
+                fontFamily: 'Poppins, sans-serif', fontSize: '9px',
+                color: '#90CAF9',
+            }).setOrigin(0.5);
+            container.add(subText);
+
+            return { container, cable, cx, restY, dropY, dropped: false, currentY: restY };
+        });
+    }
+
+    updateCertBanners() {
+        if (!this.certBanners) return;
+        const px = this.player.x;
+
+        this.certBanners.forEach(b => {
+            const dist = Math.abs(px - b.cx);
+
+            if (dist < 300 && !b.dropped) {
+                b.dropped = true;
+                this.tweens.add({
+                    targets: b.container,
+                    y: b.dropY,
+                    duration: 800,
+                    ease: 'Bounce.easeOut',
+                    onUpdate: () => { b.currentY = b.container.y; },
+                });
+            } else if (dist >= 500 && b.dropped) {
+                b.dropped = false;
+                this.tweens.add({
+                    targets: b.container,
+                    y: b.restY,
+                    duration: 600,
+                    ease: 'Cubic.easeIn',
+                    onUpdate: () => { b.currentY = b.container.y; },
+                });
+            }
+
+            // Redraw cable from top to container
+            b.cable.clear();
+            b.cable.lineStyle(1.5, 0x78909C, 0.6);
+            b.cable.lineBetween(b.cx, 0, b.cx, b.container.y);
+        });
+    }
+
     update(time) {
         if (this.isTransitioning) return;
 
@@ -652,6 +759,7 @@ export default class Level4Scene extends Phaser.Scene {
         });
 
         this.checkStarCollisions();
+        this.updateCertBanners();
 
         // Zone detection
         const newZone = this.levelZones.find(z => this.player.x >= z.startX && this.player.x < z.endX);

@@ -361,6 +361,17 @@
     justify-content: center;
     transition: all 0.4s ease;
     background: rgba(30, 30, 30, 0.8);
+    cursor: pointer;
+}
+
+.minimap-dot:hover {
+    transform: scale(1.25);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    border-color: #FFD700;
+}
+
+.minimap-dot:active {
+    transform: scale(0.95);
 }
 
 .minimap-icon {

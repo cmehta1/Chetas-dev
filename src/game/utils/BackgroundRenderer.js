@@ -964,6 +964,7 @@ function drawOracleTechHub(scene, zone, rng) {
         const tx = zone.startX + rng.between(100, width - 100);
         drawNormalTree(scene, tx, getTerrainY(tx), rng);
     }
+
 }
 
 function drawModernBuilding(scene, x, groundY, w, h, rng, isOracle) {

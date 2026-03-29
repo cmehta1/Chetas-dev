@@ -2,6 +2,8 @@ import { forwardRef, useEffect, useLayoutEffect, useRef } from 'react';
 import Phaser from 'phaser';
 import { gameConfig } from './config/gameConfig';
 import EventBus from './EventBus';
+import { ZONES } from './config/constants';
+import { LEVELS } from './config/levelConfig';
 
 const PhaserGame = forwardRef(function PhaserGame({ onGameReady }, ref) {
     const gameRef = useRef(null);
@@ -29,6 +31,26 @@ const PhaserGame = forwardRef(function PhaserGame({ onGameReady }, ref) {
             if (onGameReady) {
                 onGameReady(game, scene);
             }
+        });
+
+        EventBus.on('minimap-jump', ({ zoneId }) => {
+            const game = gameRef.current;
+            if (!game) return;
+
+            const zone = ZONES[zoneId];
+            const level = LEVELS.find(l => l.zoneIds.includes(zoneId));
+            if (!zone || !level) return;
+
+            // Stop all active scenes
+            game.scene.getScenes(true).forEach(s => game.scene.stop(s));
+
+            game.scene.start('LevelTransition', {
+                levelId: level.id,
+                playerStage: zone.playerStage,
+                targetZoneId: zoneId,
+                collectedKeys: [],
+                skillProficiency: {},
+            });
         });
 
         return () => {

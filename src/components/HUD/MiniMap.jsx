@@ -1,4 +1,5 @@
 import { useGameEvent } from '../../hooks/useGameEvent';
+import EventBus from '../../game/EventBus';
 
 const ZONE_NODES = [
     { label: 'Home', icon: '🏠', level: 1 },
@@ -12,8 +13,16 @@ const ZONE_NODES = [
     { label: 'Hobbies', icon: '🎯', level: 5 },
 ];
 
+// Flight is a cutscene — redirect to SUNY
+const ZONE_REDIRECTS = { 3: 4 };
+
 // Level bracket boundaries (zone indices where each level starts)
 const LEVEL_STARTS = [0, 2, 4, 5, 8];
+
+function handleNodeClick(zoneIndex) {
+    const targetZone = ZONE_REDIRECTS[zoneIndex] ?? zoneIndex;
+    EventBus.emit('minimap-jump', { zoneId: targetZone });
+}
 
 export default function MiniMap() {
     const zoneData = useGameEvent('zone-changed', { id: 0, progress: 0 });
@@ -33,6 +42,7 @@ export default function MiniMap() {
                                     : i === currentZone ? 'dot-current'
                                     : 'dot-future'
                             }`}
+                            onClick={() => handleNodeClick(i)}
                         >
                             <span className="minimap-icon">{node.icon}</span>
                         </div>

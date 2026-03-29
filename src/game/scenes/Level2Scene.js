@@ -20,7 +20,8 @@ export default class Level2Scene extends Phaser.Scene {
     }
 
     init(data) {
-        this.currentZoneId = 2;
+        this.targetZoneId = data.targetZoneId;
+        this.currentZoneId = (data.targetZoneId !== undefined && [2, 3].includes(data.targetZoneId)) ? data.targetZoneId : 2;
         this.playerStage = data.playerStage || 3;
         this.collectedKeys = data.collectedKeys || [];
         this.skillProficiency = data.skillProficiency || {};
@@ -308,7 +309,7 @@ export default class Level2Scene extends Phaser.Scene {
     }
 
     createPlayer() {
-        const startX = ZONES[2].startX + 100;
+        const startX = this.targetZoneId !== undefined ? ZONES[this.targetZoneId].startX + 100 : ZONES[2].startX + 100;
         const startY = GROUND_Y - 80;
 
         this.player = this.physics.add.sprite(startX, startY, 'playerBody2');

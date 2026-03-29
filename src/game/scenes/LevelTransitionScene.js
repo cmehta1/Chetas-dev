@@ -12,6 +12,7 @@ export default class LevelTransitionScene extends Phaser.Scene {
         this.collectedKeys = data.collectedKeys || [];
         this.skillProficiency = data.skillProficiency || {};
         this.playerStage = data.playerStage || 1;
+        this.targetZoneId = data.targetZoneId;
     }
 
     create() {
@@ -91,6 +92,7 @@ export default class LevelTransitionScene extends Phaser.Scene {
             collectedKeys: this.collectedKeys,
             skillProficiency: this.skillProficiency,
             playerStage: this.playerStage,
+            targetZoneId: this.targetZoneId,
         };
     }
 }
