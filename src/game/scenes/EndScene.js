@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, isMobilePortrait } from '../config/constants';
+import { GAME_WIDTH, GAME_HEIGHT, CANVAS_SCALE, isMobilePortrait } from '../config/constants';
 import { createCharacter } from '../utils/CharacterRenderer';
 import EventBus from '../EventBus';
 
@@ -16,6 +16,8 @@ export default class EndScene extends Phaser.Scene {
     }
 
     create() {
+        this.cameras.main.setZoom(CANVAS_SCALE);
+        this.cameras.main.centerOn(GAME_WIDTH / 2, GAME_HEIGHT / 2);
         this.cameras.main.setBackgroundColor('#0a0a1a');
 
         // Gradient background overlay
@@ -133,9 +135,8 @@ export default class EndScene extends Phaser.Scene {
     createSocialLinks() {
         const socials = [
             { label: 'chetasmehta', url: 'https://www.linkedin.com/in/chetasmehta', drawIcon: this.drawLinkedInIcon },
-            { label: 'X  @chetas2', url: 'https://x.com/chetas2', drawIcon: this.drawXIcon },
+            { label: '@chetas2', url: 'https://x.com/chetas2', drawIcon: this.drawXIcon },
             { label: 'cmehta1', url: 'https://github.com/cmehta1', drawIcon: this.drawGitHubIcon },
-            { label: 'ch3ta5', url: 'https://instagram.com/ch3ta5', drawIcon: this.drawInstagramIcon },
         ];
 
         const startY = GAME_HEIGHT - 140;

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../config/constants';
+import { GAME_WIDTH, GAME_HEIGHT, CANVAS_SCALE } from '../config/constants';
 import { getLevelConfig } from '../config/levelConfig';
 
 export default class LevelTransitionScene extends Phaser.Scene {
@@ -16,6 +16,8 @@ export default class LevelTransitionScene extends Phaser.Scene {
     }
 
     create() {
+        this.cameras.main.setZoom(CANVAS_SCALE);
+        this.cameras.main.centerOn(GAME_WIDTH / 2, GAME_HEIGHT / 2);
         const level = getLevelConfig(this.levelId);
         if (!level) {
             this.scene.start('Level1Scene', this.getState());

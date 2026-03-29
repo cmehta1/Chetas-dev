@@ -2,6 +2,11 @@
 export const GAME_WIDTH = 1280;
 export const GAME_HEIGHT = 720;
 
+// Canvas scale factor for crisp HD rendering.
+// The game canvas renders at GAME_WIDTH*CANVAS_SCALE × GAME_HEIGHT*CANVAS_SCALE,
+// while all game coordinates stay in the 1280×720 space via camera zoom.
+export const CANVAS_SCALE = 2;
+
 // World dimensions
 export const WORLD_WIDTH = 16500;
 export const GROUND_Y = 580;

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, GROUND_Y, TERRAIN, getTerrainY } from '../config/constants';
+import { GAME_WIDTH, GAME_HEIGHT, GROUND_Y, TERRAIN, getTerrainY } from '../config/constants';
 
 /**
  * Creates rich, detailed backgrounds for each zone.
@@ -8,27 +8,31 @@ export function renderZoneBackground(scene, zone) {
     const width = zone.endX - zone.startX;
     const cx = zone.startX + width / 2;
 
-    // === SKY GRADIENT ===
+    // === SKY GRADIENT (extra wide for parallax scrolling) ===
     const skyGfx = scene.add.graphics();
     skyGfx.setDepth(-20);
     const steps = 40;
     const topColor = Phaser.Display.Color.IntegerToColor(zone.skyTop);
     const bottomColor = Phaser.Display.Color.IntegerToColor(zone.skyBottom);
+    const skyPad = width * 0.5; // extra width so sky covers parallax shift
     for (let i = 0; i < steps; i++) {
         const t = i / steps;
         const color = Phaser.Display.Color.Interpolate.ColorWithColor(topColor, bottomColor, 100, Math.floor(t * 100));
         const hexColor = Phaser.Display.Color.GetColor(color.r, color.g, color.b);
         const bandHeight = GROUND_Y / steps + 1;
         skyGfx.fillStyle(hexColor);
-        skyGfx.fillRect(zone.startX, i * bandHeight, width, bandHeight + 1);
+        skyGfx.fillRect(zone.startX - skyPad, i * bandHeight, width + skyPad * 2, bandHeight + 1);
     }
 
-    // === CELESTIAL BODY (sun/moon) ===
-    if (zone.theme === 'flight' || zone.theme === 'oracle-tech') {
-        drawMoon(scene, zone.startX + width * 0.8, 80, zone);
-        drawStarryNight(scene, zone);
-    } else {
-        drawSun(scene, zone.startX + width * 0.75, 70, zone);
+    // === CELESTIAL BODY (sun/moon) — only one per scene ===
+    if (!scene._celestialRendered) {
+        scene._celestialRendered = true;
+        if (zone.theme === 'flight' || zone.theme === 'oracle-tech') {
+            drawMoon(scene, zone.startX + width * 0.8, 80, zone);
+            drawStarryNight(scene, zone);
+        } else {
+            drawSun(scene, zone.startX + width * 0.75, 70, zone);
+        }
     }
 
     // === CLOUDS ===
@@ -40,8 +44,13 @@ export function renderZoneBackground(scene, zone) {
         drawCloud(scene, cx2, cy, rng.between(60, 140), zone);
     }
 
-    // === GROUND (terrain-following) ===
-    drawGround(scene, zone);
+    // === GROUND (terrain-following) — skip for flight cutscene (over ocean) ===
+    if (zone.theme !== 'flight') {
+        drawGround(scene, zone);
+    }
+
+    // === PARALLAX BACKGROUND LAYERS ===
+    drawParallaxLayers(scene, zone, rng);
 
     // === THEME-SPECIFIC ELEMENTS ===
     switch (zone.theme) {
@@ -99,8 +108,10 @@ export function renderZoneBackground(scene, zone) {
 }
 
 function drawSun(scene, x, y, zone) {
+    const sf = 0.05;
     const g = scene.add.graphics();
     g.setDepth(-18);
+    g.setPosition((1 - sf) * (GAME_WIDTH / 2 - x), 0);
     g.fillStyle(0xFFFF00, 0.15);
     g.fillCircle(x, y, 50);
     g.fillStyle(0xFFFF00, 0.25);
@@ -114,22 +125,29 @@ function drawSun(scene, x, y, zone) {
             x + Math.cos(a) * 38, y + Math.sin(a) * 38
         );
     }
+    g.setScrollFactor(sf, 1);
 }
 
 function drawMoon(scene, x, y, zone) {
+    const sf = 0.05;
     const g = scene.add.graphics();
     g.setDepth(-18);
+    g.setPosition((1 - sf) * (GAME_WIDTH / 2 - x), 0);
     g.fillStyle(0xECEFF1, 0.2);
     g.fillCircle(x, y, 40);
     g.fillStyle(0xECEFF1);
     g.fillCircle(x, y, 18);
     g.fillStyle(zone.skyTop);
     g.fillCircle(x + 6, y - 3, 14);
+    g.setScrollFactor(sf, 1);
 }
 
 function drawStarryNight(scene, zone) {
+    const sf = 0.05;
+    const zoneCX = zone.startX + (zone.endX - zone.startX) / 2;
     const g = scene.add.graphics();
     g.setDepth(-19);
+    g.setPosition((1 - sf) * (GAME_WIDTH / 2 - zoneCX), 0);
     const rng = new Phaser.Math.RandomDataGenerator([`stars${zone.id}`]);
     for (let i = 0; i < 30; i++) {
         const sx = zone.startX + rng.between(20, zone.endX - zone.startX - 20);
@@ -138,16 +156,310 @@ function drawStarryNight(scene, zone) {
         g.fillStyle(0xFFFFFF, rng.realInRange(0.3, 0.9));
         g.fillCircle(sx, sy, size);
     }
+    g.setScrollFactor(sf, 1);
 }
 
 function drawCloud(scene, x, y, width, zone) {
+    const sf = 0.15;
     const g = scene.add.graphics();
     g.setDepth(-15);
+    if (!zone.isCutscene) {
+        g.setPosition((1 - sf) * (GAME_WIDTH / 2 - x), 0);
+    }
     const alpha = zone.isCutscene ? 0.9 : 0.6;
     g.fillStyle(0xFFFFFF, alpha);
     g.fillEllipse(x, y, width, width * 0.35);
     g.fillEllipse(x - width * 0.2, y + 5, width * 0.5, width * 0.25);
     g.fillEllipse(x + width * 0.25, y + 3, width * 0.4, width * 0.22);
+    if (!zone.isCutscene) {
+        g.setScrollFactor(sf, 1);
+    }
+}
+
+// ─── PARALLAX BACKGROUND LAYERS ───────────────────────────────
+function drawParallaxLayers(scene, zone, rng) {
+    if (zone.isCutscene) return;
+
+    const width = zone.endX - zone.startX;
+    const cx = zone.startX + width / 2;
+
+    // Position offset so parallax layers stay on-screen at any world X.
+    // Without this, scrollFactor < 1 causes layers to drift off-screen in later zones.
+    const pxOff = (sf) => (1 - sf) * (GAME_WIDTH / 2 - cx);
+
+    const hillColor = Phaser.Display.Color.IntegerToColor(zone.skyBottom);
+    const hillHex = Phaser.Display.Color.GetColor(
+        Math.max(0, hillColor.red - 40),
+        Math.max(0, hillColor.green - 30),
+        Math.max(0, hillColor.blue - 20),
+    );
+    const hillHex2 = Phaser.Display.Color.GetColor(
+        Math.max(0, hillColor.red - 60),
+        Math.max(0, hillColor.green - 50),
+        Math.max(0, hillColor.blue - 30),
+    );
+
+    // ── Layer 1: Far mountains (scrollFactor 0.1) ──
+    const farG = scene.add.graphics().setDepth(-17);
+    farG.setPosition(pxOff(0.1), 0);
+    farG.fillStyle(hillHex2, 0.35);
+    farG.beginPath();
+    farG.moveTo(cx - width, GROUND_Y - 80);
+    const numPeaks = 6 + Math.floor(width / 500);
+    for (let i = 0; i <= numPeaks; i++) {
+        const px = cx - width + i * (width * 2 / numPeaks);
+        const peakH = rng.between(120, 220);
+        const midX = px + (width * 2 / numPeaks) / 2;
+        farG.lineTo(midX, GROUND_Y - 80 - peakH);
+    }
+    farG.lineTo(cx + width, GROUND_Y - 80);
+    farG.lineTo(cx + width, GROUND_Y);
+    farG.lineTo(cx - width, GROUND_Y);
+    farG.closePath();
+    farG.fillPath();
+    farG.setScrollFactor(0.1, 1);
+
+    // ── Layer 2: Mid hills (scrollFactor 0.2) ──
+    const midFarG = scene.add.graphics().setDepth(-16);
+    midFarG.setPosition(pxOff(0.2), 0);
+    midFarG.fillStyle(hillHex, 0.3);
+    midFarG.beginPath();
+    midFarG.moveTo(cx - width, GROUND_Y - 40);
+    const numHills = 8 + Math.floor(width / 400);
+    for (let i = 0; i <= numHills; i++) {
+        const hx = cx - width + i * (width * 2 / numHills);
+        const hillH = rng.between(60, 130);
+        const midX = hx + (width * 2 / numHills) / 2;
+        midFarG.lineTo(midX, GROUND_Y - 40 - hillH);
+    }
+    midFarG.lineTo(cx + width, GROUND_Y - 40);
+    midFarG.lineTo(cx + width, GROUND_Y);
+    midFarG.lineTo(cx - width, GROUND_Y);
+    midFarG.closePath();
+    midFarG.fillPath();
+    midFarG.setScrollFactor(0.2, 1);
+
+    // ── Layer 3: Zone-specific distant silhouettes (scrollFactor 0.25) ──
+    drawDistantSilhouettes(scene, zone, rng, cx, width, hillHex2);
+
+    // ── Layer 4: Background trees (scrollFactor 0.4) ──
+    const treeColor1 = zone.theme?.startsWith('india') ? 0x2E7D32 :
+                       zone.theme === 'oracle-tech' ? 0x1B5E20 :
+                       zone.theme === 'hobby-park' ? 0x388E3C : 0x33691E;
+    const treeColor2 = zone.theme?.startsWith('india') ? 0x388E3C :
+                       zone.theme === 'oracle-tech' ? 0x2E7D32 :
+                       zone.theme === 'hobby-park' ? 0x43A047 : 0x4CAF50;
+
+    const midG = scene.add.graphics().setDepth(-10);
+    midG.setPosition(pxOff(0.4), 0);
+    const numBgTrees = Math.floor(width / 100);
+    for (let i = 0; i < numBgTrees; i++) {
+        const tx = cx - width * 0.3 + rng.between(0, width * 1.6);
+        const ty = GROUND_Y - rng.between(20, 50);
+        const treeW = rng.between(25, 45);
+        const treeH = rng.between(40, 70);
+        const color = i % 2 === 0 ? treeColor1 : treeColor2;
+
+        midG.fillStyle(0x5D4037, 0.4);
+        midG.fillRect(tx - 2, ty - treeH * 0.4, 4, treeH * 0.5);
+        midG.fillStyle(color, 0.35);
+        midG.fillCircle(tx, ty - treeH * 0.6, treeW * 0.5);
+        midG.fillCircle(tx - treeW * 0.25, ty - treeH * 0.45, treeW * 0.35);
+        midG.fillCircle(tx + treeW * 0.25, ty - treeH * 0.45, treeW * 0.35);
+    }
+    midG.setScrollFactor(0.4, 1);
+
+    // ── Layer 5: Near bushes & ground cover (scrollFactor 0.6) ──
+    const nearG = scene.add.graphics().setDepth(-8);
+    nearG.setPosition(pxOff(0.6), 0);
+    const numBushes = Math.floor(width / 150);
+    for (let i = 0; i < numBushes; i++) {
+        const bx = cx - width * 0.2 + rng.between(0, width * 1.4);
+        const by = GROUND_Y - rng.between(5, 25);
+        const bw = rng.between(22, 45);
+        nearG.fillStyle(treeColor2, 0.25);
+        nearG.fillEllipse(bx, by, bw, bw * 0.5);
+        nearG.fillStyle(treeColor1, 0.2);
+        nearG.fillEllipse(bx + bw * 0.3, by + 3, bw * 0.6, bw * 0.35);
+    }
+    nearG.setScrollFactor(0.6, 1);
+}
+
+// ─── Zone-specific distant silhouettes for parallax layer 3 ──
+function drawDistantSilhouettes(scene, zone, rng, cx, width, baseColor) {
+    const sf = 0.25;
+    const g = scene.add.graphics().setDepth(-13);
+    g.setPosition((1 - sf) * (GAME_WIDTH / 2 - cx), 0);
+
+    if (zone.theme === 'india-village') {
+        // Distant temples, huts, palm trees
+        for (let i = 0; i < 5; i++) {
+            const sx = cx - width * 0.4 + rng.between(0, width * 1.8);
+            const sy = GROUND_Y - 60;
+            g.fillStyle(0x8D6E63, 0.2);
+            // Hut shape
+            g.fillRect(sx - 12, sy - 20, 24, 20);
+            g.fillTriangle(sx - 16, sy - 20, sx + 16, sy - 20, sx, sy - 38);
+        }
+        // Distant palm trees
+        for (let i = 0; i < 6; i++) {
+            const px = cx - width * 0.3 + rng.between(0, width * 1.6);
+            const py = GROUND_Y - 55;
+            g.fillStyle(0x5D4037, 0.2);
+            g.fillRect(px - 1.5, py - 35, 3, 35);
+            g.fillStyle(0x2E7D32, 0.2);
+            g.fillEllipse(px - 10, py - 38, 18, 8);
+            g.fillEllipse(px + 10, py - 38, 18, 8);
+            g.fillEllipse(px, py - 42, 10, 12);
+        }
+    } else if (zone.theme === 'india-school') {
+        // Distant school buildings & flag poles
+        for (let i = 0; i < 4; i++) {
+            const sx = cx - width * 0.3 + rng.between(0, width * 1.6);
+            const sy = GROUND_Y - 50;
+            const bh = rng.between(35, 55);
+            g.fillStyle(0xBF8040, 0.18);
+            g.fillRect(sx - 20, sy - bh, 40, bh);
+            g.fillStyle(0x8B4513, 0.15);
+            g.fillRect(sx - 23, sy - bh - 3, 46, 4);
+        }
+        // Distant flag poles
+        for (let i = 0; i < 3; i++) {
+            const fx = cx - width * 0.2 + rng.between(0, width * 1.4);
+            g.fillStyle(0x9E9E9E, 0.2);
+            g.fillRect(fx, GROUND_Y - 95, 2, 45);
+            g.fillStyle(0xFF9933, 0.2);
+            g.fillRect(fx + 2, GROUND_Y - 95, 8, 3);
+            g.fillStyle(0xFFFFFF, 0.15);
+            g.fillRect(fx + 2, GROUND_Y - 92, 8, 3);
+            g.fillStyle(0x138808, 0.2);
+            g.fillRect(fx + 2, GROUND_Y - 89, 8, 3);
+        }
+    } else if (zone.theme === 'india-college') {
+        // Distant college blocks & pillared halls
+        for (let i = 0; i < 5; i++) {
+            const sx = cx - width * 0.4 + rng.between(0, width * 1.8);
+            const sy = GROUND_Y - 50;
+            const bw = rng.between(40, 70);
+            const bh = rng.between(40, 65);
+            g.fillStyle(0x9E9E9E, 0.15);
+            g.fillRect(sx - bw / 2, sy - bh, bw, bh);
+            g.fillStyle(0x757575, 0.12);
+            // Pillars
+            for (let p = 0; p < 4; p++)
+                g.fillRect(sx - bw / 2 + 5 + p * (bw / 4), sy - bh, 3, bh);
+            g.fillRect(sx - bw / 2 - 2, sy - bh - 3, bw + 4, 4);
+        }
+    } else if (zone.theme === 'usa-campus') {
+        // Distant Binghamton campus, clock towers, dorms
+        for (let i = 0; i < 4; i++) {
+            const sx = cx - width * 0.3 + rng.between(0, width * 1.6);
+            const sy = GROUND_Y - 50;
+            const bw = rng.between(30, 55);
+            const bh = rng.between(45, 70);
+            g.fillStyle(0x6D4C41, 0.18);
+            g.fillRect(sx - bw / 2, sy - bh, bw, bh);
+            g.fillStyle(0x546E7A, 0.15);
+            g.fillRect(sx - bw / 2, sy - bh - 3, bw, 4);
+        }
+        // Distant clock tower
+        const tx = cx + rng.between(-200, 200);
+        g.fillStyle(0x795548, 0.2);
+        g.fillRect(tx - 8, GROUND_Y - 120, 16, 70);
+        g.fillStyle(0x546E7A, 0.18);
+        g.fillTriangle(tx - 10, GROUND_Y - 120, tx + 10, GROUND_Y - 120, tx, GROUND_Y - 135);
+    } else if (zone.theme === 'michigan-office') {
+        // Distant suburban skyline, water tower, church steeple
+        for (let i = 0; i < 5; i++) {
+            const sx = cx - width * 0.3 + rng.between(0, width * 1.6);
+            const sy = GROUND_Y - 50;
+            const bw = rng.between(25, 45);
+            const bh = rng.between(30, 50);
+            g.fillStyle(0x8D6E63, 0.15);
+            g.fillRect(sx - bw / 2, sy - bh, bw, bh);
+            g.fillStyle(0x5D4037, 0.12);
+            g.fillTriangle(sx - bw / 2 - 3, sy - bh, sx + bw / 2 + 3, sy - bh, sx, sy - bh - 15);
+        }
+        // Water tower
+        const wt = cx + rng.between(-100, 100);
+        g.fillStyle(0x78909C, 0.2);
+        g.fillRect(wt - 2, GROUND_Y - 110, 4, 60);
+        g.fillRect(wt - 8, GROUND_Y - 110, 4, 60);
+        g.fillRect(wt + 4, GROUND_Y - 110, 4, 60);
+        g.fillStyle(0x90A4AE, 0.2);
+        g.fillEllipse(wt, GROUND_Y - 118, 22, 16);
+    } else if (zone.theme === 'kansas-corporate') {
+        // Distant Kansas City skyline — tall glass towers
+        const skylineX = cx - width * 0.4;
+        for (let i = 0; i < 8; i++) {
+            const sx = skylineX + rng.between(0, width * 1.8);
+            const sy = GROUND_Y - 50;
+            const bw = rng.between(18, 35);
+            const bh = rng.between(60, 140);
+            g.fillStyle(0x455A64, 0.18);
+            g.fillRect(sx - bw / 2, sy - bh, bw, bh);
+            // Window dots
+            g.fillStyle(0x90CAF9, 0.1);
+            const rows = Math.floor(bh / 12);
+            const cols = Math.floor(bw / 8);
+            for (let r = 0; r < rows; r++)
+                for (let c = 0; c < cols; c++)
+                    g.fillRect(sx - bw / 2 + 3 + c * 8, sy - bh + 3 + r * 12, 4, 7);
+        }
+    } else if (zone.theme === 'oracle-tech') {
+        // Distant dark tech towers with red accents
+        for (let i = 0; i < 7; i++) {
+            const sx = cx - width * 0.4 + rng.between(0, width * 1.8);
+            const sy = GROUND_Y - 50;
+            const bw = rng.between(16, 30);
+            const bh = rng.between(70, 160);
+            g.fillStyle(0x1A237E, 0.2);
+            g.fillRect(sx - bw / 2, sy - bh, bw, bh);
+            g.fillStyle(0xC62828, 0.1);
+            g.fillRect(sx - bw / 2, sy - bh, 2, bh);
+            g.fillRect(sx + bw / 2 - 2, sy - bh, 2, bh);
+            // Antenna lights
+            if (bh > 100) {
+                g.fillStyle(0xF44336, 0.25);
+                g.fillCircle(sx, sy - bh - 8, 2);
+            }
+        }
+    } else if (zone.theme === 'hobby-park') {
+        // Distant rolling hills with colorful patches, ferris wheel silhouette
+        const parkG = scene.add.graphics().setDepth(-13);
+        parkG.setPosition((1 - sf) * (GAME_WIDTH / 2 - cx), 0);
+        // Gentle rolling hills
+        parkG.fillStyle(0x4CAF50, 0.15);
+        parkG.beginPath();
+        parkG.moveTo(cx - width, GROUND_Y - 30);
+        for (let i = 0; i <= 10; i++) {
+            const hx = cx - width + i * (width * 2 / 10);
+            const hillH = rng.between(30, 60);
+            const midX = hx + (width * 2 / 10) / 2;
+            parkG.lineTo(midX, GROUND_Y - 30 - hillH);
+        }
+        parkG.lineTo(cx + width, GROUND_Y - 30);
+        parkG.lineTo(cx + width, GROUND_Y);
+        parkG.lineTo(cx - width, GROUND_Y);
+        parkG.closePath();
+        parkG.fillPath();
+        parkG.setScrollFactor(0.25, 1);
+
+        // Ferris wheel silhouette
+        const fw = cx + rng.between(-200, 200);
+        g.lineStyle(1.5, 0x795548, 0.15);
+        g.strokeCircle(fw, GROUND_Y - 110, 35);
+        g.fillStyle(0x795548, 0.12);
+        g.fillRect(fw - 2, GROUND_Y - 75, 4, 30);
+        g.fillRect(fw - 18, GROUND_Y - 47, 36, 3);
+        // Spokes
+        for (let s = 0; s < 8; s++) {
+            const angle = (s * Math.PI * 2) / 8;
+            g.lineBetween(fw, GROUND_Y - 110, fw + Math.cos(angle) * 35, GROUND_Y - 110 + Math.sin(angle) * 35);
+        }
+    }
+
+    g.setScrollFactor(0.25, 1);
 }
 
 // ─── TERRAIN-FOLLOWING GROUND ──────────────────────────────────
@@ -547,7 +859,27 @@ function drawCollegeDeptBuilding(scene, x, groundY) {
 // === FLIGHT SCENE ===
 function drawFlightScene(scene, zone, rng) {
     const cx = zone.startX + (zone.endX - zone.startX) / 2;
+    const width = zone.endX - zone.startX;
 
+    // Ocean below the flight path
+    const ocean = scene.add.graphics();
+    ocean.setDepth(-1);
+    // Deep ocean gradient
+    ocean.fillStyle(0x0D47A1, 0.6);
+    ocean.fillRect(zone.startX, GROUND_Y - 40, width, GAME_HEIGHT - GROUND_Y + 40);
+    // Wave highlights
+    ocean.lineStyle(1, 0x42A5F5, 0.15);
+    for (let w = 0; w < 12; w++) {
+        const wy = GROUND_Y - 20 + w * 15;
+        ocean.beginPath();
+        ocean.moveTo(zone.startX, wy);
+        for (let wx = zone.startX; wx <= zone.endX; wx += 40) {
+            ocean.lineTo(wx, wy + Math.sin((wx + w * 50) * 0.02) * 4);
+        }
+        ocean.strokePath();
+    }
+
+    // Static plane (decorative, the animated one is in Level2Scene)
     const plane = scene.add.graphics();
     plane.setDepth(-2);
     plane.fillStyle(0xECEFF1);
@@ -566,13 +898,7 @@ function drawFlightScene(scene, zone, rng) {
     plane.fillEllipse(cx - 30, 295, 20, 10);
     plane.fillEllipse(cx + 30, 295, 20, 10);
 
-    const earth = scene.add.graphics();
-    earth.setDepth(-8);
-    earth.fillStyle(0x4CAF50, 0.3);
-    earth.fillEllipse(cx, GROUND_Y + 200, zone.endX - zone.startX + 200, 300);
-    earth.fillStyle(0x2196F3, 0.2);
-    earth.fillEllipse(cx + 200, GROUND_Y + 220, 400, 250);
-
+    // Labels
     const indiaLabel = scene.add.text(zone.startX + 100, 420, 'INDIA', {
         fontFamily: 'Arial', fontSize: '24px', color: '#ffffff', stroke: '#000000', strokeThickness: 2,
     });
@@ -583,14 +909,15 @@ function drawFlightScene(scene, zone, rng) {
     });
     usaLabel.setAlpha(0.5).setDepth(-1);
 
+    // Dashed flight path arc
     const path = scene.add.graphics();
     path.setDepth(-3);
     path.lineStyle(2, 0xFFFFFF, 0.3);
     for (let d = 0; d < 20; d++) {
-        const dx = zone.startX + 100 + d * ((zone.endX - zone.startX - 200) / 20);
+        const dx = zone.startX + 100 + d * ((width - 200) / 20);
         const dy = 380 - Math.sin(d / 20 * Math.PI) * 100;
         if (d > 0) {
-            const pdx = zone.startX + 100 + (d - 1) * ((zone.endX - zone.startX - 200) / 20);
+            const pdx = zone.startX + 100 + (d - 1) * ((width - 200) / 20);
             const pdy = 380 - Math.sin((d - 1) / 20 * Math.PI) * 100;
             path.lineBetween(pdx, pdy, dx, dy);
         }

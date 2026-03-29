@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from './constants';
+import { GAME_WIDTH, GAME_HEIGHT, CANVAS_SCALE } from './constants';
 import BootScene from '../scenes/BootScene';
 import PreloaderScene from '../scenes/PreloaderScene';
 import LevelTransitionScene from '../scenes/LevelTransitionScene';
@@ -14,8 +14,8 @@ const isMobileDevice = ('ontouchstart' in window || navigator.maxTouchPoints > 0
 
 export const gameConfig = {
     type: Phaser.AUTO,
-    width: GAME_WIDTH,
-    height: GAME_HEIGHT,
+    width: GAME_WIDTH * CANVAS_SCALE,
+    height: GAME_HEIGHT * CANVAS_SCALE,
     physics: {
         default: 'arcade',
         arcade: {
@@ -26,6 +26,10 @@ export const gameConfig = {
     scale: {
         mode: isMobileDevice ? Phaser.Scale.ENVELOP : Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
+    },
+    render: {
+        antialias: true,
+        roundPixels: true,
     },
     scene: [BootScene, PreloaderScene, LevelTransitionScene, Level1Scene, Level2Scene, Level3Scene, Level4Scene, Level5Scene, EndScene],
     backgroundColor: '#87CEEB',

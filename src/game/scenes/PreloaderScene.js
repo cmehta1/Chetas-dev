@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, isMobilePortrait } from '../config/constants';
+import { GAME_WIDTH, GAME_HEIGHT, CANVAS_SCALE, isMobilePortrait } from '../config/constants';
 
 export default class PreloaderScene extends Phaser.Scene {
     constructor() {
@@ -7,6 +7,8 @@ export default class PreloaderScene extends Phaser.Scene {
     }
 
     create() {
+        this.cameras.main.setZoom(CANVAS_SCALE);
+        this.cameras.main.centerOn(GAME_WIDTH / 2, GAME_HEIGHT / 2);
         const mobile = isMobilePortrait();
         const visibleWidth = mobile
             ? window.innerWidth / (window.innerHeight / GAME_HEIGHT)

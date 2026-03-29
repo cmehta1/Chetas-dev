@@ -3,7 +3,7 @@ import EventBus from '../EventBus';
 import {
     GAME_WIDTH, GAME_HEIGHT, GROUND_Y,
     PLAYER_SPEED, PLAYER_JUMP_VELOCITY, PLAYER_GRAVITY,
-    PLAYER_STAGES, ZONES, getTerrainY, getCameraMargin, isMobilePortrait,
+    PLAYER_STAGES, ZONES, getTerrainY, getCameraMargin, isMobilePortrait, CANVAS_SCALE,
 } from '../config/constants';
 import { JOURNEY, SKILLS_DATA } from '../config/journeyData';
 import { AUTO_JUMP_TRIGGERS } from '../config/levelConfig';
@@ -37,6 +37,7 @@ export default class Level1Scene extends Phaser.Scene {
     }
 
     create() {
+        this.cameras.main.setZoom(CANVAS_SCALE);
         // Invisible player body texture
         const gfx = this.make.graphics({ x: 0, y: 0, add: false });
         gfx.fillStyle(0xffffff, 0);
