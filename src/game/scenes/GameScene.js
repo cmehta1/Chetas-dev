@@ -3,7 +3,7 @@ import EventBus from '../EventBus';
 import {
     GAME_WIDTH, GAME_HEIGHT, WORLD_WIDTH, GROUND_Y,
     PLAYER_SPEED, PLAYER_JUMP_VELOCITY, PLAYER_GRAVITY,
-    PLAYER_STAGES, ZONES, getTerrainY,
+    PLAYER_STAGES, ZONES, getTerrainY, isMobilePortrait,
 } from '../config/constants';
 import { JOURNEY, SKILLS_DATA } from '../config/journeyData';
 import { createCharacter, animateWalk } from '../utils/CharacterRenderer';
@@ -138,7 +138,8 @@ export default class GameScene extends Phaser.Scene {
                 fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ffffff', fontStyle: 'bold',
             }).setOrigin(0.5).setDepth(4);
 
-            const prompt = this.add.text(bx, groundY - h - 55, '[ SPACE to Enter ]', {
+            const promptText = isMobilePortrait() ? '[ Tap to Enter ]' : '[ SPACE to Enter ]';
+            const prompt = this.add.text(bx, groundY - h - 55, promptText, {
                 fontFamily: 'Poppins, sans-serif', fontSize: '15px',
                 color: '#FFD700', stroke: '#000000', strokeThickness: 4, fontStyle: 'bold',
             }).setOrigin(0.5).setDepth(10).setAlpha(0);
@@ -410,10 +411,12 @@ export default class GameScene extends Phaser.Scene {
             if (Math.abs(this.player.x - b.x) < 100) {
                 b.prompt.setAlpha(1);
                 if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) this.enterBuilding(b);
+                else if (isMobilePortrait() && this.input.activePointer.isDown && !this._pointerWasDown) this.enterBuilding(b);
             } else {
                 b.prompt.setAlpha(0);
             }
         });
+        this._pointerWasDown = this.input.activePointer.isDown;
     }
 
     enterBuilding(building) {

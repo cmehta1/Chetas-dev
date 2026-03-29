@@ -88,6 +88,34 @@ export default class Level4Scene extends Phaser.Scene {
         EventBus.emit('level-changed', { id: 4, name: 'Career' });
         this.cameras.main.fadeIn(800);
         EventBus.emit('current-scene-ready', this);
+
+        // Building interior overlay callback
+        this._onExitBuilding = () => {
+            const zoneId = this.pendingBuildingZoneId;
+            const nextZone = ZONES.find(z => z.id === zoneId + 1);
+            const isNextInLevel = nextZone && this.levelZones.some(z => z.id === nextZone.id);
+
+            this.cameras.main.fadeOut(800, 0, 0, 0);
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                if (isNextInLevel) {
+                    this.player.x = nextZone.startX + 100;
+                    this.player.y = GROUND_Y - 80;
+                    this.player.body.setVelocity(0, 0);
+                    this.growPlayer(nextZone.playerStage);
+                    this.cameras.main.fadeIn(800);
+                    this.isTransitioning = false;
+                } else {
+                    this.scene.start('LevelTransition', {
+                        levelId: 5,
+                        collectedKeys: this.collectedKeys,
+                        skillProficiency: this.skillProficiency,
+                        playerStage: this.playerStage,
+                    });
+                }
+            });
+        };
+        EventBus.on('exit-building', this._onExitBuilding);
+        this.events.on('shutdown', () => EventBus.off('exit-building', this._onExitBuilding));
     }
 
     createParallaxClouds() {
@@ -345,7 +373,8 @@ export default class Level4Scene extends Phaser.Scene {
                 fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ffffff', fontStyle: 'bold',
             }).setOrigin(0.5).setDepth(4);
 
-            const prompt = this.add.text(bx, groundY - h - 55, '[ SPACE to Enter ]', {
+            const promptText = isMobilePortrait() ? '[ Tap to Enter ]' : '[ SPACE to Enter ]';
+            const prompt = this.add.text(bx, groundY - h - 55, promptText, {
                 fontFamily: 'Poppins, sans-serif', fontSize: '15px',
                 color: '#FFD700', stroke: '#000000', strokeThickness: 4, fontStyle: 'bold',
             }).setOrigin(0.5).setDepth(10).setAlpha(0);
@@ -521,69 +550,20 @@ export default class Level4Scene extends Phaser.Scene {
             if (Math.abs(this.player.x - b.x) < 100) {
                 b.prompt.setAlpha(1);
                 if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) this.enterBuilding(b);
+                else if (isMobilePortrait() && this.input.activePointer.isDown && !this._pointerWasDown) this.enterBuilding(b);
             } else {
                 b.prompt.setAlpha(0);
             }
         });
+        this._pointerWasDown = this.input.activePointer.isDown;
     }
 
     enterBuilding(building) {
         this.isTransitioning = true;
         building.entered = true;
         building.prompt.setAlpha(0);
-
-        this.cameras.main.fadeOut(800, 0, 0, 0);
-        this.cameras.main.once('camerafadeoutcomplete', () => {
-            const zoneData = JOURNEY.zones.find(z => z.id === building.zone.id);
-            const nextZone = ZONES.find(z => z.id === building.zone.id + 1);
-            const isNextInLevel = nextZone && this.levelZones.some(z => z.id === nextZone.id);
-
-            const overlay = this.add.rectangle(
-                this.cameras.main.scrollX + GAME_WIDTH / 2, GAME_HEIGHT / 2,
-                GAME_WIDTH, GAME_HEIGHT, 0x000000
-            ).setScrollFactor(0).setDepth(99);
-
-            const city = this.add.text(
-                this.cameras.main.scrollX + GAME_WIDTH / 2, GAME_HEIGHT / 2 - 30,
-                zoneData ? zoneData.city : '', {
-                    fontFamily: 'Poppins, sans-serif', fontSize: '32px', color: '#ffffff', fontStyle: 'bold',
-                }
-            ).setOrigin(0.5).setDepth(100).setScrollFactor(0);
-
-            const yr = this.add.text(
-                this.cameras.main.scrollX + GAME_WIDTH / 2, GAME_HEIGHT / 2 + 20,
-                zoneData ? `${zoneData.yearEnd}` : '', {
-                    fontFamily: 'Poppins, sans-serif', fontSize: '44px', color: '#FFD700', fontStyle: 'bold',
-                }
-            ).setOrigin(0.5).setDepth(100).setScrollFactor(0);
-
-            const desc = this.add.text(
-                this.cameras.main.scrollX + GAME_WIDTH / 2, GAME_HEIGHT / 2 + 75,
-                zoneData ? zoneData.description : '', {
-                    fontFamily: 'Poppins, sans-serif', fontSize: '16px', color: '#aaaaaa', fontStyle: 'italic',
-                }
-            ).setOrigin(0.5).setDepth(100).setScrollFactor(0);
-
-            this.time.delayedCall(2000, () => {
-                overlay.destroy(); city.destroy(); yr.destroy(); desc.destroy();
-                if (isNextInLevel) {
-                    this.player.x = nextZone.startX + 100;
-                    this.player.y = GROUND_Y - 80;
-                    this.player.body.setVelocity(0, 0);
-                    this.growPlayer(nextZone.playerStage);
-                    this.cameras.main.fadeIn(800);
-                    this.isTransitioning = false;
-                } else {
-                    // Last building in level — transition to next level
-                    this.scene.start('LevelTransition', {
-                        levelId: 5,
-                        collectedKeys: this.collectedKeys,
-                        skillProficiency: this.skillProficiency,
-                        playerStage: this.playerStage,
-                    });
-                }
-            });
-        });
+        this.pendingBuildingZoneId = building.zone.id;
+        EventBus.emit('enter-building', { zoneId: building.zone.id });
     }
 
     createCertBanners() {

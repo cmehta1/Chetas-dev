@@ -21,6 +21,8 @@ export default class PreloaderScene extends Phaser.Scene {
             'Mapping journey... OK',
             'Career engine... OK',
             '',
+            'SWIPE to move | TAP to enter buildings',
+            '',
             'TAP to begin',
         ] : [
             'CHETAS MEHTA BIOS v1.0',
@@ -30,7 +32,7 @@ export default class PreloaderScene extends Phaser.Scene {
             'Mapping journey: Gujarat → New York → Michigan → Kansas... OK',
             'Initializing career engine... OK',
             '',
-            'SCROLL WHEEL or ARROW KEYS to move | SPACE to enter',
+            'SCROLL WHEEL or ARROW KEYS to move | SPACE to enter buildings',
             '',
             'TAP or Press ENTER to begin',
         ];

@@ -1,0 +1,475 @@
+/* ── Building Interior Overlay ── */
+.building-interior-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #0a0a1a;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    font-family: 'Poppins', sans-serif;
+}
+
+.building-interior-overlay.bi-visible {
+    opacity: 1;
+}
+
+/* ── 3D Canvas — fixed behind scroll content ── */
+.bi-canvas-fixed {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+}
+
+.character3d-canvas {
+    width: 100%;
+    height: 100%;
+}
+
+.character3d-canvas canvas {
+    display: block;
+}
+
+/* Rim glow behind character head */
+.bi-rim {
+    position: fixed;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(94, 234, 212, 0.12) 0%, transparent 70%);
+    box-shadow: 0 0 120px 60px rgba(94, 234, 212, 0.06);
+    pointer-events: none;
+    z-index: 1;
+    transition: opacity 0.5s;
+}
+
+/* ── Scrollable content ── */
+.bi-scroll {
+    position: relative;
+    z-index: 2;
+    height: 100vh;
+    overflow-y: auto;
+    pointer-events: auto;
+    overscroll-behavior: contain;
+}
+
+.bi-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+
+.bi-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 215, 0, 0.3);
+    border-radius: 2px;
+}
+
+/* ── Sections ── */
+.bi-section {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    position: relative;
+}
+
+/* Section 1: Head close-up + title */
+.bi-section-head {
+    padding-top: 5vh;
+    pointer-events: none;
+}
+
+.bi-building-name {
+    font-size: 32px;
+    color: #FFD700;
+    margin: 0;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+    letter-spacing: 1px;
+    text-align: center;
+}
+
+.bi-subtitle {
+    font-size: 14px;
+    color: #8899aa;
+    margin: 6px 0 0;
+    text-align: center;
+}
+
+.bi-description {
+    font-size: 13px;
+    color: #667788;
+    margin: 4px 0 0;
+    font-style: italic;
+    text-align: center;
+}
+
+.bi-scroll-hint {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.25);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    animation: bi-bounce 1.8s ease-in-out infinite;
+}
+
+@keyframes bi-bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(8px); }
+}
+
+/* ── Intro blurbs — flanking the character head ── */
+.bi-intro-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    max-width: 1100px;
+    margin-top: 12vh;
+    padding: 0 24px;
+    gap: 0;
+    pointer-events: none;
+}
+
+.bi-intro-spacer {
+    flex: 0 0 340px;
+}
+
+.bi-intro-blurb {
+    flex: 1;
+    max-width: 300px;
+}
+
+.bi-intro-left {
+    text-align: right;
+    padding-right: 20px;
+}
+
+.bi-intro-right {
+    text-align: left;
+    padding-left: 20px;
+}
+
+.bi-intro-heading {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 10px;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 24px rgba(255, 215, 0, 0.15);
+    position: relative;
+}
+
+.bi-intro-left .bi-intro-heading::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #FFD700);
+    margin-top: 8px;
+    margin-left: auto;
+}
+
+.bi-intro-right .bi-intro-heading::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, #FFD700, transparent);
+    margin-top: 8px;
+}
+
+.bi-intro-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: #a8b8cc;
+    margin: 0;
+    line-height: 1.7;
+    letter-spacing: 0.2px;
+}
+
+/* ── Highlight cards (paragraphs) ── */
+.bi-highlight-card .bi-card-title {
+    color: #FFD700;
+    margin-bottom: 8px;
+    font-size: 15px;
+}
+
+.bi-card-text {
+    font-size: 12px;
+    color: #bbc8d8;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Section 2: Info cards */
+.bi-section-info {
+    min-height: 100vh;
+    padding: 40px 20px;
+    justify-content: center;
+}
+
+.bi-info-grid {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    gap: 40px;
+    justify-content: space-between;
+}
+
+.bi-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 340px;
+}
+
+.bi-panel-left {
+    align-items: flex-start;
+}
+
+.bi-panel-right {
+    align-items: flex-end;
+}
+
+/* Section labels (e.g. "Projects") */
+.bi-section-label {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #FFD700;
+    margin: 8px 0 4px;
+    letter-spacing: 1px;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+    position: relative;
+    padding-bottom: 6px;
+}
+
+.bi-section-label::after {
+    content: '';
+    display: block;
+    width: 30px;
+    height: 2px;
+    background: linear-gradient(90deg, #FFD700, transparent);
+    margin-top: 4px;
+}
+
+/* Cards */
+.bi-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 14px 16px;
+    backdrop-filter: blur(12px);
+    transition: border-color 0.3s, background 0.3s;
+    pointer-events: auto;
+}
+
+.bi-card:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 215, 0, 0.2);
+}
+
+.bi-card-title {
+    font-size: 15px;
+    color: #ffffff;
+    margin: 0 0 4px;
+    font-weight: 600;
+}
+
+.bi-card-company {
+    font-size: 13px;
+    color: #FFD700;
+    margin: 0;
+    font-weight: 500;
+}
+
+.bi-card-period {
+    font-size: 12px;
+    color: #8899aa;
+    margin: 2px 0 8px;
+}
+
+.bi-card-year {
+    font-size: 12px;
+    color: #8899aa;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.bi-card-bullets {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.bi-card-bullets li {
+    font-size: 12px;
+    color: #bbc8d8;
+    padding: 3px 0 3px 14px;
+    position: relative;
+    line-height: 1.4;
+}
+
+.bi-card-bullets li::before {
+    content: '\25B8';
+    position: absolute;
+    left: 0;
+    color: #FFD700;
+    font-size: 11px;
+}
+
+/* Skills */
+.bi-skills-card .bi-card-title {
+    color: #FFD700;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.bi-skills-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.bi-skill-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    transition: background 0.2s;
+}
+
+.bi-skill-item:hover {
+    background: rgba(255, 215, 0, 0.08);
+}
+
+.bi-skill-label {
+    font-size: 13px;
+    color: #dde4ec;
+}
+
+.bi-skill-stars {
+    font-size: 12px;
+    color: #FFD700;
+    letter-spacing: 1px;
+}
+
+/* Section 3: Continue */
+.bi-section-bottom {
+    min-height: 40vh;
+    justify-content: center;
+}
+
+.bi-continue-btn {
+    padding: 10px 48px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #0a0a1a;
+    background: linear-gradient(135deg, #FFD700, #FFA000);
+    border: none;
+    border-radius: 24px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.25);
+    pointer-events: auto;
+}
+
+.bi-continue-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 30px rgba(255, 215, 0, 0.4);
+}
+
+.bi-continue-btn:active {
+    transform: scale(0.97);
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .bi-info-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .bi-panel {
+        max-width: 90%;
+    }
+
+    .bi-building-name {
+        font-size: 24px;
+    }
+
+    .bi-rim {
+        width: 280px;
+        height: 280px;
+    }
+
+    .bi-intro-row {
+        flex-direction: column;
+        align-items: center;
+        margin-top: 6vh;
+        gap: 16px;
+    }
+
+    .bi-intro-spacer {
+        display: none;
+    }
+
+    .bi-intro-blurb {
+        max-width: 80%;
+    }
+
+    .bi-intro-left,
+    .bi-intro-right {
+        text-align: center;
+        padding: 0;
+    }
+
+    .bi-intro-left .bi-intro-heading::after,
+    .bi-intro-right .bi-intro-heading::after {
+        margin-left: auto;
+        margin-right: auto;
+        background: linear-gradient(90deg, transparent, #FFD700, transparent);
+    }
+}
+
+@media (max-width: 600px) {
+    .bi-building-name {
+        font-size: 20px;
+    }
+
+    .bi-card {
+        padding: 10px 12px;
+    }
+
+    .bi-card-title {
+        font-size: 13px;
+    }
+
+    .bi-card-bullets li {
+        font-size: 11px;
+    }
+
+    .bi-continue-btn {
+        padding: 8px 36px;
+        font-size: 14px;
+    }
+
+    .bi-intro-heading {
+        font-size: 15px;
+    }
+
+    .bi-intro-text {
+        font-size: 11px;
+    }
+}

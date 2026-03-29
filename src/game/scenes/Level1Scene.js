@@ -87,6 +87,21 @@ export default class Level1Scene extends Phaser.Scene {
         EventBus.emit('level-changed', { id: 1, name: 'Early Days' });
         this.cameras.main.fadeIn(800);
         EventBus.emit('current-scene-ready', this);
+
+        // Building interior overlay callback
+        this._onExitBuilding = () => {
+            this.cameras.main.fadeOut(800, 0, 0, 0);
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                this.scene.start('LevelTransition', {
+                    levelId: 2,
+                    collectedKeys: this.collectedKeys,
+                    skillProficiency: this.skillProficiency,
+                    playerStage: this.playerStage,
+                });
+            });
+        };
+        EventBus.on('exit-building', this._onExitBuilding);
+        this.events.on('shutdown', () => EventBus.off('exit-building', this._onExitBuilding));
     }
 
     createParallaxClouds() {
@@ -235,7 +250,8 @@ export default class Level1Scene extends Phaser.Scene {
             }).setOrigin(0.5).setDepth(4);
 
             // Prompt above the tower
-            const prompt = this.add.text(bx, groundY - h - 90, '[ SPACE to Enter ]', {
+            const promptText = isMobilePortrait() ? '[ Tap to Enter ]' : '[ SPACE to Enter ]';
+            const prompt = this.add.text(bx, groundY - h - 90, promptText, {
                 fontFamily: 'Poppins, sans-serif', fontSize: '15px',
                 color: '#FFD700', stroke: '#000000', strokeThickness: 4, fontStyle: 'bold',
             }).setOrigin(0.5).setDepth(10).setAlpha(0);
@@ -409,26 +425,19 @@ export default class Level1Scene extends Phaser.Scene {
             if (Math.abs(this.player.x - b.x) < 100) {
                 b.prompt.setAlpha(1);
                 if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) this.enterBuilding(b);
+                else if (isMobilePortrait() && this.input.activePointer.isDown && !this._pointerWasDown) this.enterBuilding(b);
             } else {
                 b.prompt.setAlpha(0);
             }
         });
+        this._pointerWasDown = this.input.activePointer.isDown;
     }
 
     enterBuilding(building) {
         this.isTransitioning = true;
         building.entered = true;
         building.prompt.setAlpha(0);
-
-        this.cameras.main.fadeOut(800, 0, 0, 0);
-        this.cameras.main.once('camerafadeoutcomplete', () => {
-            this.scene.start('LevelTransition', {
-                levelId: 2,
-                collectedKeys: this.collectedKeys,
-                skillProficiency: this.skillProficiency,
-                playerStage: this.playerStage,
-            });
-        });
+        EventBus.emit('enter-building', { zoneId: building.zone.id });
     }
 
     update(time) {

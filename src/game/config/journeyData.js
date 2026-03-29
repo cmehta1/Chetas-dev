@@ -175,7 +175,8 @@ export const EXPERIENCE_DATA = [
         company: 'Midway Dental Supply',
         period: 'Sep 2016 – Sep 2017',
         bullets: [
-            'Developed web apps with JavaScript, Bootstrap & AngularJS',
+            'Expanded knowledge into Salesforce Administrator & Salesforce Developer certifications',
+            'Developed web apps with JavaScript, Bootstrap & AngularJS on the front end',
             'Built & maintained custom software in Python & Salesforce (APEX)',
             'Applied OOP design patterns in APEX for scalable solutions',
             'Created & maintained SQL & SOQL database reports',
@@ -187,11 +188,12 @@ export const EXPERIENCE_DATA = [
         company: 'Cerner Corporation',
         period: 'Sep 2017 – Sep 2022',
         bullets: [
-            'Built RESTful services with JAX-RS, Jersey & Swagger for clinical ordering',
-            'Implemented formulary services & cost computation for patient health plans',
-            'Followed Agile with daily scrums, sprint planning & retrospectives',
-            'Wrote integration tests with JUnit; used GitHub, Jenkins & Crucible',
-            'Mentored associates on process, features & team services',
+            'Built RESTful Web Services using JAX-RS, Jersey Client & Swagger for physicians and nurses to create, refill or cancel/discontinue orders',
+            'Implemented Java Services for formulary services & minimum out-of-pocket cost computation across patient health plans',
+            'Followed Agile methodologies — daily scrums, bi-weekly iteration planning & retrospectives',
+            'Designed, developed & implemented unit tests and functional tests with custom test framework using Java',
+            'Used GitHub for version control, Jenkins for integration testing & Crucible for code reviews',
+            'Mentored associates on existing processes, features & services supported by the team',
         ],
     },
     {
@@ -200,13 +202,143 @@ export const EXPERIENCE_DATA = [
         company: 'Oracle Health',
         period: 'Oct 2022 – Present',
         bullets: [
-            'Developed RESTful services in Java (JAX-RS, JDBC) for clinical ordering',
-            'Added Discern alerts feature for physician-created patient notifications',
-            'Created Jenkins pipelines & managed CI/CD infrastructure',
-            'Built Postman collections with Newman for automated API testing',
-            'Wrote integration tests with JUnit; established release server processes',
+            'Developed RESTful services in Java (JAX-RS, Jersey, JDBC) for EJS clinical ordering used by physicians & nurses',
+            'Added Discern alerts feature enabling physicians to create custom alerts for efficient patient care',
+            'Performed & followed Agile methodologies — daily scrums, bi-weekly planning, retrospectives & design discussions with Solution Designers & Software Architects',
+            'Established & documented the release server process for the team',
+            'Created Jenkins pipeline scripts & managed CI/CD boxes for continuous deployment',
+            'Built Postman collections with Newman for automated REST API testing & reporting',
+            'Wrote integration tests with JUnit; used Oracle SQL for data management',
             'Built AI-enabled apps & agents using MCP, DeepAgents & A2UI',
-            'Mentored associates on tools, technologies & team workflows',
+            'Mentored associates on tools, technologies, processes & functionalities',
         ],
     },
 ];
+
+// Intro blurbs — shown on left/right of character head when building opens
+export const ZONE_INTROS = {
+    1: {
+        left: {
+            heading: 'Science Stream',
+            text: 'Attended 3 different schools across Gujarat, building a strong foundation in Mathematics, Science & Computer fundamentals.',
+        },
+        right: {
+            heading: 'Early Spark',
+            text: 'Scored 100/100 in Science & 99/100 in Mathematics. Developed a deep curiosity for problem-solving and technology.',
+        },
+    },
+    2: {
+        left: {
+            heading: 'B.E. Computer Science',
+            text: 'Pursued Bachelor of Engineering in Computer Science & Engineering from Gujarat Technological University (GTU).',
+        },
+        right: {
+            heading: 'Deepening Passion',
+            text: 'Dove deep into Networks, Databases, Software Engineering & Programming Languages. Grew from an average student to a top ranker through hard work.',
+        },
+    },
+    4: {
+        left: {
+            heading: 'M.S. Computer Science',
+            text: 'Pursued Master of Science in Computer Science at SUNY Binghamton, graduating with a 3.7/4.0 GPA.',
+        },
+        right: {
+            heading: 'New Horizons',
+            text: 'Acclimatized to a new country, new weather & a new culture while gaining deep practical knowledge through intensive coursework & projects.',
+        },
+    },
+    5: {
+        left: {
+            heading: 'Software Developer',
+            text: 'First professional role in the USA, working as a Software Developer at Midway Dental Supply in Livonia, Michigan.',
+        },
+        right: {
+            heading: 'Expanding Skills',
+            text: 'Expanded into Salesforce Administration & Development while building front-end applications with AngularJS & JavaScript.',
+        },
+    },
+    6: {
+        left: {
+            heading: 'Software Engineer II',
+            text: 'Joined Cerner Corporation in Kansas City, MO — building clinical software used by physicians and nurses nationwide.',
+        },
+        right: {
+            heading: 'Healthcare Tech',
+            text: 'Developed RESTful services for clinical ordering, formulary computations & patient health plan cost optimization.',
+        },
+    },
+    7: {
+        left: {
+            heading: 'Member of Technical Staff',
+            text: 'Continued the healthcare mission at Oracle Health in Overland Park, KS — building the next generation of clinical software.',
+        },
+        right: {
+            heading: 'Innovation & AI',
+            text: 'Leading development of AI-enabled applications using MCP, DeepAgents & A2UI while mentoring the next wave of engineers.',
+        },
+    },
+};
+
+// Zone highlights — detailed paragraphs shown when scrolling down
+export const ZONE_HIGHLIGHTS = {
+    1: [
+        {
+            title: 'Academic Foundation',
+            text: 'Growing up in Gujarat, education was the cornerstone of every aspiration. Across three different schools, I built a rock-solid foundation in Mathematics and Science — scoring a perfect 100 in Science and 99 in Mathematics in my secondary school exams, finishing with an overall 92.77%. These years taught me that no goal is too hard to achieve if you believe in it and give your hundred percent.',
+        },
+        {
+            title: 'Sports, Competitions & Early Interests',
+            text: 'School was not just about textbooks. I developed a deep love for cricket — playing for the school team at the regional level for three consecutive years and, in 2005, representing the Under-19 cricket team as the youngest player at just 15 years old, winning the tournament. Beyond sports, I actively participated in competitive exams, science projects, quizzes and technical events, earning numerous prizes. I also won awards for Drawing and Dance. Learning C Language in high school was my first window into programming — I was fascinated by how computers could simulate intelligence and enliven virtual worlds, a spark that would shape my entire career.',
+        },
+    ],
+    2: [
+        {
+            title: 'From Curiosity to Mastery',
+            text: 'Joining B.E. in Computer Science & Engineering was a pivotal milestone. The highly diverse nature of computer science — Networks, Databases, Software Engineering, Programming Languages — captivated me completely. I went from an average first-year student to a top ranker through sheer dedication. I attended workshops on PHP/MySQL, delivered lectures on Design & Analysis of Algorithms, and was one of three students selected by faculty to maintain the college website.',
+        },
+        {
+            title: 'Building Real-World Systems',
+            text: 'Hands-on projects defined my college years. I built an Event Management System using Visual Basic & SQL, connecting decorators, caterers and party-plots with users. My fascination with databases grew as I explored how small chips could store gigabytes of data. This led to my capstone project at Larsen & Toubro — India\'s largest engineering company — where I developed an Inventory & Invoice Management System, converting manual workflows into automated systems. I also completed a year-long training in Linux & Java, and developed a Home Automation System that was featured in the local newspaper.',
+        },
+    ],
+    4: [
+        {
+            title: 'A New Chapter in Binghamton',
+            text: 'Moving to Binghamton, New York was a transformative leap — a new country, a harsh winter climate, and an entirely different academic culture. At SUNY Binghamton, I pursued my M.S. in Computer Science, graduating with a 3.7/4.0 GPA. The rigorous coursework in Computer Architecture, Operating Systems, Algorithms & Databases deepened my understanding far beyond what textbooks could offer.',
+        },
+        {
+            title: 'Intensive Projects & Growth',
+            text: 'The project-driven curriculum pushed me to my limits. I built a 3D game using JMonkey Engine at a hackathon, implemented a Secure Electronic Voting System with RSA encryption in C, developed an APEX pipelining simulator with out-of-order execution, and created a Retail Business Management System using Oracle PL/SQL & Java. Each project sharpened my practical skills and taught me how to tackle complex engineering challenges under real deadlines.',
+        },
+    ],
+    5: [
+        {
+            title: 'First Professional Chapter',
+            text: 'Joining Midway Dental Supply in Livonia, Michigan as my first professional role in the USA was an exciting transition from academia to industry. I expanded my knowledge beyond traditional computer science into Salesforce Administration and Salesforce Development, earning certifications in both. On the front end, I built responsive web applications using JavaScript, Bootstrap & AngularJS.',
+        },
+        {
+            title: 'Broadening the Toolkit',
+            text: 'Working in a smaller company meant wearing many hats — from building custom Python & APEX software solutions to creating SQL & SOQL database reports. I applied object-oriented design patterns to write scalable, maintainable code. This experience taught me adaptability and the importance of understanding the full stack from database to user interface.',
+        },
+    ],
+    6: [
+        {
+            title: 'Healthcare at Scale',
+            text: 'At Cerner Corporation in Kansas City, I spent five years building clinical software that directly impacted patient care. I developed RESTful Web Services using JAX-RS, Jersey Client & Swagger — enabling physicians and nurses to create, refill, or cancel orders for patients. I implemented Java services for formulary lookups and computed the minimum out-of-pocket cost across multiple patient health plans.',
+        },
+        {
+            title: 'Engineering Excellence',
+            text: 'Working within Agile methodologies — daily scrums, bi-weekly sprints, and retrospectives — I honed my craft in writing clean, testable code. I designed custom test frameworks, used GitHub, Jenkins & Crucible for CI/CD, and consistently mentored new associates to bring them up to speed on the team\'s processes and services. This role solidified my identity as a healthcare software engineer.',
+        },
+    ],
+    7: [
+        {
+            title: 'Continuing the Mission',
+            text: 'When Cerner became Oracle Health, I continued building upon the clinical ordering platform — now as a Member of Technical Staff. I work closely with Solution Designers and Software Architects to break down complex implementation tasks, develop RESTful services in Java, and have established the team\'s release server process. I also added the Discern alerts feature, enabling physicians to create custom alerts for more efficient patient care.',
+        },
+        {
+            title: 'AI & the Future',
+            text: 'Beyond core engineering, I\'ve embraced the AI revolution — building intelligent applications and agents using MCP, DeepAgents & A2UI. I manage Jenkins pipelines for continuous deployment, create automated API testing suites with Postman & Newman, and continue mentoring the next generation of engineers. At Oracle Health, I\'m at the intersection of healthcare and cutting-edge technology, shaping the future of clinical software.',
+        },
+    ],
+};

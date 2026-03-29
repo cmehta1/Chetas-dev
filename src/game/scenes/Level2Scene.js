@@ -95,6 +95,22 @@ export default class Level2Scene extends Phaser.Scene {
         EventBus.emit('level-changed', { id: 2, name: 'Engineering' });
         this.cameras.main.fadeIn(800);
         EventBus.emit('current-scene-ready', this);
+
+        // Building interior overlay callback
+        this._onExitBuilding = () => {
+            this.cameras.main.fadeOut(800, 0, 0, 0);
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                // Move player to flight zone after GTU building
+                this.currentZoneId = 3;
+                this.player.x = ZONES[3].startX + 50;
+                this.player.y = GROUND_Y - 80;
+                this.player.body.setVelocity(0, 0);
+                this.cameras.main.fadeIn(800);
+                this.isTransitioning = false;
+            });
+        };
+        EventBus.on('exit-building', this._onExitBuilding);
+        this.events.on('shutdown', () => EventBus.off('exit-building', this._onExitBuilding));
     }
 
     createParallaxClouds() {
@@ -237,7 +253,8 @@ export default class Level2Scene extends Phaser.Scene {
             }).setOrigin(0.5).setDepth(4);
 
             // Prompt above the logo/pediment
-            const prompt = this.add.text(bx, groundY - h - 75, '[ SPACE to Enter ]', {
+            const promptText = isMobilePortrait() ? '[ Tap to Enter ]' : '[ SPACE to Enter ]';
+            const prompt = this.add.text(bx, groundY - h - 75, promptText, {
                 fontFamily: 'Poppins, sans-serif', fontSize: '15px',
                 color: '#FFD700', stroke: '#000000', strokeThickness: 4, fontStyle: 'bold',
             }).setOrigin(0.5).setDepth(10).setAlpha(0);
@@ -449,50 +466,18 @@ export default class Level2Scene extends Phaser.Scene {
             if (b.entered) return;
             if (Math.abs(this.player.x - b.x) < 100) {
                 b.prompt.setAlpha(1);
-                if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+                const tapped = isMobilePortrait() && this.input.activePointer.isDown && !this._pointerWasDown;
+                if (Phaser.Input.Keyboard.JustDown(this.spaceKey) || tapped) {
                     b.entered = true;
                     b.prompt.setAlpha(0);
-                    // Enter building triggers transition to flight zone
                     this.isTransitioning = true;
-                    this.cameras.main.fadeOut(800, 0, 0, 0);
-                    this.cameras.main.once('camerafadeoutcomplete', () => {
-                        // Show building interstitial
-                        const zoneData = JOURNEY.zones[2];
-                        const overlay = this.add.rectangle(
-                            this.cameras.main.scrollX + GAME_WIDTH / 2, GAME_HEIGHT / 2,
-                            GAME_WIDTH, GAME_HEIGHT, 0x000000
-                        ).setScrollFactor(0).setDepth(99);
-
-                        const city = this.add.text(
-                            this.cameras.main.scrollX + GAME_WIDTH / 2, GAME_HEIGHT / 2 - 30,
-                            zoneData.city, {
-                                fontFamily: 'Poppins, sans-serif', fontSize: '32px', color: '#ffffff', fontStyle: 'bold',
-                            }
-                        ).setOrigin(0.5).setDepth(100).setScrollFactor(0);
-
-                        const yr = this.add.text(
-                            this.cameras.main.scrollX + GAME_WIDTH / 2, GAME_HEIGHT / 2 + 20,
-                            `${zoneData.yearEnd}`, {
-                                fontFamily: 'Poppins, sans-serif', fontSize: '44px', color: '#FFD700', fontStyle: 'bold',
-                            }
-                        ).setOrigin(0.5).setDepth(100).setScrollFactor(0);
-
-                        this.time.delayedCall(2000, () => {
-                            overlay.destroy(); city.destroy(); yr.destroy();
-                            // Move player to flight zone
-                            this.currentZoneId = 3;
-                            this.player.x = ZONES[3].startX + 50;
-                            this.player.y = GROUND_Y - 80;
-                            this.player.body.setVelocity(0, 0);
-                            this.cameras.main.fadeIn(800);
-                            this.isTransitioning = false;
-                        });
-                    });
+                    EventBus.emit('enter-building', { zoneId: b.zone.id });
                 }
             } else {
                 b.prompt.setAlpha(0);
             }
         });
+        this._pointerWasDown = this.input.activePointer.isDown;
     }
 
     update(time) {
