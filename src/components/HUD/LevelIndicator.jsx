@@ -12,7 +12,8 @@ export default function LevelIndicator() {
         <div className="level-indicator">
             <span className="level-number">L{levelData.id}</span>
             <span className="level-name">
-                {levelData.name || ''}{zoneName ? `: ${zoneName}` : ''}
+                {levelData.name || ''}
+                {zoneName && <span className="level-zone">: {zoneName}</span>}
             </span>
         </div>
     );

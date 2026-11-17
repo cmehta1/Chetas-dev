@@ -9,6 +9,7 @@ import { JOURNEY, SKILLS_DATA, CERTIFICATIONS } from '../config/journeyData';
 import { AUTO_JUMP_TRIGGERS } from '../config/levelConfig';
 import { createCharacter, animateWalk } from '../utils/CharacterRenderer';
 import { renderZoneBackground } from '../utils/BackgroundRenderer';
+import { startCameraFollow, updateCameraLead, keepInView } from '../utils/CameraLead';
 
 /**
  * Level 4: Career (Zones 5-7: Midway, Cerner, Oracle)
@@ -66,9 +67,7 @@ export default class Level4Scene extends Phaser.Scene {
         this.createAutoJumpIndicators();
         this.createCertBanners();
 
-        this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
-        const mobile = isMobilePortrait();
-        this.cameras.main.setFollowOffset(mobile ? 0 : -200, mobile ? 30 : 50);
+        startCameraFollow(this);
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -635,6 +634,7 @@ export default class Level4Scene extends Phaser.Scene {
             fontFamily: 'Poppins, sans-serif', fontSize: '16px',
             color, stroke: '#000000', strokeThickness: 4, fontStyle: 'bold',
         }).setOrigin(0.5).setDepth(20);
+        keepInView(this, flash);
         this.tweens.add({
             targets: flash, y: flash.y - 40, alpha: 0, duration: 1200,
             ease: 'Cubic.easeOut', onComplete: () => flash.destroy(),
@@ -699,10 +699,12 @@ export default class Level4Scene extends Phaser.Scene {
             fontFamily: 'Poppins, sans-serif', fontSize: '26px',
             color: '#FFD700', stroke: '#000000', strokeThickness: 5, fontStyle: 'bold',
         }).setOrigin(0.5).setDepth(20);
+        keepInView(this, flash);
         const sub = this.add.text(this.player.x, charTop + 15, PLAYER_STAGES[newStage].label, {
             fontFamily: 'Poppins, sans-serif', fontSize: '15px',
             color: '#ffffff', stroke: '#000000', strokeThickness: 3,
         }).setOrigin(0.5).setDepth(20);
+        keepInView(this, sub);
 
         this.tweens.add({
             targets: [flash, sub], y: '-=80', alpha: 0, duration: 2000,
@@ -898,6 +900,7 @@ export default class Level4Scene extends Phaser.Scene {
         if (this.isMoving) this.walkTimer += 0.2;
         else this.walkTimer = 0;
         animateWalk(this.playerVisual, this.walkTimer, this.isMoving, this.player.body.blocked.down, time);
+        updateCameraLead(this);
 
         this.starObjects.forEach(s => {
             if (!s.collected && s.shape.active) {

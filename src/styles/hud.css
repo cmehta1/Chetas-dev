@@ -769,3 +769,48 @@
         font-size: 11px;
     }
 }
+
+/* ─── Narrow phones: keep the top bar on screen ──── */
+@media (max-width: 600px) {
+    .hud-top {
+        padding: 8px 10px;
+        gap: 6px;
+        justify-content: flex-start;
+    }
+
+    .year-counter {
+        flex: none;
+        padding: 6px 10px;
+        gap: 8px;
+    }
+
+    .year-display { padding-left: 8px; }
+
+    /* the zone subtitle and zone name repeat what the level and location already say */
+    .location-theme,
+    .level-zone {
+        display: none;
+    }
+
+    .level-indicator {
+        flex: 1 1 auto;
+        min-width: 0;
+        padding: 6px 10px;
+        overflow: hidden;
+    }
+
+    .level-name {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .progress-bar-container {
+        flex: none;
+        max-width: none;
+        padding: 6px 10px;
+    }
+
+    .progress-bar { display: none; }
+}

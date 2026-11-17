@@ -9,6 +9,7 @@ import { JOURNEY, SKILLS_DATA } from '../config/journeyData';
 import { AUTO_JUMP_TRIGGERS } from '../config/levelConfig';
 import { createCharacter, animateWalk } from '../utils/CharacterRenderer';
 import { renderZoneBackground } from '../utils/BackgroundRenderer';
+import { startCameraFollow, updateCameraLead, keepInView } from '../utils/CameraLead';
 
 /**
  * Level 3: Masters at SUNY Binghamton (Zone 4)
@@ -65,9 +66,7 @@ export default class Level3Scene extends Phaser.Scene {
         this.createAutoJumpIndicators();
         this.createWeatherEffects();
 
-        this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
-        const mobile = isMobilePortrait();
-        this.cameras.main.setFollowOffset(mobile ? 0 : -200, mobile ? 30 : 50);
+        startCameraFollow(this);
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -407,6 +406,7 @@ export default class Level3Scene extends Phaser.Scene {
             fontFamily: 'Poppins, sans-serif', fontSize: '16px',
             color, stroke: '#000000', strokeThickness: 4, fontStyle: 'bold',
         }).setOrigin(0.5).setDepth(20);
+        keepInView(this, flash);
         this.tweens.add({
             targets: flash, y: flash.y - 40, alpha: 0, duration: 1200,
             ease: 'Cubic.easeOut', onComplete: () => flash.destroy(),
@@ -560,6 +560,7 @@ export default class Level3Scene extends Phaser.Scene {
         if (this.isMoving) this.walkTimer += 0.2;
         else this.walkTimer = 0;
         animateWalk(this.playerVisual, this.walkTimer, this.isMoving, this.player.body.blocked.down, time);
+        updateCameraLead(this);
 
         this.starObjects.forEach(s => {
             if (!s.collected && s.shape.active) {

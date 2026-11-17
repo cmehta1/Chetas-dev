@@ -3,12 +3,13 @@ import EventBus from '../EventBus';
 import {
     GAME_WIDTH, GAME_HEIGHT, GROUND_Y,
     PLAYER_SPEED, PLAYER_JUMP_VELOCITY, PLAYER_GRAVITY,
-    PLAYER_STAGES, ZONES, getTerrainY, getCameraMargin, isMobilePortrait, CANVAS_SCALE,
+    PLAYER_STAGES, ZONES, getTerrainY, getCameraMargin, CANVAS_SCALE,
 } from '../config/constants';
 import { JOURNEY, HOBBIES_DATA } from '../config/journeyData';
 import { AUTO_JUMP_TRIGGERS } from '../config/levelConfig';
 import { createCharacter, animateWalk } from '../utils/CharacterRenderer';
 import { renderZoneBackground } from '../utils/BackgroundRenderer';
+import { startCameraFollow, updateCameraLead } from '../utils/CameraLead';
 
 /**
  * Level 5: Hobbies & Interests (Zone 8)
@@ -64,9 +65,7 @@ export default class Level5Scene extends Phaser.Scene {
         this.createPlayer();
         this.createAutoJumpIndicators();
 
-        this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
-        const mobile = isMobilePortrait();
-        this.cameras.main.setFollowOffset(mobile ? 0 : -200, mobile ? 30 : 50);
+        startCameraFollow(this);
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -564,6 +563,7 @@ export default class Level5Scene extends Phaser.Scene {
         if (this.isMoving) this.walkTimer += 0.2;
         else this.walkTimer = 0;
         animateWalk(this.playerVisual, this.walkTimer, this.isMoving, this.player.body.blocked.down, time);
+        updateCameraLead(this);
 
         // Hobby station bob animation
         this.hobbyStations.forEach(s => {
