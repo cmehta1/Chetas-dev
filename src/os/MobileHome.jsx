@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Wallpaper from './components/Wallpaper';
+import ChetasLogo from './components/ChetasLogo';
 import HeroCharacter from './components/HeroCharacter';
 import AppIcon from './components/AppIcon';
 import Icon from './components/Icons';
 import { Avatar, Walker } from './components/Avatar';
 import AppContent from './AppContent';
 import { APPS, MOBILE_DOCK, MOBILE_PAGES, openExternal } from './apps';
-import { PROFILE, JOURNEY_STOPS, yearsOfExperience } from './data';
+import { PROFILE, ROUTE_RECENT_FIRST, yearsOfExperience } from './data';
 import { useClock, prefetchGame } from './hooks';
 
 function AppGrid({ ids, onOpen }) {
@@ -36,6 +37,29 @@ export default function MobileHome({ onPlay }) {
     const [closing, setClosing] = useState(false);
     const [page, setPage] = useState(0);
     const pagesRef = useRef(null);
+    const sheetRef = useRef(null);
+
+    // When the on-screen keyboard opens, iPhone and Android shrink only the *visual* viewport.
+    // Fit the open app to it so nothing (like the terminal prompt) hides behind the keyboard.
+    useEffect(() => {
+        const vv = window.visualViewport;
+        const el = sheetRef.current;
+        if (!vv || !el || !appId) return undefined;
+        const fit = () => {
+            const keyboardOpen = window.innerHeight - vv.height > 80;
+            el.style.top = keyboardOpen ? `${vv.offsetTop}px` : '';
+            el.style.height = keyboardOpen ? `${vv.height}px` : '';
+            el.style.bottom = keyboardOpen ? 'auto' : '';
+            el.classList.toggle('has-keyboard', keyboardOpen);
+        };
+        fit();
+        vv.addEventListener('resize', fit);
+        vv.addEventListener('scroll', fit);
+        return () => {
+            vv.removeEventListener('resize', fit);
+            vv.removeEventListener('scroll', fit);
+        };
+    }, [appId]);
 
     const openApp = useCallback((id) => {
         if (!APPS[id]) return;
@@ -84,7 +108,7 @@ export default function MobileHome({ onPlay }) {
 
             <div className="cos-m-status" aria-hidden="true">
                 <span className="cos-m-time">{time}</span>
-                <span className="cos-m-os"><span className="cos-logo-mark">◆</span> ChetasOS</span>
+                <span className="cos-m-os"><ChetasLogo size={13} className="cos-logo-mark" /> ChetasOS</span>
                 <span className="cos-m-sys">
                     <svg width="18" height="11" viewBox="0 0 18 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="currentColor" /><rect x="5" y="5" width="3" height="6" rx="1" fill="currentColor" /><rect x="10" y="2.5" width="3" height="8.5" rx="1" fill="currentColor" /><rect x="15" y="0" width="3" height="11" rx="1" fill="currentColor" /></svg>
                     <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="currentColor" opacity="0.5" /><rect x="2" y="2" width="16" height="8" rx="1.8" fill="currentColor" /><rect x="22.5" y="4" width="2" height="4" rx="1" fill="currentColor" opacity="0.5" /></svg>
@@ -124,12 +148,12 @@ export default function MobileHome({ onPlay }) {
                     <button type="button" className="cos-widget cos-widget-route cos-m-route" onClick={() => openApp('route')}>
                         <span className="cos-widget-label">The route</span>
                         <ol>
-                            {JOURNEY_STOPS.map(s => (
+                            <li className="is-next"><span>The journey continues</span><span>…</span></li>
+                            {ROUTE_RECENT_FIRST.map(s => (
                                 <li key={s.city} className={s.current ? 'is-current' : ''}>
                                     <span>{s.city}, {s.region}</span><span>{s.current ? `${s.year}–now` : s.year}</span>
                                 </li>
                             ))}
-                            <li className="is-next"><span>The journey continues</span><span>…</span></li>
                         </ol>
                     </button>
 
@@ -153,7 +177,7 @@ export default function MobileHome({ onPlay }) {
             </nav>
 
             {appId && (
-                <section className={`cos-m-sheet ${closing ? 'is-closing' : ''}`} role="dialog" aria-label={APPS[appId].title}>
+                <section ref={sheetRef} className={`cos-m-sheet ${closing ? 'is-closing' : ''}`} role="dialog" aria-label={APPS[appId].title}>
                     <header className="cos-m-sheet-bar">
                         <button type="button" className="cos-m-back" onClick={close}>
                             <Icon name="back" size={20} /> Home

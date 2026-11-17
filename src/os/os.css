@@ -4,7 +4,6 @@
    ═══════════════════════════════════════════════════════════════ */
 
 .cos-root,
-.cos-boot,
 .cos-launch {
     --cos-text: #F3F4F8;
     --cos-muted: #A3A9BE;
@@ -54,7 +53,6 @@
 .cos-root a { color: inherit; }
 
 /* ─── Boot + launch screens ───────────────────────────────────── */
-.cos-boot,
 .cos-launch {
     position: fixed;
     inset: 0;
@@ -65,27 +63,6 @@
     place-items: center;
     padding: 24px;
     cursor: default;
-}
-
-.cos-boot-lines {
-    width: min(560px, 100%);
-    font-size: clamp(12px, 3.4vw, 15px);
-    line-height: 1.9;
-    white-space: pre;
-    text-shadow: 0 0 8px rgba(57, 255, 122, 0.45);
-}
-
-.cos-boot-lines p:first-child { color: #B7FFCF; font-weight: 600; margin-bottom: 6px; }
-
-.cos-boot-skip {
-    position: absolute;
-    bottom: calc(28px + var(--cos-safe-bottom));
-    left: 0;
-    right: 0;
-    text-align: center;
-    font-size: 12px;
-    color: rgba(57, 255, 122, 0.45);
-    letter-spacing: 1px;
 }
 
 .cos-caret {
@@ -99,6 +76,61 @@
 }
 
 @keyframes cos-blink { 50% { opacity: 0; } }
+
+/* ─── Start-up splash (logo + wordmark + progress) ────────────── */
+.cos-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    display: grid;
+    place-items: center;
+    background: #000;
+    transition: opacity 0.45s ease;
+    cursor: default;
+}
+.cos-splash.is-leaving { opacity: 0; }
+.cos-splash-inner { display: flex; flex-direction: column; align-items: center; }
+.cos-splash-logo {
+    filter: drop-shadow(0 12px 36px rgba(255, 153, 51, 0.35));
+    animation: cos-logo-in 0.75s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.cos-splash-word {
+    margin-top: 18px;
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    color: #fff;
+    animation: cos-rise-in 0.6s 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.cos-splash-word span { color: #FFC94A; }
+.cos-splash-bar {
+    margin-top: 28px;
+    width: 160px;
+    height: 4px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.16);
+    animation: cos-rise-in 0.5s 0.35s ease both;
+}
+.cos-splash-bar span {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    background: #fff;
+    transform-origin: left center;
+    animation-name: cos-bar-fill;
+    animation-timing-function: cubic-bezier(0.3, 0.6, 0.4, 1);
+    animation-fill-mode: both;
+    animation-delay: 0.3s;
+}
+@keyframes cos-logo-in { from { opacity: 0; transform: scale(0.82); } }
+@keyframes cos-rise-in { from { opacity: 0; transform: translateY(6px); } }
+@keyframes cos-bar-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* the small logo in the menu bar and phone status bar */
+svg.cos-logo-mark { display: inline-block; vertical-align: -3px; margin-right: 4px; }
 
 .cos-launch-inner { width: min(360px, 100%); font-size: 14px; }
 .cos-launch-bar {
@@ -357,7 +389,7 @@
     top: 8px;
     bottom: 8px;
     width: 2px;
-    background: linear-gradient(var(--cos-saffron), #60A5FA, var(--cos-red));
+    background: linear-gradient(var(--cos-red), #60A5FA, var(--cos-saffron));
     border-radius: 2px;
 }
 .cos-widget-route li {
@@ -732,7 +764,7 @@
     left: 6px;
     right: 6px;
     height: 2px;
-    background: linear-gradient(90deg, var(--cos-saffron), #60A5FA, var(--cos-red));
+    background: linear-gradient(90deg, var(--cos-red), #60A5FA, var(--cos-saffron));
     opacity: 0.8;
 }
 .cos-route li { position: relative; flex: 1; display: flex; flex-direction: column; gap: 2px; padding-top: 22px; min-width: 0; }
@@ -828,6 +860,7 @@
     background: rgba(255, 255, 255, 0.06) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
+.cos-term-quick.is-top { border-top: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.07); }
 .cos-term-quick button:hover { color: #fff !important; background: rgba(255, 255, 255, 0.1) !important; }
 
 /* ─── Contact ─────────────────────────────────────────────────── */
@@ -1350,7 +1383,7 @@
     top: 14px;
     bottom: 14px;
     width: 2px;
-    background: linear-gradient(var(--cos-saffron), #60A5FA, var(--cos-red));
+    background: linear-gradient(var(--cos-red), #60A5FA, var(--cos-saffron));
 }
 .cos-stops li { position: relative; display: grid; grid-template-columns: 20px 1fr; gap: 14px; align-items: start; }
 .cos-stop-pin {
@@ -1589,6 +1622,10 @@
 }
 .cos-m-sheet-body:has(.cos-term) { overflow: hidden; padding-bottom: calc(18px + var(--cos-safe-bottom)); }
 
+/* keyboard open: no room to spare for the home bar */
+.cos-m-sheet.has-keyboard .cos-m-homebar { display: none; }
+.cos-m-sheet.has-keyboard .cos-m-sheet-body:has(.cos-term) { padding-bottom: 0; }
+
 .cos-m-homebar {
     position: absolute;
     left: 50%;
@@ -1608,7 +1645,7 @@
 .cos-mobile .cos-about-avatar { width: 72px; height: 72px; border-radius: 20px; }
 .cos-mobile .cos-stats { grid-template-columns: repeat(2, 1fr); }
 .cos-mobile .cos-route { flex-direction: column; gap: 14px; }
-.cos-mobile .cos-route::before { top: 6px; bottom: 6px; left: 6px; right: auto; width: 2px; height: auto; background: linear-gradient(var(--cos-saffron), #60A5FA, var(--cos-red)); }
+.cos-mobile .cos-route::before { top: 6px; bottom: 6px; left: 6px; right: auto; width: 2px; height: auto; background: linear-gradient(var(--cos-red), #60A5FA, var(--cos-saffron)); }
 .cos-mobile .cos-route li { padding: 0 0 0 26px; flex-direction: row; justify-content: space-between; align-items: center; }
 .cos-mobile .cos-route-dot { top: 50%; margin-top: -7px; }
 .cos-mobile .cos-about-actions .cos-btn-primary { width: 100%; justify-content: center; padding: 12px 16px; }

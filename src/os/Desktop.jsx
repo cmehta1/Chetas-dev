@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Wallpaper from './components/Wallpaper';
+import ChetasLogo from './components/ChetasLogo';
 import HeroCharacter from './components/HeroCharacter';
 import AppIcon from './components/AppIcon';
 import Icon from './components/Icons';
@@ -7,7 +8,7 @@ import { Avatar, Walker } from './components/Avatar';
 import Window from './Window';
 import AppContent from './AppContent';
 import { APPS, DESKTOP_ORDER, openExternal } from './apps';
-import { PROFILE, JOURNEY_STOPS, yearsOfExperience } from './data';
+import { PROFILE, ROUTE_RECENT_FIRST, yearsOfExperience } from './data';
 import { useClock, prefetchGame } from './hooks';
 
 const MENUBAR_H = 34;
@@ -104,7 +105,7 @@ export default function Desktop({ onPlay }) {
             <nav className="cos-menubar" aria-label="ChetasOS menu bar">
                 <div className="cos-menubar-left">
                     <button type="button" className="cos-logo" onClick={() => openApp('about')}>
-                        <span className="cos-logo-mark">◆</span> ChetasOS
+                        <ChetasLogo size={17} className="cos-logo-mark" /> ChetasOS
                     </button>
                     <span className="cos-menubar-app">{focusedId ? APPS[focusedId].title : 'Desktop'}</span>
                 </div>
@@ -123,7 +124,7 @@ export default function Desktop({ onPlay }) {
                     <button key={id} type="button" role="listitem" className="cos-desk-icon" onClick={() => openApp(id)}
                         onPointerEnter={APPS[id].game ? prefetchGame : undefined}>
                         <AppIcon id={id} size={52} />
-                        <span>{APPS[id].game ? 'Journey.exe' : APPS[id].short}</span>
+                        <span>{APPS[id].short}</span>
                     </button>
                 ))}
             </div>
@@ -155,12 +156,12 @@ export default function Desktop({ onPlay }) {
                 <div className="cos-widget cos-widget-route">
                     <p className="cos-widget-label">The route</p>
                     <ol>
-                        {JOURNEY_STOPS.map(s => (
+                        <li className="is-next"><span>The journey continues</span><span>…</span></li>
+                        {ROUTE_RECENT_FIRST.map(s => (
                             <li key={s.city} className={s.current ? 'is-current' : ''}>
                                 <span>{s.city}, {s.region}</span><span>{s.current ? `${s.year}–now` : s.year}</span>
                             </li>
                         ))}
-                        <li className="is-next"><span>The journey continues</span><span>…</span></li>
                     </ol>
                 </div>
             </aside>

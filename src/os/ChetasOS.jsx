@@ -9,13 +9,17 @@ const BOOT_KEY = 'chetasos-booted';
 
 export default function ChetasOS({ onPlay }) {
     const mobile = useIsMobile();
-    const [booted, setBooted] = useState(() => session.get(BOOT_KEY) === '1' || prefersReducedMotion());
+    const [booting, setBooting] = useState(() => !(session.get(BOOT_KEY) === '1' || prefersReducedMotion()));
 
     const finishBoot = useCallback(() => {
         session.set(BOOT_KEY, '1');
-        setBooted(true);
+        setBooting(false);
     }, []);
 
-    if (!booted) return <Boot onDone={finishBoot} />;
-    return mobile ? <MobileHome onPlay={onPlay} /> : <Desktop onPlay={onPlay} />;
+    return (
+        <>
+            {mobile ? <MobileHome onPlay={onPlay} /> : <Desktop onPlay={onPlay} />}
+            {booting && <Boot onDone={finishBoot} />}
+        </>
+    );
 }

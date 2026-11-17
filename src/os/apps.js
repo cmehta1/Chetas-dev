@@ -17,7 +17,7 @@ export const APPS = {
     linkedin: { title: 'LinkedIn', short: 'LinkedIn', icon: 'linkedin', tint: ['#2D8CE0', '#0A66C2'], url: social.linkedin },
     github: { title: 'GitHub', short: 'GitHub', icon: 'github', tint: ['#3B4048', '#16191D'], url: social.github },
     x: { title: 'X', short: 'X', icon: 'x', tint: ['#2A2A2A', '#000000'], url: social.x },
-    journey: { title: 'Journey', short: 'Journey', icon: 'gamepad', tint: ['#FFD54F', '#FF6F00'], game: true },
+    journey: { title: 'Journey Game', short: 'Journey Game', icon: 'gamepad', tint: ['#FFD54F', '#FF6F00'], game: true },
 };
 
 export const DESKTOP_ORDER = ['about', 'experience', 'projects', 'certs', 'skills', 'hobbies', 'route', 'terminal', 'contact', 'journey'];

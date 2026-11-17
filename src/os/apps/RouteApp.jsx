@@ -1,4 +1,4 @@
-import { JOURNEY_STOPS } from '../data';
+import { ROUTE_RECENT_FIRST } from '../data';
 
 export default function RouteApp() {
     return (
@@ -6,11 +6,21 @@ export default function RouteApp() {
             <header className="cos-app-head">
                 <p className="cos-kicker">maps</p>
                 <h1>The route</h1>
-                <p className="cos-app-sub">Where I've lived, and what I did in each place, from Gujarat to Kansas.</p>
+                <p className="cos-app-sub">Where I've lived and what I did in each place, most recent first.</p>
             </header>
             <ol className="cos-stops">
-                {JOURNEY_STOPS.map((s, i) => (
-                    <li key={s.city} style={{ '--i': i }} className={s.current ? 'is-now' : ''}>
+                <li className="is-next" style={{ '--i': 0 }}>
+                    <span className="cos-stop-pin" aria-hidden="true" />
+                    <div className="cos-stop-card">
+                        <div className="cos-stop-head">
+                            <span className="cos-stop-city">What's next</span>
+                            <span className="cos-stop-years">to be continued</span>
+                        </div>
+                        <p className="cos-stop-about">The journey continues. New problems to solve, new things to build.</p>
+                    </div>
+                </li>
+                {ROUTE_RECENT_FIRST.map((s, i) => (
+                    <li key={s.city} style={{ '--i': i + 1 }} className={s.current ? 'is-now' : ''}>
                         <span className="cos-stop-pin" aria-hidden="true" />
                         <div className="cos-stop-card">
                             <div className="cos-stop-head">
@@ -29,16 +39,6 @@ export default function RouteApp() {
                         </div>
                     </li>
                 ))}
-                <li className="is-next" style={{ '--i': JOURNEY_STOPS.length }}>
-                    <span className="cos-stop-pin" aria-hidden="true" />
-                    <div className="cos-stop-card">
-                        <div className="cos-stop-head">
-                            <span className="cos-stop-city">What's next</span>
-                            <span className="cos-stop-years">to be continued</span>
-                        </div>
-                        <p className="cos-stop-about">The journey continues. New problems to solve, new things to build.</p>
-                    </div>
-                </li>
             </ol>
         </div>
     );

@@ -248,6 +248,7 @@ export const EXPERIENCE_DATA = [
         period: 'Oct 2022 – Present',
         bullets: [
             'Developed RESTful services in Java (JAX-RS, Jersey, JDBC) for EJS clinical ordering used by physicians & nurses',
+            'Built e-prescribing and prior authorization features for clinicians',
             'Added Discern alerts feature enabling physicians to create custom alerts for efficient patient care',
             'Performed & followed Agile methodologies — daily scrums, bi-weekly planning, retrospectives & design discussions with Solution Designers & Software Architects',
             'Established & documented the release server process for the team',

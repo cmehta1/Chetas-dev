@@ -13,7 +13,7 @@ export const PROFILE = {
     title: 'Senior Member of Technical Staff',
     company: 'Oracle Health',
     location: 'Overland Park, KS',
-    tagline: 'Healthcare software engineer building clinical ordering services and AI agents.',
+    tagline: 'Full-stack healthcare engineer: clinical ordering, e-prescribing, prior authorization and agentic AI.',
     languages: LANGUAGES,
 };
 
@@ -84,6 +84,7 @@ export const JOURNEY_STOPS = [
             { when: 'Sep 2017', text: 'Software Engineer II at Cerner: clinical ordering services' },
             { when: '2019', text: 'Started volunteering with TLC for Kids USA' },
             { when: 'Oct 2022', text: 'Cerner becomes Oracle Health; Member of Technical Staff' },
+            { when: '2022–now', text: 'E-prescribing and prior authorization features at Oracle Health' },
             { when: 'Jul 2024', text: 'OCI Generative AI Professional certification' },
             { when: 'May 2025', text: 'OCI Foundations and AI Vector Search certifications' },
             { when: 'Aug 2025', text: 'Mentoring engineers on ADPList; named a Top 50 Fullstack Mentor' },
@@ -91,6 +92,10 @@ export const JOURNEY_STOPS = [
         ],
     },
 ];
+
+/* The route as shown on screen: most recent place first, newest events first. */
+export const ROUTE_RECENT_FIRST = [...JOURNEY_STOPS].reverse()
+    .map(s => ({ ...s, events: [...s.events].reverse() }));
 
 /* ── Experience (newest first) ── */
 const EXPERIENCE_META = {

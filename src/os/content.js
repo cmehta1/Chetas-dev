@@ -229,7 +229,7 @@ export const HOBBY_COPY = {
 
 export const EXPERIENCE_COPY = {
     7: {
-        summary: 'Promoted to Senior Member of Technical Staff; clinical ordering services and agentic AI.',
+        summary: 'Senior Member of Technical Staff: clinical ordering, e-prescribing, prior authorization and agentic AI.',
     },
     6: {
         summary: 'Five years of RESTful clinical services for ordering, formulary and patient cost.',

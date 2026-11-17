@@ -758,37 +758,35 @@
 /* make room for the close button at the right of the top bar */
 .hud-top { padding-right: 76px; }
 
-/* Phones: the close button sits at the right of the Skills / Projects row */
+/* Phones: the close button sits at the very top right, on the year / level / progress row,
+   so it reads as "close the game" rather than belonging to the Projects panel below. */
 @media (max-width: 1024px) {
     .game-exit-btn {
-        top: 56px;
+        top: calc(10px + env(safe-area-inset-top, 0px));
         right: 10px;
         width: 36px;
         height: 36px;
     }
-    .hud-top { padding-right: 10px; }
-    .mobile-panel-toggles {
-        justify-content: flex-start;
-        gap: 8px;
-        padding-right: 56px;
-    }
+    .hud-top { padding-right: 54px; }
 }
 
 /* ─── Narrow phones: keep the top bar on screen ──── */
 @media (max-width: 600px) {
     .hud-top {
-        padding: 8px 10px;
-        gap: 6px;
+        padding: 8px 52px 8px 8px;
+        gap: 5px;
         justify-content: flex-start;
     }
 
     .year-counter {
         flex: none;
-        padding: 6px 10px;
-        gap: 8px;
+        padding: 6px 8px;
+        gap: 6px;
     }
 
-    .year-display { padding-left: 8px; }
+    .year-display { padding-left: 6px; }
+    .location-flag { font-size: 14px; }
+    .year-value { font-size: 17px; }
 
     /* the zone subtitle and zone name repeat what the level and location already say */
     .location-theme,
@@ -799,9 +797,12 @@
     .level-indicator {
         flex: 1 1 auto;
         min-width: 0;
-        padding: 6px 10px;
+        padding: 6px 8px;
+        gap: 5px;
         overflow: hidden;
     }
+
+    .level-number { font-size: 15px; }
 
     .level-name {
         min-width: 0;
@@ -813,7 +814,7 @@
     .progress-bar-container {
         flex: none;
         max-width: none;
-        padding: 6px 10px;
+        padding: 6px 8px;
     }
 
     .progress-bar { display: none; }

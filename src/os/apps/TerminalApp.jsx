@@ -21,7 +21,7 @@ const HELP = [
     ['ls · clear · history · date', 'the usual'],
 ];
 
-const FILES = ['about.md', 'experience/', 'projects/', 'certs/', 'hobbies/', 'skills.json', 'journey.exe*'];
+const FILES = ['about.md', 'experience/', 'projects/', 'certs/', 'hobbies/', 'skills.json', 'journey-game.exe*'];
 
 function neofetch() {
     const info = [
@@ -108,9 +108,11 @@ function run(raw, api, history) {
         }
         case 'play':
         case './journey.exe':
+        case './journey-game.exe':
+        case 'game':
         case 'journey':
             setTimeout(() => api.launchGame(), 400);
-            return [{ t: 'accent', text: 'Launching journey.exe…' }];
+            return [{ t: 'accent', text: 'Launching the Journey Game…' }];
         case 'ls':
             return [{ t: 'pre', text: FILES.join('   ') }];
         case 'neofetch':
@@ -196,8 +198,27 @@ export default function TerminalApp({ api }) {
         }
     };
 
+    // Suggested commands. On phones they sit at the top, where the keyboard can't cover them.
+    // preventDefault on pointerdown keeps focus (and the keyboard) where it is when one is tapped.
+    const quickBar = (
+        <div className={`cos-term-quick ${api.mobile ? 'is-top' : ''}`} aria-label="Quick commands">
+            {QUICK.map(q => (
+                <button key={q} type="button" onPointerDown={(e) => e.preventDefault()}
+                    onClick={(e) => { e.stopPropagation(); submit(q); }}>{q}</button>
+            ))}
+        </div>
+    );
+    const keepPromptInView = () => {
+        // Wait for the keyboard to finish opening, then bring the prompt into view.
+        setTimeout(() => {
+            const el = scrollRef.current;
+            if (el) el.scrollTop = el.scrollHeight;
+        }, 300);
+    };
+
     return (
         <div className="cos-term" onClick={() => { if (!window.getSelection()?.toString()) inputRef.current?.focus({ preventScroll: true }); }}>
+            {api.mobile && quickBar}
             <div className="cos-term-scroll" ref={scrollRef}>
                 {lines.map((l, i) => {
                     if (l.t === 'cmd') return <p key={i} className="cos-term-line"><span className="cos-term-prompt">{PROMPT}</span> {l.text}</p>;
@@ -212,6 +233,7 @@ export default function TerminalApp({ api }) {
                         value={value}
                         onChange={(e) => setValue(e.target.value)}
                         onKeyDown={onKeyDown}
+                        onFocus={keepPromptInView}
                         autoComplete="off"
                         autoCapitalize="off"
                         autoCorrect="off"
@@ -221,11 +243,7 @@ export default function TerminalApp({ api }) {
                     />
                 </form>
             </div>
-            <div className="cos-term-quick" aria-label="Quick commands">
-                {QUICK.map(q => (
-                    <button key={q} type="button" onClick={(e) => { e.stopPropagation(); submit(q); }}>{q}</button>
-                ))}
-            </div>
+            {!api.mobile && quickBar}
         </div>
     );
 }

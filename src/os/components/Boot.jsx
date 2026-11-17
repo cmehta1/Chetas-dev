@@ -1,44 +1,40 @@
 import { useEffect, useRef, useState } from 'react';
-import { yearsOfExperience } from '../data';
+import ChetasLogo from './ChetasLogo';
 
-const LINES = [
-    'CHETASOS BIOS v2.0',
-    'Memory check ............ 640K OK',
-    `Mounting /career ........ ${yearsOfExperience()} yrs OK`,
-    'Loading card decks ...... OK',
-    'Starting window manager . OK',
-];
+const SHOW_MS = 2000;  // logo + progress bar
+const FADE_MS = 450;   // fade into the home screen
 
-/** Short, skippable boot sequence that hands off to the desktop. */
+/** Branded start-up splash: logo, wordmark and a thin progress bar, then a fade.
+    The home screen renders underneath, so it's ready the moment the splash fades. */
 export default function Boot({ onDone }) {
-    const [shown, setShown] = useState(0);
-    const doneRef = useRef(false);
+    const [leaving, setLeaving] = useState(false);
+    const leavingRef = useRef(false);
 
     useEffect(() => {
+        const timers = [];
         const finish = () => {
-            if (doneRef.current) return;
-            doneRef.current = true;
-            onDone();
+            if (leavingRef.current) return;
+            leavingRef.current = true;
+            setLeaving(true);
+            timers.push(setTimeout(onDone, FADE_MS));
         };
-        const timers = LINES.map((_, i) => setTimeout(() => setShown(i + 1), 160 + i * 220));
-        timers.push(setTimeout(finish, 160 + LINES.length * 220 + 450));
-        const skip = () => finish();
-        window.addEventListener('keydown', skip);
-        window.addEventListener('pointerdown', skip);
+        timers.push(setTimeout(finish, SHOW_MS));
+        window.addEventListener('keydown', finish);
+        window.addEventListener('pointerdown', finish);
         return () => {
             timers.forEach(clearTimeout);
-            window.removeEventListener('keydown', skip);
-            window.removeEventListener('pointerdown', skip);
+            window.removeEventListener('keydown', finish);
+            window.removeEventListener('pointerdown', finish);
         };
     }, [onDone]);
 
     return (
-        <div className="cos-boot" aria-label="ChetasOS is starting">
-            <div className="cos-boot-lines">
-                {LINES.slice(0, shown).map((l, i) => <p key={i}>{l}</p>)}
-                <p className="cos-boot-cursor"><span className="cos-caret" /></p>
+        <div className={`cos-splash ${leaving ? 'is-leaving' : ''}`} role="status" aria-label="ChetasOS is starting">
+            <div className="cos-splash-inner">
+                <ChetasLogo size={96} className="cos-splash-logo" />
+                <p className="cos-splash-word">Chetas<span>OS</span></p>
+                <div className="cos-splash-bar" aria-hidden="true"><span style={{ animationDuration: `${SHOW_MS - 250}ms` }} /></div>
             </div>
-            <p className="cos-boot-skip">press any key to skip</p>
         </div>
     );
 }
