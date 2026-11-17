@@ -3,6 +3,7 @@ import PhaserGame from './game/PhaserGame';
 import HUD from './components/HUD/HUD';
 import Joystick from './components/HUD/Joystick';
 import EventBus from './game/EventBus';
+import { navigate, HOME_PATH } from './router';
 import './styles/hud.css';
 
 const BuildingInterior = lazy(() => import('./components/BuildingInterior/BuildingInterior'));
@@ -48,6 +49,9 @@ function App() {
     return (
         <div id="app-container">
             <PhaserGame ref={phaserRef} />
+            <button type="button" className="game-exit-btn" onClick={() => navigate(HOME_PATH)} aria-label="Exit to ChetasOS">
+                <span aria-hidden="true">◆</span> ChetasOS
+            </button>
             <HUD />
             {isMobile && !gameEnded && <Joystick />}
             {buildingZone !== null && (

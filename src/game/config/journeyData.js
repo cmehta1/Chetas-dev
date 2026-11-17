@@ -342,3 +342,46 @@ export const ZONE_HIGHLIGHTS = {
         },
     ],
 };
+
+// Certifications — shown as cards in ChetasOS; Oracle ones also drop in as banners in Level 4.
+// `banner` holds the short text used on the in-game banner.
+export const CERTIFICATIONS = [
+    {
+        name: 'OCI Generative AI Professional',
+        issuer: 'Oracle',
+        level: 'Certified Professional',
+        year: '2024',
+        tags: ['Generative AI', 'LLMs', 'OCI'],
+        banner: { title: 'OCI Gen AI 2024', subtitle: 'Certified Professional' },
+    },
+    {
+        name: 'OCI Foundations Associate',
+        issuer: 'Oracle',
+        level: 'Certified Associate',
+        year: '2025',
+        tags: ['Cloud', 'OCI'],
+        banner: { title: 'OCI Foundations', subtitle: 'Certified Associate' },
+    },
+    {
+        name: 'Oracle AI Vector Search Professional',
+        issuer: 'Oracle',
+        level: 'Certified Professional',
+        year: '2025',
+        tags: ['Vector search', 'Embeddings', 'Oracle Database'],
+        banner: { title: 'AI Vector Search', subtitle: 'Certified Professional' },
+    },
+    {
+        name: 'Salesforce Administrator',
+        issuer: 'Salesforce',
+        level: 'Certification',
+        year: 'Midway era',
+        tags: ['Salesforce', 'Admin'],
+    },
+    {
+        name: 'Salesforce Developer',
+        issuer: 'Salesforce',
+        level: 'Certification',
+        year: 'Midway era',
+        tags: ['Salesforce', 'APEX', 'SOQL'],
+    },
+];

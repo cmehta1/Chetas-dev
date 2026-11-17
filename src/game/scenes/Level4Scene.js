@@ -5,7 +5,7 @@ import {
     PLAYER_SPEED, PLAYER_JUMP_VELOCITY, PLAYER_GRAVITY,
     PLAYER_STAGES, ZONES, getTerrainY, getCameraMargin, isMobilePortrait, CANVAS_SCALE,
 } from '../config/constants';
-import { JOURNEY, SKILLS_DATA } from '../config/journeyData';
+import { JOURNEY, SKILLS_DATA, CERTIFICATIONS } from '../config/journeyData';
 import { AUTO_JUMP_TRIGGERS } from '../config/levelConfig';
 import { createCharacter, animateWalk } from '../utils/CharacterRenderer';
 import { renderZoneBackground } from '../utils/BackgroundRenderer';
@@ -736,11 +736,9 @@ export default class Level4Scene extends Phaser.Scene {
 
     createCertBanners() {
         // Oracle certifications — ordered by date (oldest first)
-        const certs = [
-            { title: 'OCI Gen AI 2024', subtitle: 'Certified Professional', year: '2024' },
-            { title: 'OCI Foundations', subtitle: 'Certified Associate', year: '2025' },
-            { title: 'AI Vector Search', subtitle: 'Certified Professional', year: '2025' },
-        ];
+        const certs = CERTIFICATIONS
+            .filter(c => c.issuer === 'Oracle' && c.banner)
+            .map(c => ({ ...c.banner, year: c.year }));
 
         // Place between buildings in Zone 7 (12200–14000)
         // Background buildings: main tower ~13100, supporting ~12500/13400, data center ~12650

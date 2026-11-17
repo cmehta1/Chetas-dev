@@ -732,3 +732,40 @@
         bottom: calc(10px + env(safe-area-inset-bottom, 0px));
     }
 }
+
+/* ─── EXIT TO CHETASOS ──────────────────────────── */
+.game-exit-btn {
+    position: fixed;
+    left: 20px;
+    bottom: 16px;
+    z-index: 25;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #e0e0e0;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.game-exit-btn span { color: #FFD700; }
+.game-exit-btn:hover { border-color: rgba(255, 215, 0, 0.7); color: #fff; }
+
+/* Mobile: sit between the Skills / Projects toggles instead of under the joystick */
+@media (max-width: 1024px) {
+    .game-exit-btn {
+        left: 50%;
+        bottom: auto;
+        top: 60px;
+        transform: translateX(-50%);
+        padding: 5px 12px;
+        font-size: 11px;
+    }
+}
