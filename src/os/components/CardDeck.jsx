@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import TradingCard from './TradingCard';
+import CardDetail from './CardDetail';
 import Icon from './Icons';
 
 const SWIPE_AT = 90;
@@ -36,10 +37,12 @@ function useDeviceTilt(enabled) {
     return tilt;
 }
 
-export default function CardDeck({ cards, heading, intro, mobile }) {
+export default function CardDeck({ cards: allCards, heading, intro, mobile }) {
     const [view, setView] = useState(mobile ? 'stack' : 'grid');
+    const [group, setGroup] = useState('All');
     const [index, setIndex] = useState(0);
     const [flipped, setFlipped] = useState(() => new Set());
+    const [detailId, setDetailId] = useState(null);
     const [dx, setDx] = useState(0);
     const [leaving, setLeaving] = useState(0);
     const [dragging, setDragging] = useState(false);
@@ -48,8 +51,10 @@ export default function CardDeck({ cards, heading, intro, mobile }) {
     const moved = useRef(false);
     const deckRef = useRef(null);
 
-    const tilt = useDeviceTilt(tiltOn && view === 'stack');
+    const groups = ['All', ...new Set(allCards.map(c => c.group).filter(Boolean))];
+    const cards = group === 'All' ? allCards : allCards.filter(c => c.group === group);
     const n = cards.length;
+    const tilt = useDeviceTilt(tiltOn && view === 'stack' && !detailId);
 
     const toggleFlip = (id) => setFlipped(s => {
         const next = new Set(s);
@@ -57,8 +62,43 @@ export default function CardDeck({ cards, heading, intro, mobile }) {
         return next;
     });
 
+    const pickGroup = (g) => {
+        setGroup(g);
+        setIndex(0);
+        setFlipped(new Set());
+    };
+
+    /* ── detail view (Back button on phones closes it) ── */
+    const openDetail = (id) => {
+        if (mobile) window.history.pushState({ ...(window.history.state || {}), cosDetail: id }, '');
+        setDetailId(id);
+    };
+    const closeDetail = useCallback(() => {
+        if (mobile && window.history.state?.cosDetail) window.history.back();
+        else setDetailId(null);
+    }, [mobile]);
+    useEffect(() => {
+        if (!mobile) return undefined;
+        const onPop = (e) => { if (!e.state?.cosDetail) setDetailId(null); };
+        window.addEventListener('popstate', onPop);
+        return () => window.removeEventListener('popstate', onPop);
+    }, [mobile]);
+
+    const detailIndex = cards.findIndex(c => c.id === detailId);
+    const stepDetail = useCallback((dir) => {
+        if (detailIndex < 0) return;
+        const next = cards[(detailIndex + dir + n) % n];
+        if (mobile && window.history.state?.cosDetail) {
+            window.history.replaceState({ ...window.history.state, cosDetail: next.id }, '');
+        }
+        setDetailId(next.id);
+    }, [cards, detailIndex, n, mobile]);
+    const prevDetail = useCallback(() => stepDetail(-1), [stepDetail]);
+    const nextDetail = useCallback(() => stepDetail(1), [stepDetail]);
+
+    /* ── stack interactions ── */
     const go = (dir) => {
-        if (leaving) return;
+        if (leaving || n < 2) return;
         setLeaving(dir);
         setTimeout(() => {
             setIndex(i => (i + (dir > 0 ? 1 : -1) + n) % n);
@@ -105,13 +145,15 @@ export default function CardDeck({ cards, heading, intro, mobile }) {
         } catch { /* user declined or unsupported */ }
     };
 
-    const stack = [0, 1, 2].map(o => cards[(index + o) % n]).filter((c, i, arr) => arr.indexOf(c) === i);
+    const safeIndex = n ? index % n : 0;
+    const stack = [0, 1, 2].map(o => cards[(safeIndex + o) % n]).filter((c, i, arr) => c && arr.indexOf(c) === i);
+    const detailCard = detailIndex >= 0 ? cards[detailIndex] : null;
 
     return (
         <div className="cos-app cos-deck" ref={deckRef}>
             <header className="cos-deck-head">
                 <div>
-                    <p className="cos-kicker">{n} cards</p>
+                    <p className="cos-kicker">{allCards.length} cards</p>
                     <h1>{heading}</h1>
                     <p className="cos-app-sub">{intro}</p>
                 </div>
@@ -132,15 +174,27 @@ export default function CardDeck({ cards, heading, intro, mobile }) {
                 </div>
             </header>
 
+            {groups.length > 2 && (
+                <div className="cos-filters" role="group" aria-label="Filter cards">
+                    {groups.map(g => (
+                        <button key={g} type="button" aria-pressed={group === g} onClick={() => pickGroup(g)}>
+                            {g}
+                            <span>{g === 'All' ? allCards.length : allCards.filter(c => c.group === g).length}</span>
+                        </button>
+                    ))}
+                </div>
+            )}
+
             {view === 'grid' ? (
                 <div className="cos-deck-grid">
                     {cards.map(c => (
-                        <TradingCard key={c.id} card={c} flipped={flipped.has(c.id)} onFlip={() => toggleFlip(c.id)} />
+                        <TradingCard key={c.id} card={c} flipped={flipped.has(c.id)}
+                            onFlip={() => toggleFlip(c.id)} onOpen={() => openDetail(c.id)} />
                     ))}
                 </div>
             ) : (
                 <div className="cos-deck-stage" tabIndex={0} onKeyDown={onKeyDown} aria-roledescription="carousel"
-                    aria-label={`${heading}: card ${index + 1} of ${n}. Use arrow keys or swipe.`}>
+                    aria-label={`${heading}: card ${safeIndex + 1} of ${n}. Use arrow keys or swipe.`}>
                     <div
                         className="cos-deck-stack"
                         onPointerDown={onPointerDown}
@@ -157,7 +211,7 @@ export default function CardDeck({ cards, heading, intro, mobile }) {
                             return (
                                 <div
                                     key={c.id}
-                                    className={`cos-deck-slot ${isTop ? 'is-top' : ''} ${isTop && (dx || leaving) ? 'is-dragging' : ''}`}
+                                    className={`cos-deck-slot ${isTop ? 'is-top' : ''}`}
                                     style={{
                                         '--depth': depth,
                                         transform: `translateX(${offX}px) rotate(${rot}deg) translateY(${depth * 14}px) scale(${1 - depth * 0.05})`,
@@ -171,6 +225,7 @@ export default function CardDeck({ cards, heading, intro, mobile }) {
                                         interactive={isTop}
                                         flipped={isTop && flipped.has(c.id)}
                                         onFlip={() => isTop && toggleFlip(c.id)}
+                                        onOpen={() => openDetail(c.id)}
                                         tilt={isTop ? tilt : null}
                                     />
                                 </div>
@@ -179,11 +234,21 @@ export default function CardDeck({ cards, heading, intro, mobile }) {
                     </div>
                     <div className="cos-deck-nav">
                         <button type="button" aria-label="Previous card" onClick={() => go(-1)}><Icon name="chevronLeft" size={20} /></button>
-                        <span className="cos-deck-count">{index + 1} / {n}</span>
+                        <span className="cos-deck-count">{safeIndex + 1} / {n}</span>
                         <button type="button" aria-label="Next card" onClick={() => go(1)}><Icon name="chevronRight" size={20} /></button>
                     </div>
                     <p className="cos-deck-hint">{mobile ? 'Swipe to deal · tap to flip' : 'Drag or use ← → · click to flip'}</p>
                 </div>
+            )}
+
+            {detailCard && (
+                <CardDetail
+                    card={detailCard}
+                    onClose={closeDetail}
+                    onPrev={prevDetail}
+                    onNext={nextDetail}
+                    position={`${detailIndex + 1} / ${n}`}
+                />
             )}
         </div>
     );

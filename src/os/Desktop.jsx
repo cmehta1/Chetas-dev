@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Wallpaper from './components/Wallpaper';
+import HeroCharacter from './components/HeroCharacter';
 import AppIcon from './components/AppIcon';
 import Icon from './components/Icons';
 import { Avatar, Walker } from './components/Avatar';
 import Window from './Window';
 import AppContent from './AppContent';
-import { APPS, DESKTOP_ORDER } from './apps';
+import { APPS, DESKTOP_ORDER, openExternal } from './apps';
 import { PROFILE, JOURNEY_STOPS, yearsOfExperience } from './data';
 import { useClock, prefetchGame } from './hooks';
 
@@ -24,7 +25,7 @@ function initialRect(id, count) {
 }
 
 export default function Desktop({ onPlay }) {
-    const [windows, setWindows] = useState(() => [{ id: 'about', z: 1, min: false, max: false, ...initialRect('about', 0) }]);
+    const [windows, setWindows] = useState([]);
     const zRef = useRef(1);
     const now = useClock();
 
@@ -46,6 +47,7 @@ export default function Desktop({ onPlay }) {
     const openApp = useCallback((id) => {
         if (!APPS[id]) return;
         if (APPS[id].game) { onPlay(); return; }
+        if (openExternal(id)) return;
         zRef.current += 1;
         const z = zRef.current;
         setWindows(ws => {
@@ -75,12 +77,29 @@ export default function Desktop({ onPlay }) {
     }, [focusedId, close]);
 
     const openIds = new Set(windows.filter(w => !w.closing).map(w => w.id));
+    const anyVisible = windows.some(w => !w.min && !w.closing);
+    const anyMaximized = windows.some(w => w.max && !w.min && !w.closing);
     const timeStr = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
     const dateStr = now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
 
     return (
         <div className="cos-root cos-desktop">
             <Wallpaper />
+            <HeroCharacter mobile={false} paused={anyMaximized} />
+
+            <div className={`cos-greeting ${anyVisible ? 'is-hidden' : ''}`} aria-hidden={anyVisible}>
+                <p className="cos-greeting-hi">Hi, I'm {PROFILE.firstName} <span aria-hidden="true">👋</span></p>
+                <p className="cos-greeting-text">
+                    {PROFILE.title} at {PROFILE.company}. Open an app from the dock, or walk through my story.
+                </p>
+                <div className="cos-greeting-actions">
+                    <button type="button" className="cos-btn cos-btn-primary" onClick={onPlay}
+                        onPointerEnter={prefetchGame} tabIndex={anyVisible ? -1 : 0}>
+                        <Icon name="play" size={13} /> Play my journey
+                    </button>
+                    <button type="button" className="cos-btn" onClick={() => openApp('about')} tabIndex={anyVisible ? -1 : 0}>About me</button>
+                </div>
+            </div>
 
             <nav className="cos-menubar" aria-label="ChetasOS menu bar">
                 <div className="cos-menubar-left">

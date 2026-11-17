@@ -84,6 +84,7 @@ export default function AboutApp({ api }) {
                     ))}
                 </ul>
             </section>
+
         </div>
     );
 }

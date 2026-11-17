@@ -17,6 +17,7 @@ const HELP = [
     ['open <app>', 'open an app (e.g. open projects)'],
     ['play', 'launch the journey game'],
     ['neofetch', 'system info'],
+    ['credits', 'icon and logo credits'],
     ['ls · clear · history · date', 'the usual'],
 ];
 
@@ -94,7 +95,7 @@ function run(raw, api, history) {
         case 'skills': {
             const top = SKILL_GROUPS_LIST.filter(g => g.group !== 'School')
                 .map(g => ({ t: 'pre', text: `  ${g.group.padEnd(16)}${g.skills.map(s => s.label).join(', ')}` }));
-            return [...top, { t: 'muted', text: "Tip: 'open skills' for the monitor." }];
+            return [...top, { t: 'muted', text: "Tip: 'open skills' for the skill cards." }];
         }
         case 'contact':
         case 'socials':
@@ -114,6 +115,11 @@ function run(raw, api, history) {
             return [{ t: 'pre', text: FILES.join('   ') }];
         case 'neofetch':
             return neofetch();
+        case 'credits':
+            return [
+                { t: 'text', text: 'Card art: drawn in code for ChetasOS.' },
+                { t: 'text', text: 'Icons: Lucide (ISC). Technology logos: Devicon (MIT).' },
+            ];
         case 'date':
             return [{ t: 'text', text: new Date().toString() }];
         case 'echo':

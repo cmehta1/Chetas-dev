@@ -11,7 +11,7 @@ export const JOURNEY = {
         { id: 4, name: 'Binghamton University', city: 'Binghamton, NY', yearStart: 2014, yearEnd: 2016, description: 'M.S. in Computer Science' },
         { id: 5, name: 'Midway Dental Supply', city: 'Livonia, MI', yearStart: 2016, yearEnd: 2017, description: 'Software Developer' },
         { id: 6, name: 'Cerner Corporation', city: 'Kansas City, MO', yearStart: 2017, yearEnd: 2022, description: 'Software Engineer II' },
-        { id: 7, name: 'Oracle Health', city: 'Overland Park, KS', yearStart: 2022, yearEnd: 2026, description: 'Member of Technical Staff' },
+        { id: 7, name: 'Oracle Health', city: 'Overland Park, KS', yearStart: 2022, yearEnd: 2026, description: 'Senior Member of Technical Staff' },
         { id: 8, name: 'Hobbies', city: 'Life', yearStart: 2026, yearEnd: 2026, description: 'Beyond the code...' },
     ],
 };
@@ -198,7 +198,7 @@ export const EXPERIENCE_DATA = [
     },
     {
         zone: 7,
-        title: 'Member of Technical Staff',
+        title: 'Senior Member of Technical Staff',
         company: 'Oracle Health',
         period: 'Oct 2022 – Present',
         bullets: [
@@ -269,7 +269,7 @@ export const ZONE_INTROS = {
     },
     7: {
         left: {
-            heading: 'Member of Technical Staff',
+            heading: 'Senior Member of Technical Staff',
             text: 'Continued the healthcare mission at Oracle Health in Overland Park, KS — building the next generation of clinical software.',
         },
         right: {
@@ -334,7 +334,7 @@ export const ZONE_HIGHLIGHTS = {
     7: [
         {
             title: 'Continuing the Mission',
-            text: 'When Cerner became Oracle Health, I continued building upon the clinical ordering platform — now as a Member of Technical Staff. I work closely with Solution Designers and Software Architects to break down complex implementation tasks, develop RESTful services in Java, and have established the team\'s release server process. I also added the Discern alerts feature, enabling physicians to create custom alerts for more efficient patient care.',
+            text: 'When Cerner became Oracle Health, I continued building upon the clinical ordering platform — first as a Member of Technical Staff and now, after a promotion, as a Senior Member of Technical Staff. I work closely with Solution Designers and Software Architects to break down complex implementation tasks, develop RESTful services in Java, and have established the team\'s release server process. I also added the Discern alerts feature, enabling physicians to create custom alerts for more efficient patient care.',
         },
         {
             title: 'AI & the Future',

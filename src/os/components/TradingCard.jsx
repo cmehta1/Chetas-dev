@@ -1,9 +1,11 @@
 import { useRef } from 'react';
 import { CARD_KIND_LABEL } from '../data';
+import CardIllustration from './CardIllustration';
 
-/* A collectible card. Tilts toward the pointer (or the phone's tilt, via `tilt` prop),
-   with a holographic sheen that follows. Click / tap flips it to the details side. */
-export default function TradingCard({ card, flipped, onFlip, tilt, interactive = true, style, className = '' }) {
+/* A collectible card. Tilts toward the pointer (or the phone's tilt, via `tilt`),
+   with a holographic sheen. Tapping the front flips it; the back has a short write-up
+   and a button that opens the full detail view. */
+export default function TradingCard({ card, flipped, onFlip, onOpen, tilt, interactive = true, style, className = '' }) {
     const ref = useRef(null);
 
     const setTilt = (px, py) => {
@@ -37,6 +39,10 @@ export default function TradingCard({ card, flipped, onFlip, tilt, interactive =
         '--hyp': Math.min(1, Math.hypot(tilt.x - 0.5, tilt.y - 0.5) * 2),
     } : null;
 
+    const kindLabel = CARD_KIND_LABEL[card.kind];
+    const frontFocusable = interactive && !flipped;
+    const backFocusable = interactive && flipped;
+
     return (
         <div
             ref={ref}
@@ -45,56 +51,57 @@ export default function TradingCard({ card, flipped, onFlip, tilt, interactive =
             onPointerMove={onPointerMove}
             onPointerLeave={onPointerLeave}
         >
-            <button
-                type="button"
-                className="cos-card-inner"
-                onClick={onFlip}
-                aria-pressed={!!flipped}
-                aria-label={`${card.title}, ${CARD_KIND_LABEL[card.kind]} card. ${flipped ? 'Showing details' : 'Flip for details'}`}
-                tabIndex={interactive ? 0 : -1}
-            >
+            <div className="cos-card-inner">
                 {/* front */}
-                <span className="cos-card-face cos-card-front">
+                <button
+                    type="button"
+                    className="cos-card-face cos-card-front"
+                    onClick={onFlip}
+                    tabIndex={frontFocusable ? 0 : -1}
+                    aria-hidden={flipped}
+                    aria-label={`${card.title}. ${kindLabel}${card.subtitle ? `, ${card.subtitle}` : ''}. Flip for details.`}
+                >
                     <span className="cos-card-top">
                         <span className="cos-card-title">{card.title}</span>
                         {card.year && <span className="cos-card-year">{card.year}</span>}
                     </span>
-                    <span className="cos-card-art">
-                        <span className="cos-card-art-pattern" />
-                        <span className="cos-card-emoji">{card.icon}</span>
+                    <span className="cos-card-art-wrap">
+                        <CardIllustration card={card} />
                         {card.badge && <span className="cos-card-badge">{card.badge}</span>}
                     </span>
                     <span className="cos-card-type">
-                        <span>{CARD_KIND_LABEL[card.kind]}</span>
+                        <span>{kindLabel}</span>
                         {card.subtitle && <span className="cos-card-type-sub">· {card.subtitle}</span>}
                     </span>
-                    <span className="cos-card-text">{card.flavor || card.bullets[0] || ''}</span>
+                    <span className="cos-card-text">{card.summary}</span>
                     <span className="cos-card-foot">
                         <span className="cos-card-set">◆ CHETAS</span>
                         <span className="cos-card-num">{card.number}</span>
                     </span>
                     <span className="cos-card-shine" />
                     <span className="cos-card-glare" />
-                </span>
+                </button>
 
                 {/* back */}
-                <span className="cos-card-face cos-card-back">
+                <div className="cos-card-face cos-card-back" aria-hidden={!flipped}>
                     <span className="cos-card-back-title">{card.title}</span>
-                    {card.subtitle && <span className="cos-card-back-sub">{card.subtitle}{card.year ? ` · ${card.year}` : ''}</span>}
-                    {card.bullets.length > 0 && (
-                        <span className="cos-card-back-list">
-                            {card.bullets.map((b, i) => <span key={i} className="cos-card-back-li">{b}</span>)}
-                        </span>
-                    )}
-                    {card.flavor && <span className="cos-card-back-flavor">{card.flavor}</span>}
-                    {card.stack.length > 0 && (
-                        <span className="cos-card-back-chips">
-                            {card.stack.map(s => <span key={s}>{s}</span>)}
-                        </span>
-                    )}
-                    <span className="cos-card-back-hint">tap to flip back</span>
-                </span>
-            </button>
+                    {card.subtitle && <span className="cos-card-back-sub">{card.subtitle}</span>}
+                    <span className="cos-card-back-desc">{card.description || card.summary}</span>
+                    <dl className="cos-card-back-facts">
+                        {card.facts.slice(0, 3).map(f => (
+                            <div key={f.label}><dt>{f.label}</dt><dd>{f.value}</dd></div>
+                        ))}
+                    </dl>
+                    <span className="cos-card-back-actions">
+                        <button type="button" className="cos-card-more" onClick={onOpen} tabIndex={backFocusable ? 0 : -1}>
+                            Full details
+                        </button>
+                        <button type="button" className="cos-card-flipback" onClick={onFlip} tabIndex={backFocusable ? 0 : -1} aria-label="Flip back">
+                            ↺
+                        </button>
+                    </span>
+                </div>
+            </div>
         </div>
     );
 }
