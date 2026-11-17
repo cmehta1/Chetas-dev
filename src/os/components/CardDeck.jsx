@@ -3,58 +3,80 @@ import TradingCard from './TradingCard';
 import CardDetail from './CardDetail';
 import Icon from './Icons';
 
-const SWIPE_AT = 90;
+const SWIPE_AT = 80;
+const GYRO_MAX_X = 6;  // degrees, gentler than the desktop pointer tilt
+const GYRO_MAX_Y = 8;
 
-function needsTiltPermission() {
-    return typeof window.DeviceOrientationEvent !== 'undefined'
-        && typeof window.DeviceOrientationEvent.requestPermission === 'function';
-}
-
-/** Phone tilt → {x, y} in 0..1, smoothed with rAF. Only active when `enabled`. */
-function useDeviceTilt(enabled) {
-    const [tilt, setTilt] = useState(null);
+/* Phone tilt for every card in the deck. Writes CSS variables on the deck element each
+   frame (no React re-renders); cards read them in CSS. On iPhone the system asks for
+   motion access once, on the first tap inside the deck. */
+function useDeckGyro(deckRef, enabled) {
     useEffect(() => {
-        if (!enabled || typeof window.DeviceOrientationEvent === 'undefined') return undefined;
+        const deck = deckRef.current;
+        const DOE = window.DeviceOrientationEvent;
+        if (!enabled || !deck || typeof DOE === 'undefined') return undefined;
+
         let base = null;
         let frame = 0;
-        let latest = null;
+        const target = { x: 0, y: 0 };
+        const cur = { x: 0, y: 0 };
+        const tick = () => {
+            cur.x += (target.x - cur.x) * 0.15;
+            cur.y += (target.y - cur.y) * 0.15;
+            deck.style.setProperty('--gy', `${(cur.x * GYRO_MAX_Y).toFixed(2)}deg`);
+            deck.style.setProperty('--gx', `${(-cur.y * GYRO_MAX_X).toFixed(2)}deg`);
+            deck.style.setProperty('--gmx', `${(50 + cur.x * 45).toFixed(1)}%`);
+            deck.style.setProperty('--gmy', `${(50 + cur.y * 45).toFixed(1)}%`);
+            frame = Math.abs(target.x - cur.x) + Math.abs(target.y - cur.y) > 0.002 ? requestAnimationFrame(tick) : 0;
+        };
         const onOrient = (e) => {
             if (e.beta == null || e.gamma == null) return;
             if (base == null) base = e.beta;
-            latest = {
-                x: Math.min(1, Math.max(0, 0.5 + e.gamma / 50)),
-                y: Math.min(1, Math.max(0, 0.5 + (e.beta - base) / 50)),
-            };
-            if (!frame) frame = requestAnimationFrame(() => { frame = 0; setTilt(latest); });
+            target.x = Math.max(-1, Math.min(1, e.gamma / 30));
+            target.y = Math.max(-1, Math.min(1, (e.beta - base) / 30));
+            deck.classList.add('has-gyro');
+            if (!frame) frame = requestAnimationFrame(tick);
         };
-        window.addEventListener('deviceorientation', onOrient);
+        const listen = () => window.addEventListener('deviceorientation', onOrient);
+
+        let asked = false;
+        const askOnce = () => {
+            if (asked) return;
+            asked = true;
+            DOE.requestPermission().then(res => { if (res === 'granted') listen(); }).catch(() => {});
+        };
+        // iPhone only allows the request inside a tap (click), so ask on the first one.
+        if (typeof DOE.requestPermission === 'function') deck.addEventListener('click', askOnce, { once: true, capture: true });
+        else listen();
+
         return () => {
+            deck.removeEventListener('click', askOnce, { capture: true });
             window.removeEventListener('deviceorientation', onOrient);
             cancelAnimationFrame(frame);
-            setTilt(null);
+            deck.classList.remove('has-gyro');
         };
-    }, [enabled]);
-    return tilt;
+    }, [deckRef, enabled]);
 }
 
 export default function CardDeck({ cards: allCards, heading, intro, mobile }) {
-    const [view, setView] = useState(mobile ? 'stack' : 'grid');
+    const [view, setView] = useState('grid');
     const [group, setGroup] = useState('All');
     const [index, setIndex] = useState(0);
     const [flipped, setFlipped] = useState(() => new Set());
     const [detailId, setDetailId] = useState(null);
     const [dx, setDx] = useState(0);
-    const [leaving, setLeaving] = useState(0);
+    const [leaving, setLeaving] = useState(false);
+    const [entering, setEntering] = useState(0); // bumps to replay the "slide back in" animation
     const [dragging, setDragging] = useState(false);
-    const [tiltOn, setTiltOn] = useState(() => mobile && !needsTiltPermission());
     const drag = useRef(null);
     const moved = useRef(false);
     const deckRef = useRef(null);
 
+    useDeckGyro(deckRef, mobile && !detailId);
+
     const groups = ['All', ...new Set(allCards.map(c => c.group).filter(Boolean))];
     const cards = group === 'All' ? allCards : allCards.filter(c => c.group === group);
     const n = cards.length;
-    const tilt = useDeviceTilt(tiltOn && view === 'stack' && !detailId);
 
     const toggleFlip = (id) => setFlipped(s => {
         const next = new Set(s);
@@ -96,16 +118,23 @@ export default function CardDeck({ cards: allCards, heading, intro, mobile }) {
     const prevDetail = useCallback(() => stepDetail(-1), [stepDetail]);
     const nextDetail = useCallback(() => stepDetail(1), [stepDetail]);
 
-    /* ── stack interactions ── */
-    const go = (dir) => {
+    /* ── stack: next = top card flies off to the left; previous = it slides back in ── */
+    const next = () => {
         if (leaving || n < 2) return;
-        setLeaving(dir);
+        setLeaving(true);
         setTimeout(() => {
-            setIndex(i => (i + (dir > 0 ? 1 : -1) + n) % n);
-            setLeaving(0);
+            setIndex(i => (i + 1) % n);
+            setLeaving(false);
             setDx(0);
             setFlipped(new Set());
         }, 230);
+    };
+    const prev = () => {
+        if (leaving || n < 2) return;
+        setIndex(i => (i - 1 + n) % n);
+        setDx(0);
+        setFlipped(new Set());
+        setEntering(e => e + 1);
     };
 
     const onPointerDown = (e) => {
@@ -128,21 +157,15 @@ export default function CardDeck({ cards: allCards, heading, intro, mobile }) {
         if (!drag.current) return;
         drag.current = null;
         setDragging(false);
-        if (Math.abs(dx) > SWIPE_AT) go(dx < 0 ? 1 : -1);
+        if (dx < -SWIPE_AT) next();
+        else if (dx > SWIPE_AT) prev();
         else setDx(0);
     };
 
     const onKeyDown = (e) => {
         if (view !== 'stack') return;
-        if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
-        if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
-    };
-
-    const enableTilt = async () => {
-        try {
-            const res = await window.DeviceOrientationEvent.requestPermission();
-            if (res === 'granted') setTiltOn(true);
-        } catch { /* user declined or unsupported */ }
+        if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
     };
 
     const safeIndex = n ? index % n : 0;
@@ -158,17 +181,12 @@ export default function CardDeck({ cards: allCards, heading, intro, mobile }) {
                     <p className="cos-app-sub">{intro}</p>
                 </div>
                 <div className="cos-deck-tools">
-                    {mobile && view === 'stack' && !tiltOn && needsTiltPermission() && (
-                        <button type="button" className="cos-pill" onClick={enableTilt}>
-                            <Icon name="sparkle" size={14} /> Tilt
-                        </button>
-                    )}
                     <div className="cos-seg" role="group" aria-label="Deck view">
-                        <button type="button" aria-pressed={view === 'stack'} onClick={() => setView('stack')}>
-                            <Icon name="stack" size={15} /> <span>Stack</span>
-                        </button>
                         <button type="button" aria-pressed={view === 'grid'} onClick={() => setView('grid')}>
                             <Icon name="grid" size={15} /> <span>All</span>
+                        </button>
+                        <button type="button" aria-pressed={view === 'stack'} onClick={() => setView('stack')}>
+                            <Icon name="stack" size={15} /> <span>Stack</span>
                         </button>
                     </div>
                 </div>
@@ -206,7 +224,10 @@ export default function CardDeck({ cards: allCards, heading, intro, mobile }) {
                         {stack.slice().reverse().map(c => {
                             const depth = stack.indexOf(c);
                             const isTop = depth === 0;
-                            const offX = isTop ? (leaving ? leaving * -560 : dx) : 0;
+                            // Dragging left pulls the card away; dragging right only nudges it
+                            // (letting go past the threshold brings the previous card back).
+                            const drift = isTop ? (dx < 0 ? dx : dx * 0.25) : 0;
+                            const offX = isTop && leaving ? -560 : drift;
                             const rot = isTop ? offX * 0.05 : 0;
                             return (
                                 <div
@@ -220,24 +241,25 @@ export default function CardDeck({ cards: allCards, heading, intro, mobile }) {
                                     }}
                                     aria-hidden={!isTop}
                                 >
-                                    <TradingCard
-                                        card={c}
-                                        interactive={isTop}
-                                        flipped={isTop && flipped.has(c.id)}
-                                        onFlip={() => isTop && toggleFlip(c.id)}
-                                        onOpen={() => openDetail(c.id)}
-                                        tilt={isTop ? tilt : null}
-                                    />
+                                    <div key={isTop ? `enter-${entering}` : 'still'} className={isTop && entering ? 'cos-deck-enter' : undefined}>
+                                        <TradingCard
+                                            card={c}
+                                            interactive={isTop}
+                                            flipped={isTop && flipped.has(c.id)}
+                                            onFlip={() => isTop && toggleFlip(c.id)}
+                                            onOpen={() => openDetail(c.id)}
+                                        />
+                                    </div>
                                 </div>
                             );
                         })}
                     </div>
                     <div className="cos-deck-nav">
-                        <button type="button" aria-label="Previous card" onClick={() => go(-1)}><Icon name="chevronLeft" size={20} /></button>
+                        <button type="button" aria-label="Previous card" onClick={prev}><Icon name="chevronLeft" size={20} /></button>
                         <span className="cos-deck-count">{safeIndex + 1} / {n}</span>
-                        <button type="button" aria-label="Next card" onClick={() => go(1)}><Icon name="chevronRight" size={20} /></button>
+                        <button type="button" aria-label="Next card" onClick={next}><Icon name="chevronRight" size={20} /></button>
                     </div>
-                    <p className="cos-deck-hint">{mobile ? 'Swipe to deal · tap to flip' : 'Drag or use ← → · click to flip'}</p>
+                    <p className="cos-deck-hint">{mobile ? 'Swipe left for next, right to go back · tap to flip' : 'Drag or use ← → · click to flip'}</p>
                 </div>
             )}
 

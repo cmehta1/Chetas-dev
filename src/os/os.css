@@ -379,7 +379,10 @@
     background: #10132A;
     border: 2px solid #fff;
 }
-.cos-widget-route li:last-child::before { background: var(--cos-red); border-color: #FFD1CC; }
+.cos-widget-route li.is-current::before { background: var(--cos-red); border-color: #FFD1CC; box-shadow: 0 0 0 4px rgba(232, 72, 59, 0.25); }
+.cos-widget-route li.is-next { color: var(--cos-muted); font-style: italic; }
+.cos-widget-route li.is-next::before { background: transparent; border-style: dashed; border-color: var(--cos-muted); animation: cos-next-pulse 2.4s ease-in-out infinite; }
+@keyframes cos-next-pulse { 50% { box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.12); } }
 .cos-widget-route li span:last-child { color: var(--cos-muted); font-family: var(--cos-mono); font-size: 12px; }
 
 /* Play widget (shared with mobile hero) */
@@ -744,7 +747,20 @@
     border: 2px solid #fff;
     animation: cos-pop 0.4s calc(var(--i) * 90ms) both cubic-bezier(0.3, 1.6, 0.5, 1);
 }
-.cos-route li:last-child .cos-route-dot { background: var(--cos-red); border-color: #FFD1CC; }
+.cos-route li.is-current .cos-route-dot { background: var(--cos-red); border-color: #FFD1CC; box-shadow: 0 0 0 4px rgba(232, 72, 59, 0.25); }
+.cos-route li.is-next .cos-route-dot { background: transparent; border-style: dashed; border-color: var(--cos-muted); }
+.cos-route li.is-next .cos-route-city { color: var(--cos-muted); font-style: italic; }
+.cos-route li.is-next .cos-route-dot::after { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.3); animation: cos-next-ring 2.4s ease-out infinite; }
+@keyframes cos-next-ring { from { transform: scale(0.6); opacity: 1; } to { transform: scale(1.6); opacity: 0; } }
+.cos-link-btn { margin-top: 14px; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; color: var(--cos-gold) !important; padding: 0; }
+
+/* About: intro, strengths, work boxes */
+.cos-lede p + p { margin-top: 12px; }
+.cos-tags { list-style: none; margin-top: 18px; display: flex; flex-wrap: wrap; gap: 6px; }
+.cos-tags li { font-size: 12.5px; padding: 5px 11px; border-radius: 999px; background: rgba(255, 201, 74, 0.1); border: 1px solid rgba(255, 201, 74, 0.28); color: #FFE7A8; }
+.cos-edu.cos-work li { padding: 0; }
+.cos-work button { display: block; width: 100%; text-align: left; padding: 12px 14px; border-radius: 12px; transition: background 0.15s ease; }
+.cos-work button:hover { background: var(--cos-panel-hi) !important; }
 .cos-route-city { font-size: 13px; font-weight: 600; }
 .cos-route-meta { font-family: var(--cos-mono); font-size: 11px; color: var(--cos-muted); }
 @keyframes cos-pop { from { transform: scale(0); } }
@@ -907,6 +923,10 @@
     transform-origin: 50% 100%;
 }
 .cos-deck-slot:not(.is-top) { pointer-events: none; filter: brightness(calc(1 - var(--depth) * 0.18)); }
+.cos-deck-slot > div { height: 100%; }
+/* Going back: the previous card slides in from the left, the way the swipe points. */
+.cos-deck-enter { animation: cos-deck-enter 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes cos-deck-enter { from { transform: translateX(-115%) rotate(-12deg); opacity: 0.2; } }
 
 .cos-deck-nav { display: flex; align-items: center; gap: 14px; }
 .cos-deck-nav button {
@@ -952,11 +972,6 @@
 
 /* ─── Trading card ────────────────────────────────────────────── */
 .cos-card {
-    --rx: 0deg;
-    --ry: 0deg;
-    --mx: 50%;
-    --my: 50%;
-    --hyp: 0;
     --flip: 0deg;
     --frame: linear-gradient(160deg, #A78BFA, #5B33D6 48%, #241A63);
     --ink: #fff;
@@ -970,17 +985,27 @@
 }
 .cos-card.is-flipped { --flip: 180deg; }
 
+.cos-card-tilt {
+    /* Tilt: the pointer (--rx/--ry, set per card) wins; otherwise the phone tilt from the deck (--gx/--gy). */
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transform: rotateX(var(--rx, var(--gx, 0deg))) rotateY(var(--ry, var(--gy, 0deg)));
+    transition: transform 0.12s linear;
+    border-radius: 5cqw;
+}
+/* A flipped card lies flat so its back is easy to read. */
+.cos-card.is-flipped .cos-card-tilt { transform: none; transition: transform 0.3s ease; }
+
 .cos-card-inner {
     position: absolute;
     inset: 0;
     transform-style: preserve-3d;
-    transform: rotateX(var(--rx)) rotateY(calc(var(--ry) + var(--flip)));
+    transform: rotateY(var(--flip));
     transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
     border-radius: 5cqw;
     will-change: transform;
 }
-.cos-card.is-tilting .cos-card-inner { transition: transform 0.08s linear; }
-.cos-card.is-flipped .cos-card-inner { transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1); }
 
 .cos-card-face {
     position: absolute;
@@ -1008,7 +1033,7 @@
     color: var(--ink);
 }
 .cos-card:hover .cos-card-front,
-.cos-card.is-tilting .cos-card-front { box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 22px 50px rgba(0, 0, 0, 0.5), 0 0 34px var(--glow); }
+.cos-card.is-hovered .cos-card-front { box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 22px 50px rgba(0, 0, 0, 0.5), 0 0 34px var(--glow); }
 
 .cos-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 2cqw; padding: 0.6cqw 1cqw 0; min-height: 15cqw; }
 .cos-card-title {
@@ -1108,34 +1133,35 @@
     color: var(--ink-soft);
 }
 
-/* holo + glare layers */
+/* holo + glare: confined to the artwork so the card text always stays clean */
 .cos-card-shine,
 .cos-card-glare {
     position: absolute;
     inset: 0;
     pointer-events: none;
     border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.25s ease;
 }
 .cos-card-shine {
-    opacity: 0;
-    mix-blend-mode: color-dodge;
+    mix-blend-mode: soft-light;
     background:
         repeating-linear-gradient(115deg,
-            rgba(255, 0, 132, 0.4) 0%, rgba(255, 196, 0, 0.4) 8%, rgba(0, 255, 166, 0.4) 16%,
-            rgba(0, 166, 255, 0.4) 24%, rgba(186, 0, 255, 0.4) 32%, rgba(255, 0, 132, 0.4) 40%);
+            rgba(255, 0, 132, 0.5) 0%, rgba(255, 196, 0, 0.5) 8%, rgba(0, 255, 166, 0.5) 16%,
+            rgba(0, 166, 255, 0.5) 24%, rgba(186, 0, 255, 0.5) 32%, rgba(255, 0, 132, 0.5) 40%);
     background-size: 220% 220%;
-    background-position: var(--mx) var(--my);
-    transition: opacity 0.25s ease;
-    filter: brightness(0.9) contrast(1.2);
+    background-position: var(--mx, var(--gmx, 50%)) var(--my, var(--gmy, 50%));
 }
 .cos-card-glare {
-    opacity: calc(0.25 + var(--hyp) * 0.55);
     mix-blend-mode: overlay;
-    background: radial-gradient(farthest-corner circle at var(--mx) var(--my), rgba(255, 255, 255, 0.75) 8%, rgba(255, 255, 255, 0.2) 28%, rgba(0, 0, 0, 0.35) 90%);
-    transition: opacity 0.25s ease;
+    background: radial-gradient(farthest-corner circle at var(--mx, var(--gmx, 50%)) var(--my, var(--gmy, 50%)), rgba(255, 255, 255, 0.6) 6%, rgba(255, 255, 255, 0.12) 30%, transparent 70%);
 }
-.cos-card:not(.is-tilting) .cos-card-glare { opacity: 0; }
-.cos-card.is-tilting .cos-card-shine { opacity: calc(0.22 + var(--hyp) * 0.45); }
+.cos-card.is-hovered .cos-card-shine,
+.has-gyro .cos-card-shine { opacity: 0.45; }
+.cos-card.is-hovered .cos-card-glare,
+.has-gyro .cos-card-glare { opacity: 0.5; }
+.cos-card.is-flipped .cos-card-shine,
+.cos-card.is-flipped .cos-card-glare { opacity: 0; }
 
 /* back */
 .cos-card-back {
@@ -1205,7 +1231,6 @@
 }
 .cos-card-cert .cos-card-year { background: rgba(42, 24, 0, 0.16); }
 .cos-card-cert .cos-card-text { background: rgba(255, 255, 255, 0.3); }
-.cos-card-cert .cos-card-shine { opacity: 0.18; }
 
 .cos-card-hobby {
     --frame: linear-gradient(160deg, #A7F3D0, #10B981 40%, #065F46 100%);
@@ -1346,7 +1371,15 @@
 .cos-stop-city { font-family: var(--cos-display); font-weight: 600; font-size: 17px; }
 .cos-stop-city span { color: var(--cos-muted); font-weight: 500; }
 .cos-stop-years { font-family: var(--cos-mono); font-size: 12px; color: var(--cos-gold); }
-.cos-stop-card p { margin-top: 6px; font-size: 14px; line-height: 1.55; color: #CDD1E0; }
+.cos-stop-about { margin-top: 6px; font-size: 13.5px; line-height: 1.55; color: var(--cos-muted); font-style: italic; }
+.cos-substops { list-style: none; margin-top: 12px; display: grid; gap: 8px; border-left: 1px dashed rgba(255, 255, 255, 0.18); padding-left: 14px; }
+.cos-substops li { position: relative; display: grid; grid-template-columns: 74px 1fr; gap: 10px; align-items: baseline; }
+.cos-substops li::before { content: ''; position: absolute; left: -18px; top: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--cos-gold); }
+.cos-substop-when { font-family: var(--cos-mono); font-size: 11px; color: var(--cos-gold); }
+.cos-substop-text { font-size: 13.5px; line-height: 1.5; color: #DCDFEA; }
+.cos-stops li.is-next .cos-stop-pin { background: transparent; border-style: dashed; border-color: var(--cos-muted); }
+.cos-stops li.is-next .cos-stop-card { border-style: dashed; background: transparent; }
+.cos-stops li.is-next .cos-stop-city { color: var(--cos-muted); font-style: italic; }
 
 /* ═══════════════ Mobile: phone home screen ═══════════════ */
 .cos-mobile {
@@ -1399,21 +1432,6 @@
     display: flex;
     flex-direction: column;
     gap: 22px;
-}
-
-.cos-m-more {
-    align-self: center;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 8px 14px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 600;
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: 1px solid rgba(255, 255, 255, 0.16) !important;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
 }
 
 .cos-m-dots {
@@ -1474,7 +1492,7 @@
 .cos-m-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 18px 6px;
+    gap: 14px 6px;
     padding: 0 2px;
 }
 .cos-m-app {
@@ -1597,6 +1615,7 @@
 .cos-mobile .cos-deck-head { flex-direction: column; gap: 12px; margin-bottom: 18px; }
 .cos-mobile .cos-deck-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
 .cos-mobile .cos-term { font-size: 12.5px; }
+.cos-mobile .cos-substops li { grid-template-columns: 62px 1fr; }
 .cos-mobile .cos-filters { flex-wrap: nowrap; overflow-x: auto; margin: -4px -18px 16px; padding: 0 18px; scrollbar-width: none; }
 .cos-mobile .cos-detail-backdrop { padding: 0; place-items: stretch; }
 .cos-mobile .cos-detail { width: 100%; max-height: none; height: 100%; border-radius: 0; border: 0; padding-bottom: var(--cos-safe-bottom); }

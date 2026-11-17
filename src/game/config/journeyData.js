@@ -73,6 +73,7 @@ export const SKILLS_DATA = [
     { key: 'agents_7', id: 'agents', label: 'Agents', zone: 7, proficiency: 4 },
     { key: 'codex_7', id: 'codex', label: 'Codex', zone: 7, proficiency: 4 },
     { key: 'a2ui_7', id: 'a2ui', label: 'A2UI', zone: 7, proficiency: 4 },
+    { key: 'agentskills_7', id: 'agentskills', label: 'Agent Skills', zone: 7, proficiency: 4 },
 ];
 
 // Hobbies — displayed in Level 5
@@ -81,11 +82,15 @@ export const HOBBIES_DATA = [
     { id: 'football', label: 'Football', category: 'Sports' },
     { id: 'boxing', label: 'Boxing', category: 'Sports' },
     { id: 'tennis', label: 'Tennis', category: 'Sports' },
+    { id: 'pickleball', label: 'Pickleball', category: 'Sports' },
+    { id: 'fitness', label: 'Fitness', category: 'Sports' },
     { id: 'chess', label: 'Chess', category: 'Sports' },
     { id: 'space', label: 'Space Science', category: 'Interests' },
     { id: 'drawing', label: 'Drawing', category: 'Interests' },
     { id: 'coding', label: 'Coding', category: 'Interests' },
     { id: 'gaming', label: 'Gaming', category: 'Interests' },
+    { id: 'reading', label: 'Reading', category: 'Interests' },
+    { id: 'traveling', label: 'Traveling', category: 'Interests' },
 ];
 
 // Projects — shown on right side panel, grouped by zone
@@ -166,6 +171,46 @@ export const PROJECTS_DATA = [
         ],
     },
 ];
+
+// Career and side projects (zone 6 = Cerner, 7 = Oracle Health, null = side project)
+PROJECTS_DATA.push(
+    {
+        zone: 6,
+        title: 'EHRC Order App',
+        year: '2017–22',
+        bullets: [
+            'RESTful services (JAX-RS, Jersey, Swagger) for physicians & nurses to create, refill, cancel or discontinue orders',
+            'Java services for formulary lookups & lowest out-of-pocket cost across patient health plans',
+        ],
+    },
+    {
+        zone: 7,
+        title: 'Reimagine EHR: Agentic AI Workflows',
+        year: 'Now',
+        bullets: [
+            'Agentic AI workflows for the next-generation EHR at Oracle Health',
+            'Agents built with MCP servers, Agent Skills, DeepAgents & A2UI',
+        ],
+    },
+    {
+        zone: null,
+        title: 'Online Hindu Temple',
+        year: 'Live',
+        bullets: [
+            'A living 3D mandir in the browser: darshan, aarti, offerings & japa',
+            'Seven temples, live aarti five times a day & family darshan by invite link',
+        ],
+    },
+    {
+        zone: null,
+        title: 'Giberish',
+        year: 'Live',
+        bullets: [
+            'An interactive fragrance house for pure attars & perfumes',
+            'Scent Kundli quiz, immersive scent worlds & a virtual boutique',
+        ],
+    },
+);
 
 // Work experience — shown instead of projects for career zones (5-7)
 export const EXPERIENCE_DATA = [
@@ -351,6 +396,7 @@ export const CERTIFICATIONS = [
         issuer: 'Oracle',
         level: 'Certified Professional',
         year: '2024',
+        issued: 'Jul 2024',
         tags: ['Generative AI', 'LLMs', 'OCI'],
         banner: { title: 'OCI Gen AI 2024', subtitle: 'Certified Professional' },
     },
@@ -359,6 +405,7 @@ export const CERTIFICATIONS = [
         issuer: 'Oracle',
         level: 'Certified Associate',
         year: '2025',
+        issued: 'May 2025',
         tags: ['Cloud', 'OCI'],
         banner: { title: 'OCI Foundations', subtitle: 'Certified Associate' },
     },
@@ -367,6 +414,7 @@ export const CERTIFICATIONS = [
         issuer: 'Oracle',
         level: 'Certified Professional',
         year: '2025',
+        issued: 'May 2025',
         tags: ['Vector search', 'Embeddings', 'Oracle Database'],
         banner: { title: 'AI Vector Search', subtitle: 'Certified Professional' },
     },

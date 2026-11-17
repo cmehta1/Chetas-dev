@@ -51,6 +51,12 @@ export default function CardDetail({ card, onClose, onPrev, onNext, position }) 
                         <p className="cos-detail-desc">{card.description}</p>
                     )}
 
+                    {card.link && (
+                        <a className="cos-btn cos-btn-primary cos-detail-link" href={card.link} target="_blank" rel="noopener noreferrer">
+                            Visit {card.link.replace(/^https?:\/\//, '')} <Icon name="external" size={14} />
+                        </a>
+                    )}
+
                     <dl className="cos-detail-facts">
                         {card.facts.map(f => (
                             <div key={f.label}><dt>{f.label}</dt><dd>{f.value}</dd></div>

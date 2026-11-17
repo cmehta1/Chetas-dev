@@ -16,7 +16,7 @@ function AppGrid({ ids, onOpen }) {
                 <button key={id} type="button" className="cos-m-app" onClick={() => onOpen(id)}
                     onTouchStart={APPS[id].game ? prefetchGame : undefined}>
                     <span className="cos-m-app-icon">
-                        <AppIcon id={id} size={60} />
+                        <AppIcon id={id} size={56} />
                         {APPS[id].url && <span className="cos-m-app-link" aria-hidden="true"><Icon name="external" size={10} strokeWidth={2.4} /></span>}
                     </span>
                     <span>{APPS[id].short}</span>
@@ -117,10 +117,6 @@ export default function MobileHome({ onPlay }) {
                     </section>
 
                     <AppGrid ids={MOBILE_PAGES[0]} onOpen={openApp} />
-
-                    <button type="button" className="cos-m-more" onClick={() => goToPage(1)}>
-                        More apps <Icon name="chevronRight" size={14} />
-                    </button>
                 </main>
 
                 {/* Page 2: the route and profile links */}
@@ -129,8 +125,11 @@ export default function MobileHome({ onPlay }) {
                         <span className="cos-widget-label">The route</span>
                         <ol>
                             {JOURNEY_STOPS.map(s => (
-                                <li key={s.city}><span>{s.city}, {s.region}</span><span>{s.year}</span></li>
+                                <li key={s.city} className={s.current ? 'is-current' : ''}>
+                                    <span>{s.city}, {s.region}</span><span>{s.current ? `${s.year}–now` : s.year}</span>
+                                </li>
                             ))}
+                            <li className="is-next"><span>The journey continues</span><span>…</span></li>
                         </ol>
                     </button>
 

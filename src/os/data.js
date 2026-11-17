@@ -33,12 +33,63 @@ export const EDUCATION = [
     { degree: 'B.E. Computer Science & Engineering', school: 'Gujarat Technological University', place: 'Gujarat, India', years: '2009 – 2013', note: 'Top ranker', zone: 2 },
 ];
 
-/* Where Chetas has lived (not office locations). */
+/* Where Chetas has lived (not office locations), with what happened in each place. */
 export const JOURNEY_STOPS = [
-    { city: 'Gujarat', region: 'India', year: '1991', years: '1991 – 2014', note: 'Childhood, school, and a B.E. in Computer Science at Gujarat Technological University.' },
-    { city: 'Binghamton', region: 'NY', year: '2014', years: '2014 – 2016', note: 'Flew to the USA for an M.S. in Computer Science at SUNY Binghamton.' },
-    { city: 'Livonia', region: 'MI', year: '2016', years: '2016 – 2017', note: 'First job in the US: Software Developer at Midway Dental Supply.' },
-    { city: 'Overland Park', region: 'KS', year: '2017', years: '2017 – now', note: 'Home since 2017: five years at Cerner, then Oracle Health.' },
+    {
+        city: 'Gujarat', region: 'India', year: '1991', years: '1991 – 2014',
+        note: 'Childhood, school, and a B.E. in Computer Science at Gujarat Technological University.',
+        about: "A state on India's west coast, home to Ahmedabad, Vadodara and the Narmada river.",
+        events: [
+            { when: '1991', text: 'Born and raised in Gujarat' },
+            { when: '1994–2009', text: 'Three schools; 100/100 in Science and 99/100 in Maths' },
+            { when: '2002', text: 'First place in a district-level science quiz' },
+            { when: '2005', text: 'Youngest player, at 15, on the winning Under-19 cricket team' },
+            { when: '2009–13', text: 'B.E. in Computer Science & Engineering at GTU' },
+            { when: '2011–12', text: 'Helped organise Aahvan, a national-level college tech festival' },
+            { when: '2012–13', text: "Capstone with L&T Infotech for Larsen & Toubro's HMD-IT department" },
+            { when: '2012–14', text: 'Taught Vedic and speed maths to school students' },
+            { when: '2014', text: 'Home automation system featured in the local newspaper' },
+            { when: '2014', text: 'Flew to the USA' },
+        ],
+    },
+    {
+        city: 'Binghamton', region: 'NY', year: '2014', years: '2014 – 2016',
+        note: 'M.S. in Computer Science at SUNY Binghamton.',
+        about: "A college city in New York's Southern Tier, where the Susquehanna and Chenango rivers meet, known for long snowy winters.",
+        events: [
+            { when: '2014', text: 'Started an M.S. in Computer Science at SUNY Binghamton' },
+            { when: 'Mar 2015', text: 'Built a 3D shooter game at a hackathon' },
+            { when: 'May 2015', text: 'Secure electronic voting system with RSA, in C' },
+            { when: 'Oct 2015', text: 'APEX out-of-order CPU simulator, 3x faster than in-order' },
+            { when: 'Nov 2015', text: 'Retail business management system on Oracle 11g' },
+            { when: '2016', text: 'Graduated with a 3.7 GPA' },
+        ],
+    },
+    {
+        city: 'Livonia', region: 'MI', year: '2016', years: '2016 – 2017',
+        note: 'First job in the US: Software Developer at Midway Dental Supply.',
+        about: 'A suburb of Detroit in southeast Michigan.',
+        events: [
+            { when: 'Sep 2016', text: 'Software Developer at Midway Dental Supply' },
+            { when: '2016–17', text: "Built out the company's Salesforce CRM for the sales team" },
+            { when: '2016–17', text: 'Python and APEX software, AngularJS web apps, SQL and SOQL reports' },
+        ],
+    },
+    {
+        city: 'Overland Park', region: 'KS', year: '2017', years: '2017 – now',
+        note: 'Home since 2017: five years at Cerner, then Oracle Health.',
+        about: 'One of the largest cities in the Kansas City metro area, in Johnson County, Kansas.',
+        current: true,
+        events: [
+            { when: 'Sep 2017', text: 'Software Engineer II at Cerner: clinical ordering services' },
+            { when: '2019', text: 'Started volunteering with TLC for Kids USA' },
+            { when: 'Oct 2022', text: 'Cerner becomes Oracle Health; Member of Technical Staff' },
+            { when: 'Jul 2024', text: 'OCI Generative AI Professional certification' },
+            { when: 'May 2025', text: 'OCI Foundations and AI Vector Search certifications' },
+            { when: 'Aug 2025', text: 'Mentoring engineers on ADPList; named a Top 50 Fullstack Mentor' },
+            { when: 'Now', text: 'Senior Member of Technical Staff, building agentic AI for the EHR' },
+        ],
+    },
 ];
 
 /* ── Experience (newest first) ── */
@@ -54,7 +105,7 @@ export const EXPERIENCE = [...EXPERIENCE_DATA]
 
 /* ── Skills, merged across zones (highest rating wins, earliest year kept) ── */
 const SKILL_GROUPS = {
-    'AI & Agents': ['mcp', 'agents', 'a2ui', 'codex'],
+    'AI & Agents': ['mcp', 'agents', 'agentskills', 'a2ui', 'codex'],
     Languages: ['java', 'javascript', 'typescript', 'python', 'c', 'cplusplus', 'sql'],
     'Web & Services': ['react', 'restapis', 'angularjs', 'salesforce'],
     Foundations: ['algorithms', 'dsa', 'os', 'comparch', 'databases', 'compsec'],
@@ -134,6 +185,7 @@ const experienceCards = [
     }),
 ];
 
+const PROJECT_GROUP_ORDER = ['Oracle Health', 'Cerner', 'Side projects', 'SUNY Binghamton', 'GTU'];
 const projectCards = PROJECTS_DATA.map(p => {
     const copy = PROJECT_COPY[p.title] || {};
     return {
@@ -143,10 +195,11 @@ const projectCards = PROJECTS_DATA.map(p => {
         subtitle: copy.where,
         year: p.year,
         badge: copy.badge,
+        link: copy.link,
         art: PROJECT_ART[p.title],
         summary: copy.summary || p.bullets[0],
         description: copy.description,
-        bullets: p.bullets,
+        bullets: copy.highlights || p.bullets,
         stack: copy.stack || [],
         facts: [
             { label: 'Year', value: p.year },
@@ -154,7 +207,7 @@ const projectCards = PROJECTS_DATA.map(p => {
             { label: 'Built with', value: (copy.stack || []).join(', ') },
         ].filter(f => f.value),
     };
-});
+}).sort((a, b) => PROJECT_GROUP_ORDER.indexOf(a.group) - PROJECT_GROUP_ORDER.indexOf(b.group));
 
 const certCards = CERTIFICATIONS.map(c => {
     const copy = CERT_COPY[c.name] || {};
@@ -173,7 +226,7 @@ const certCards = CERTIFICATIONS.map(c => {
         facts: [
             { label: 'Issuer', value: c.issuer },
             { label: 'Level', value: c.level },
-            { label: 'Earned', value: c.year },
+            { label: 'Earned', value: c.issued || c.year },
         ],
     };
 });
@@ -206,7 +259,7 @@ const skillCards = SKILL_GROUPS_LIST.flatMap(g => g.skills.map(s => {
         rating: s.proficiency,
         art: SKILL_ART[s.id],
         summary: copy.summary,
-        description: '',
+        description: copy.description || '',
         bullets: [],
         stack: [],
         facts: [

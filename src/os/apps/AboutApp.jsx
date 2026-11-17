@@ -3,12 +3,22 @@ import Icon from '../components/Icons';
 import { PROFILE, EDUCATION, JOURNEY_STOPS, EXPERIENCE, CARDS, yearsOfExperience } from '../data';
 import { prefetchGame } from '../hooks';
 
+const STRENGTHS = [
+    'Healthcare IT, 10+ years',
+    'Java & RESTful services',
+    'React & TypeScript',
+    'Agentic AI: MCP, Agent Skills, A2UI',
+    'Oracle Cloud certified',
+    'Product design & 3D on the web',
+    'Mentoring',
+];
+
 export default function AboutApp({ api }) {
     const stats = [
-        { value: `${yearsOfExperience()}`, label: 'years in industry' },
+        { value: `${yearsOfExperience()}+`, label: 'years building software' },
         { value: `${EXPERIENCE.length}`, label: 'companies' },
+        { value: `${CARDS.project.length}`, label: 'projects' },
         { value: `${CARDS.cert.length}`, label: 'certifications' },
-        { value: `${PROFILE.languages.length}`, label: 'languages spoken' },
     ];
 
     return (
@@ -23,11 +33,24 @@ export default function AboutApp({ api }) {
                 </div>
             </header>
 
-            <p className="cos-lede">
-                I build clinical ordering software used by physicians and nurses. That's RESTful services in Java
-                for EJS clinical ordering, Discern alerts, and lately AI-enabled apps and agents
-                with MCP, DeepAgents and A2UI. I've been in healthcare tech since 2017, at Cerner and then Oracle Health.
-            </p>
+            <div className="cos-lede">
+                <p>
+                    I'm a software engineer with 10+ years in healthcare IT, and I like turning ideas into things people
+                    actually use. At Oracle Health I build the Java services behind clinical ordering for physicians and
+                    nurses, and I'm helping reimagine the EHR with agentic AI: agents that work through MCP servers,
+                    Agent Skills and A2UI.
+                </p>
+                <p>
+                    I design and build end to end, from APIs and data models to interfaces people enjoy. Outside work I keep
+                    creating: a 3D temple anyone can visit in the browser, an interactive fragrance house, and this
+                    portfolio you can explore as an OS or play as a game. I also mentor engineers on ADPList, where I was
+                    named a Top 50 Fullstack Mentor.
+                </p>
+            </div>
+
+            <ul className="cos-tags" aria-label="Strengths">
+                {STRENGTHS.map(s => <li key={s}>{s}</li>)}
+            </ul>
 
             <ul className="cos-stats">
                 {stats.map(s => (
@@ -40,8 +63,8 @@ export default function AboutApp({ api }) {
                     onPointerEnter={prefetchGame} onTouchStart={prefetchGame}>
                     <Icon name="play" size={14} /> Play my journey
                 </button>
-                <button type="button" className="cos-btn" onClick={() => api.openApp('experience')}>Experience</button>
                 <button type="button" className="cos-btn" onClick={() => api.openApp('projects')}>Projects</button>
+                <button type="button" className="cos-btn" onClick={() => api.openApp('skills')}>Skills</button>
                 <button type="button" className="cos-btn" onClick={() => api.openApp('contact')}>Contact</button>
             </div>
 
@@ -49,13 +72,36 @@ export default function AboutApp({ api }) {
                 <h2>The route</h2>
                 <ol className="cos-route">
                     {JOURNEY_STOPS.map((s, i) => (
-                        <li key={s.city} style={{ '--i': i }}>
+                        <li key={s.city} style={{ '--i': i }} className={s.current ? 'is-current' : ''}>
                             <span className="cos-route-dot" />
                             <span className="cos-route-city">{s.city}</span>
-                            <span className="cos-route-meta">{s.region} · {s.year}</span>
+                            <span className="cos-route-meta">{s.region} · {s.current ? `${s.year}–now` : s.year}</span>
                         </li>
                     ))}
+                    <li className="is-next" style={{ '--i': JOURNEY_STOPS.length }}>
+                        <span className="cos-route-dot" />
+                        <span className="cos-route-city">What's next</span>
+                        <span className="cos-route-meta">the journey continues</span>
+                    </li>
                 </ol>
+                <button type="button" className="cos-link-btn" onClick={() => api.openApp('route')}>
+                    See the full route <Icon name="chevronRight" size={13} />
+                </button>
+            </section>
+
+            <section className="cos-section">
+                <h2>Work</h2>
+                <ul className="cos-edu cos-work">
+                    {EXPERIENCE.map(e => (
+                        <li key={e.zone}>
+                            <button type="button" onClick={() => api.openApp('experience')}>
+                                <p className="cos-edu-degree">{e.title}</p>
+                                <p className="cos-edu-school">{e.company} · {e.location}</p>
+                                <p className="cos-edu-meta">{e.period}</p>
+                            </button>
+                        </li>
+                    ))}
+                </ul>
             </section>
 
             <section className="cos-section">
@@ -84,7 +130,6 @@ export default function AboutApp({ api }) {
                     ))}
                 </ul>
             </section>
-
         </div>
     );
 }

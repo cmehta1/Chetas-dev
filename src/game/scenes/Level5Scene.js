@@ -373,6 +373,74 @@ export default class Level5Scene extends Phaser.Scene {
                 g.fillRect(x - 10, y - 2, 1, 3);
                 break;
 
+            case 'pickleball':
+                // Paddle
+                g.fillStyle(0x1E88E5);
+                g.fillRoundedRect(x - 20, y - 22, 24, 28, 9);
+                g.lineStyle(1.5, 0x0D47A1);
+                g.strokeRoundedRect(x - 20, y - 22, 24, 28, 9);
+                g.fillStyle(0x0D47A1);
+                g.fillRoundedRect(x - 11, y + 5, 6, 15, 2);
+                // Ball with holes
+                g.fillStyle(0xFFEB3B);
+                g.fillCircle(x + 13, y + 10, 7);
+                g.fillStyle(0xF9A825);
+                [[-3, -2], [2, -3], [3, 2], [-2, 3], [0, 0]].forEach(([dx, dy]) => g.fillCircle(x + 13 + dx, y + 10 + dy, 1.2));
+                break;
+
+            case 'fitness':
+                // Dumbbell
+                g.fillStyle(0x9E9E9E);
+                g.fillRect(x - 18, y + 2, 36, 5);
+                g.fillStyle(0x37474F);
+                g.fillRoundedRect(x - 25, y - 9, 8, 27, 2);
+                g.fillRoundedRect(x + 17, y - 9, 8, 27, 2);
+                g.fillStyle(0x546E7A);
+                g.fillRoundedRect(x - 31, y - 4, 6, 17, 2);
+                g.fillRoundedRect(x + 25, y - 4, 6, 17, 2);
+                // Heart
+                g.fillStyle(0xE53935);
+                g.fillCircle(x - 4, y - 18, 4);
+                g.fillCircle(x + 4, y - 18, 4);
+                g.fillTriangle(x - 8, y - 16.5, x + 8, y - 16.5, x, y - 8);
+                break;
+
+            case 'reading':
+                // Open book
+                g.fillStyle(0x6D4C41);
+                g.fillRoundedRect(x - 25, y - 4, 50, 26, 3);
+                g.fillStyle(0xFFF8E1);
+                g.fillRect(x - 22, y - 8, 21, 27);
+                g.fillRect(x + 1, y - 8, 21, 27);
+                g.lineStyle(1, 0xBCAAA4);
+                for (let i = 0; i < 4; i++) {
+                    g.lineBetween(x - 19, y - 2 + i * 5, x - 4, y - 2 + i * 5);
+                    g.lineBetween(x + 4, y - 2 + i * 5, x + 19, y - 2 + i * 5);
+                }
+                g.lineStyle(1.5, 0x8D6E63);
+                g.lineBetween(x, y - 8, x, y + 19);
+                // Bookmark
+                g.fillStyle(0xE53935);
+                g.fillRect(x + 12, y - 12, 4, 10);
+                break;
+
+            case 'traveling':
+                // Suitcase
+                g.lineStyle(3, 0x5D4037);
+                g.strokeRoundedRect(x - 10, y - 10, 14, 9, 3);
+                g.fillStyle(0xE53935);
+                g.fillRoundedRect(x - 19, y - 4, 32, 24, 4);
+                g.fillStyle(0xFFCDD2);
+                g.fillRect(x - 12, y - 4, 3, 24);
+                g.fillRect(x + 4, y - 4, 3, 24);
+                // Plane overhead
+                g.fillStyle(0xECEFF1);
+                g.fillEllipse(x + 14, y - 24, 24, 6);
+                g.fillTriangle(x + 13, y - 24, x + 8, y - 33, x + 19, y - 24);
+                g.fillTriangle(x + 13, y - 24, x + 8, y - 16, x + 19, y - 24);
+                g.fillTriangle(x + 3, y - 24, x + 1, y - 30, x + 7, y - 24);
+                break;
+
             case 'gaming':
                 // Controller body
                 g.fillStyle(0x37474F);

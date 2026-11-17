@@ -7,6 +7,10 @@ const LANG_NODES = ['Code', 'Braces', 'Terminal', 'Bug', 'GitBranch', 'Laptop'];
 const WEB_NODES = ['AppWindow', 'Server', 'Globe', 'Plug', 'Layers', 'Smartphone'];
 
 export const PROJECT_ART = {
+    'Reimagine EHR: Agentic AI Workflows': { theme: 'neon', palette: 'violet', main: 'Bot', nodes: ['HeartPulse', 'PlugZap', 'Puzzle', 'Workflow', 'Sparkles', 'LayoutDashboard'] },
+    'EHRC Order App': { theme: 'glass', palette: 'ocean', main: 'ClipboardList', nodes: ['Stethoscope', 'Pill', 'Server', 'Calculator', 'ShieldCheck', 'Users'] },
+    'Online Hindu Temple': { theme: 'poster', palette: 'sunset', main: 'x:temple', nodes: ['Flame', 'BellRing', 'Flower2', 'Users', 'CalendarCheck', 'Globe'] },
+    Giberish: { theme: 'paper', palette: 'peach', main: 'Flower2', nodes: ['Sparkles', 'Gem', 'Wind', 'Moon', 'Star', 'Sun'] },
     'Event Management System': { theme: 'poster', palette: 'sunset', main: 'PartyPopper', nodes: ['Flower2', 'Utensils', 'Music', 'CalendarCheck', 'Users', 'Cake'] },
     'Hotel Management System': { theme: 'iso', palette: 'peach', main: 'ConciergeBell', nodes: ['Bed', 'Key', 'Luggage', 'ClipboardList', 'CreditCard', 'Coffee'] },
     'Inventory & Invoice Management': { theme: 'glass', palette: 'sand', main: 'Warehouse', nodes: ['Package', 'Receipt', 'Barcode', 'Truck', 'Database', 'ChartBar'] },
@@ -29,11 +33,15 @@ export const HOBBY_ART = {
     cricket: { theme: 'paper', palette: 'forest', main: 'x:cricket', nodes: ['Trophy', 'Medal', 'Users', 'Timer', 'Target', 'Award'] },
     football: { theme: 'iso', palette: 'lime', main: 'x:football', nodes: ['Trophy', 'Users', 'Timer', 'Target', 'Flag', 'Footprints'] },
     boxing: { theme: 'poster', palette: 'crimson', main: 'x:glove', nodes: ['Dumbbell', 'Timer', 'Flame', 'Target', 'Medal', 'Activity'] },
+    pickleball: { theme: 'hub', palette: 'teal', main: 'x:paddle', nodes: ['Trophy', 'Users', 'Timer', 'Sun', 'Target', 'Activity'] },
+    fitness: { theme: 'neon', palette: 'crimson', main: 'Dumbbell', nodes: ['HeartPulse', 'Timer', 'Flame', 'Activity', 'Footprints', 'Trophy'] },
     tennis: { theme: 'poster', palette: 'sand', main: 'x:racket', nodes: ['x:tennisball', 'Trophy', 'Timer', 'Target', 'Sun', 'Medal'] },
     chess: { theme: 'iso', palette: 'slate', main: 'x:knight', nodes: ['Crown', 'Brain', 'Timer', 'Swords', 'Target', 'Trophy'] },
     space: { theme: 'orbit', palette: 'violet', main: 'Telescope', nodes: ['Rocket', 'Orbit', 'Satellite', 'Moon', 'Star', 'Globe'] },
     drawing: { theme: 'paper', palette: 'lavender', main: 'Pencil', nodes: ['Palette', 'Brush', 'Award', 'Feather', 'Star', 'Sparkles'] },
     coding: { theme: 'neon', palette: 'teal', main: 'Code2', nodes: ['Terminal', 'Braces', 'Bug', 'GitBranch', 'Laptop', 'Brain'] },
+    reading: { theme: 'paper', palette: 'sand', main: 'BookOpen', nodes: ['Library', 'Bookmark', 'Lightbulb', 'Coffee', 'Brain', 'Feather'] },
+    traveling: { theme: 'orbit', palette: 'teal', main: 'Plane', nodes: ['Luggage', 'Map', 'Camera', 'Mountain', 'Compass', 'Globe'] },
     gaming: { theme: 'glass', palette: 'magenta', main: 'Gamepad2', nodes: ['Joystick', 'Trophy', 'Ghost', 'Rocket', 'Star', 'Monitor'] },
 };
 
@@ -62,6 +70,7 @@ export const SKILL_ART = {
     salesforce: { theme: 'bubbles', palette: 'sky', main: 'logo', logo: 'salesforce', nodes: ['Users', 'Workflow', 'Database', 'ChartBar', 'Code2', 'Cloud'] },
     mcp: { theme: 'circuit', palette: 'teal', main: 'PlugZap', nodes: ['Bot', 'Database', 'Wrench', 'Cable', 'Server', 'FileCode'] },
     agents: { theme: 'hub', palette: 'violet', main: 'Bot', nodes: ['Brain', 'Workflow', 'Wrench', 'MessageSquare', 'Search', 'Sparkles'] },
+    agentskills: { theme: 'iso', palette: 'lavender', main: 'Puzzle', nodes: ['Bot', 'FileCode', 'Wrench', 'BookOpen', 'Sparkles', 'Workflow'] },
     a2ui: { theme: 'glass', palette: 'lavender', main: 'LayoutDashboard', nodes: ['Bot', 'AppWindow', 'MousePointer2', 'Smartphone', 'Sparkles', 'Palette'] },
     codex: { theme: 'neon', palette: 'slate', main: 'SquareTerminal', nodes: ['Bot', 'Code2', 'GitBranch', 'Bug', 'Sparkles', 'FileCode'] },
     algorithms: { theme: 'blueprint', palette: 'ocean', main: 'ArrowDownUp', nodes: ['GitFork', 'Timer', 'Binary', 'Infinity', 'Search', 'Layers'] },

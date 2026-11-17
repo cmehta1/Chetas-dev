@@ -11,10 +11,11 @@ import {
     Moon, Satellite, Crown, Swords, Timer, Medal, Target, Dumbbell, Award, Stethoscope, Pill, HeartPulse, Activity,
     BellRing, ClipboardList, CalendarCheck, Coffee, Box, Zap, Wrench, Feather, Joystick, Flame, Footprints, Sun,
     Flag, Snowflake, Table, MessageSquare, Eye, Droplet, Filter, ChartBar, ChartLine, Infinity as InfinityIcon,
-    Hash, Languages,
+    Hash, Languages, Puzzle, Gem, Wind, Plane, Camera, Mountain, Library, Bookmark,
 } from 'lucide-react';
 import {
     CricketGlyph, FootballGlyph, GloveGlyph, RacketGlyph, TennisBallGlyph, KnightGlyph, ToothGlyph,
+    PaddleGlyph, TempleGlyph,
 } from '../components/Glyphs';
 
 const ICONS = {
@@ -29,7 +30,9 @@ const ICONS = {
     Moon, Satellite, Crown, Swords, Timer, Medal, Target, Dumbbell, Award, Stethoscope, Pill, HeartPulse, Activity,
     BellRing, ClipboardList, CalendarCheck, Coffee, Box, Zap, Wrench, Feather, Joystick, Flame, Footprints, Sun,
     Flag, Snowflake, Table, MessageSquare, Eye, Droplet, Filter, ChartBar, ChartLine, Infinity: InfinityIcon,
-    Hash, Languages,
+    Hash, Languages, Puzzle, Gem, Wind, Plane, Camera, Mountain, Library, Bookmark,
+    'x:paddle': PaddleGlyph,
+    'x:temple': TempleGlyph,
     'x:cricket': CricketGlyph,
     'x:football': FootballGlyph,
     'x:glove': GloveGlyph,

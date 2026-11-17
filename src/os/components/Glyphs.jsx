@@ -78,3 +78,29 @@ export function ToothGlyph(props) {
         </Glyph>
     );
 }
+
+export function PaddleGlyph(props) {
+    return (
+        <Glyph {...props}>
+            <rect x="3.5" y="2.5" width="10" height="12" rx="4.5" transform="rotate(-20 8.5 8.5)" />
+            <path d="M10.2 14.3 12.4 20" strokeWidth={(props.strokeWidth || 2) * 1.4} />
+            <circle cx="18" cy="17" r="3" />
+            <circle cx="17.2" cy="16.3" r=".35" fill="currentColor" />
+            <circle cx="18.8" cy="17.6" r=".35" fill="currentColor" />
+        </Glyph>
+    );
+}
+
+export function TempleGlyph(props) {
+    return (
+        <Glyph {...props}>
+            <path d="M12 2v2.5" />
+            <path d="m12 2 3 1.2-3 1.2" />
+            <path d="M7.5 13 9 7.5c.6-2 1.7-3 3-3s2.4 1 3 3l1.5 5.5" />
+            <path d="M5 21v-6.5h14V21" />
+            <path d="M3.5 21h17" />
+            <path d="M10 21v-3.5a2 2 0 0 1 4 0V21" />
+            <path d="M5 14.5 7.5 13h9l2.5 1.5" />
+        </Glyph>
+    );
+}

@@ -156,8 +156,11 @@ export default function Desktop({ onPlay }) {
                     <p className="cos-widget-label">The route</p>
                     <ol>
                         {JOURNEY_STOPS.map(s => (
-                            <li key={s.city}><span>{s.city}, {s.region}</span><span>{s.year}</span></li>
+                            <li key={s.city} className={s.current ? 'is-current' : ''}>
+                                <span>{s.city}, {s.region}</span><span>{s.current ? `${s.year}–now` : s.year}</span>
+                            </li>
                         ))}
+                        <li className="is-next"><span>The journey continues</span><span>…</span></li>
                     </ol>
                 </div>
             </aside>

@@ -14,7 +14,7 @@ const DECKS = {
     projects: {
         kind: 'project',
         heading: 'Project deck',
-        intro: 'Things I built at GTU and SUNY Binghamton, from a home automation system that made the local paper to an out-of-order CPU simulator.',
+        intro: 'From agentic AI for the next-generation EHR and clinical ordering at Cerner, to side projects like a 3D online temple, and the systems I built at Binghamton and GTU.',
     },
     certs: {
         kind: 'cert',

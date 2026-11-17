@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import EventBus from '../../game/EventBus';
-import { PROJECTS_DATA, EXPERIENCE_DATA } from '../../game/config/journeyData';
+import { PROJECTS_DATA, EXPERIENCE_DATA, HOBBIES_DATA } from '../../game/config/journeyData';
 
 export default function ProjectsPanel() {
     const [currentZone, setCurrentZone] = useState(0);
@@ -82,10 +82,8 @@ export default function ProjectsPanel() {
 
 function getItems(zoneId) {
     if (zoneId === 8) {
-        return [
-            { title: 'Sports', bullets: ['Cricket', 'Football', 'Boxing', 'Tennis', 'Chess'] },
-            { title: 'Interests', bullets: ['Space Science', 'Drawing', 'Coding', 'Gaming'] },
-        ];
+        const categories = [...new Set(HOBBIES_DATA.map(h => h.category))];
+        return categories.map(c => ({ title: c, bullets: HOBBIES_DATA.filter(h => h.category === c).map(h => h.label) }));
     }
     if (zoneId >= 5) {
         return EXPERIENCE_DATA.filter(e => e.zone === zoneId);
