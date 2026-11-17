@@ -8,7 +8,7 @@ const WEB_NODES = ['AppWindow', 'Server', 'Globe', 'Plug', 'Layers', 'Smartphone
 
 export const PROJECT_ART = {
     'Reimagine EHR: Agentic AI Workflows': { theme: 'neon', palette: 'violet', main: 'Bot', nodes: ['HeartPulse', 'PlugZap', 'Puzzle', 'Workflow', 'Sparkles', 'LayoutDashboard'] },
-    'EHRC Order App': { theme: 'glass', palette: 'ocean', main: 'ClipboardList', nodes: ['Stethoscope', 'Pill', 'Server', 'Calculator', 'ShieldCheck', 'Users'] },
+    'EHR Order App': { theme: 'glass', palette: 'ocean', main: 'ClipboardList', nodes: ['Stethoscope', 'Pill', 'Server', 'Calculator', 'ShieldCheck', 'Users'] },
     'Online Hindu Temple': { theme: 'poster', palette: 'sunset', main: 'x:temple', nodes: ['Flame', 'BellRing', 'Flower2', 'Users', 'CalendarCheck', 'Globe'] },
     Giberish: { theme: 'paper', palette: 'peach', main: 'Flower2', nodes: ['Sparkles', 'Gem', 'Wind', 'Moon', 'Star', 'Sun'] },
     'Event Management System': { theme: 'poster', palette: 'sunset', main: 'PartyPopper', nodes: ['Flower2', 'Utensils', 'Music', 'CalendarCheck', 'Users', 'Cake'] },

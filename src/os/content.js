@@ -15,7 +15,7 @@ export const PROJECT_COPY = {
         ],
         badge: 'Current',
     },
-    'EHRC Order App': {
+    'EHR Order App': {
         group: 'Cerner', where: 'Cerner Corporation',
         stack: ['Java', 'JAX-RS', 'Jersey', 'Swagger', 'SQL', 'Jenkins'],
         summary: 'The services behind clinical ordering: create, refill, cancel and discontinue orders.',

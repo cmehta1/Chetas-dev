@@ -176,7 +176,7 @@ export const PROJECTS_DATA = [
 PROJECTS_DATA.push(
     {
         zone: 6,
-        title: 'EHRC Order App',
+        title: 'EHR Order App',
         year: '2017–22',
         bullets: [
             'RESTful services (JAX-RS, Jersey, Swagger) for physicians & nurses to create, refill, cancel or discontinue orders',
