@@ -37,8 +37,8 @@ export default function AboutApp({ api }) {
                 <p className="cos-intro">
                     A detail-oriented full-stack engineer with {yearsOfExperience()}+ years of experience working in the
                     fields of{' '}
-                    <span className="cos-intro-hl">Healthcare IT, Agentic AI, E-prescribing, Prior Authorization</span> and{' '}
-                    <span className="cos-intro-hl">3D on the web</span>, focused on crafting reliable, intelligent and
+                    <span className="cos-intro-hl">Healthcare IT, Agentic AI</span> and{' '}
+                    <span className="cos-intro-hl">Interactive UI/UX</span>, focused on crafting reliable, intelligent and
                     delightful software that people love to use.
                 </p>
                 <p>
