@@ -764,7 +764,7 @@ svg.cos-logo-mark { display: inline-block; vertical-align: -3px; margin-right: 4
     left: 6px;
     right: 6px;
     height: 2px;
-    background: linear-gradient(90deg, var(--cos-red), #60A5FA, var(--cos-saffron));
+    background: linear-gradient(90deg, var(--cos-saffron), #60A5FA, var(--cos-red));
     opacity: 0.8;
 }
 .cos-route li { position: relative; flex: 1; display: flex; flex-direction: column; gap: 2px; padding-top: 22px; min-width: 0; }
@@ -788,6 +788,18 @@ svg.cos-logo-mark { display: inline-block; vertical-align: -3px; margin-right: 4
 
 /* About: intro, strengths, work boxes */
 .cos-lede p + p { margin-top: 12px; }
+/* Opening statement: bold and italic, larger, with the fields picked out in saffron. */
+.cos-lede .cos-intro {
+    font-size: 21px;
+    line-height: 1.42;
+    font-weight: 700;
+    font-style: italic;
+    letter-spacing: -0.01em;
+    color: var(--cos-text);
+    margin-bottom: 18px;
+}
+.cos-intro-hl { color: var(--cos-saffron); }
+.cos-mobile .cos-lede .cos-intro { font-size: 19px; }
 .cos-tags { list-style: none; margin-top: 18px; display: flex; flex-wrap: wrap; gap: 6px; }
 .cos-tags li { font-size: 12.5px; padding: 5px 11px; border-radius: 999px; background: rgba(255, 201, 74, 0.1); border: 1px solid rgba(255, 201, 74, 0.28); color: #FFE7A8; }
 .cos-edu.cos-work li { padding: 0; }
@@ -1645,7 +1657,7 @@ svg.cos-logo-mark { display: inline-block; vertical-align: -3px; margin-right: 4
 .cos-mobile .cos-about-avatar { width: 72px; height: 72px; border-radius: 20px; }
 .cos-mobile .cos-stats { grid-template-columns: repeat(2, 1fr); }
 .cos-mobile .cos-route { flex-direction: column; gap: 14px; }
-.cos-mobile .cos-route::before { top: 6px; bottom: 6px; left: 6px; right: auto; width: 2px; height: auto; background: linear-gradient(var(--cos-red), #60A5FA, var(--cos-saffron)); }
+.cos-mobile .cos-route::before { top: 6px; bottom: 6px; left: 6px; right: auto; width: 2px; height: auto; background: linear-gradient(var(--cos-saffron), #60A5FA, var(--cos-red)); }
 .cos-mobile .cos-route li { padding: 0 0 0 26px; flex-direction: row; justify-content: space-between; align-items: center; }
 .cos-mobile .cos-route-dot { top: 50%; margin-top: -7px; }
 .cos-mobile .cos-about-actions .cos-btn-primary { width: 100%; justify-content: center; padding: 12px 16px; }

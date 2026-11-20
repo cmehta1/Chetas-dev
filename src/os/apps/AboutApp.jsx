@@ -1,6 +1,6 @@
 import { Avatar } from '../components/Avatar';
 import Icon from '../components/Icons';
-import { PROFILE, EDUCATION, ROUTE_RECENT_FIRST, EXPERIENCE, CARDS, yearsOfExperience } from '../data';
+import { PROFILE, EDUCATION, JOURNEY_STOPS, EXPERIENCE, CARDS, yearsOfExperience } from '../data';
 import { prefetchGame } from '../hooks';
 
 const STRENGTHS = [
@@ -34,6 +34,13 @@ export default function AboutApp({ api }) {
             </header>
 
             <div className="cos-lede">
+                <p className="cos-intro">
+                    A detail-oriented full-stack engineer with {yearsOfExperience()}+ years of experience working in the
+                    fields of{' '}
+                    <span className="cos-intro-hl">Healthcare IT, Agentic AI, E-prescribing, Prior Authorization</span> and{' '}
+                    <span className="cos-intro-hl">3D on the web</span>, focused on crafting reliable, intelligent and
+                    delightful software that people love to use.
+                </p>
                 <p>
                     I'm a software engineer with 10+ years in healthcare IT, and I like turning ideas into things people
                     actually use. At Oracle Health I build across the stack for clinical ordering, e-prescribing and prior
@@ -71,19 +78,20 @@ export default function AboutApp({ api }) {
 
             <section className="cos-section">
                 <h2>The route</h2>
+                {/* Unlike the Route app, this summary reads in time order, from Gujarat to what's next. */}
                 <ol className="cos-route">
-                    <li className="is-next" style={{ '--i': 0 }}>
-                        <span className="cos-route-dot" />
-                        <span className="cos-route-city">What's next</span>
-                        <span className="cos-route-meta">the journey continues</span>
-                    </li>
-                    {ROUTE_RECENT_FIRST.map((s, i) => (
-                        <li key={s.city} style={{ '--i': i + 1 }} className={s.current ? 'is-current' : ''}>
+                    {JOURNEY_STOPS.map((s, i) => (
+                        <li key={s.city} style={{ '--i': i }} className={s.current ? 'is-current' : ''}>
                             <span className="cos-route-dot" />
                             <span className="cos-route-city">{s.city}</span>
                             <span className="cos-route-meta">{s.region} · {s.current ? `${s.year}–now` : s.year}</span>
                         </li>
                     ))}
+                    <li className="is-next" style={{ '--i': JOURNEY_STOPS.length }}>
+                        <span className="cos-route-dot" />
+                        <span className="cos-route-city">What's next</span>
+                        <span className="cos-route-meta">the journey continues</span>
+                    </li>
                 </ol>
                 <button type="button" className="cos-link-btn" onClick={() => api.openApp('route')}>
                     See the full route <Icon name="chevronRight" size={13} />
